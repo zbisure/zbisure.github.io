@@ -7,6 +7,7 @@
 ```
 index.html          # 学习主页（主题卡片列表）
 unknowns/index.html # 01 · 未知项野外指南（Finding Your Unknowns）
+unknowns/demos/     # Thariq 11 个交互演示页的中文译版（01–11，界面中文、功能性 prompt 保留英文+中文大意）
 ```
 
 ## 增加新学习主题
