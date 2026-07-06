@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Claude Code 澄清未知项方法论：四象限模型、11 个技巧与可复制提示词、自测 quiz。整理自 Thariq Shihipar 的 A Field Guide to Fable。">
+<title>未知项野外指南 · Finding Your Unknowns</title>
+<style>
+  :root{
+    --paper:#F3F5F1;
+    --paper-raised:#FBFCFA;
+    --ink:#20302E;
+    --ink-soft:#5A6B67;
+    --ink-faint:#8B9995;
+    --line:#D8DED8;
+    --contour:#B5A488;
+    --survey:#28599C;
+    --survey-soft:#DCE6F4;
+    --marker:#B4452B;
+    --good:#3D7A4E;
+    --good-soft:#DFEDE2;
+    --bad-soft:#F4E2DC;
+    --mono-bg:#E9EEE9;
+    --shadow:0 1px 2px rgba(32,48,46,.06),0 6px 20px rgba(32,48,46,.07);
+    --serif:"Songti SC","Georgia","Times New Roman",serif;
+    --sans:"PingFang SC",-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    --mono:"SF Mono","Menlo","Consolas",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#151B1B;
+      --paper-raised:#1D2525;
+      --ink:#DCE3DF;
+      --ink-soft:#96A5A0;
+      --ink-faint:#687571;
+      --line:#2E3938;
+      --contour:#6E6350;
+      --survey:#7FA9E4;
+      --survey-soft:#22334C;
+      --marker:#D97B62;
+      --good:#7FB98E;
+      --good-soft:#243B2B;
+      --bad-soft:#462921;
+      --mono-bg:#111716;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#151B1B; --paper-raised:#1D2525; --ink:#DCE3DF; --ink-soft:#96A5A0;
+    --ink-faint:#687571; --line:#2E3938; --contour:#6E6350; --survey:#7FA9E4;
+    --survey-soft:#22334C; --marker:#D97B62; --good:#7FB98E; --good-soft:#243B2B;
+    --bad-soft:#462921; --mono-bg:#111716;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --paper:#F3F5F1; --paper-raised:#FBFCFA; --ink:#20302E; --ink-soft:#5A6B67;
+    --ink-faint:#8B9995; --line:#D8DED8; --contour:#B5A488; --survey:#28599C;
+    --survey-soft:#DCE6F4; --marker:#B4452B; --good:#3D7A4E; --good-soft:#DFEDE2;
+    --bad-soft:#F4E2DC; --mono-bg:#E9EEE9;
+    --shadow:0 1px 2px rgba(32,48,46,.06),0 6px 20px rgba(32,48,46,.07);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+  a{color:var(--survey)}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding:72px 0 56px}
+  .hero svg.contours{position:absolute;inset:0;width:100%;height:100%;color:var(--contour);opacity:.28;pointer-events:none}
+  .hero .wrap{position:relative}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--survey);margin:0 0 18px}
+  h1{font-family:var(--serif);font-size:clamp(34px,6vw,54px);line-height:1.2;margin:0 0 20px;text-wrap:balance;font-weight:700}
+  .thesis{max-width:38em;font-size:17.5px;color:var(--ink-soft);margin:0 0 8px}
+  .thesis strong{color:var(--ink)}
+  .credit{font-size:13.5px;color:var(--ink-faint);margin-top:20px}
+  .credit a{color:var(--ink-faint)}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .legend a{
+    font-family:var(--mono);font-size:12.5px;text-decoration:none;color:var(--ink-soft);
+    border:1px solid var(--line);background:var(--paper-raised);border-radius:3px;
+    padding:6px 12px;display:inline-flex;gap:8px;align-items:center;
+  }
+  .legend a:hover{border-color:var(--survey);color:var(--survey)}
+  .legend .dot{width:7px;height:7px;border-radius:50%;background:var(--survey)}
+
+  /* ---------- sections ---------- */
+  section{padding:60px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .sec-no{font-family:var(--mono);font-size:13px;color:var(--contour);letter-spacing:.1em}
+  h2{font-family:var(--serif);font-size:clamp(24px,3.6vw,32px);margin:0;text-wrap:balance}
+  .sec-lede{color:var(--ink-soft);max-width:42em;margin:10px 0 34px}
+  h3{font-family:var(--serif);font-size:20px;margin:36px 0 12px}
+
+  /* ---------- quadrant ---------- */
+  .quad-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:26px 0 6px}
+  @media(max-width:600px){.quad-grid{grid-template-columns:1fr}}
+  .quad{
+    text-align:left;font:inherit;color:inherit;cursor:pointer;
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:4px;
+    padding:18px 20px;transition:border-color .15s;
+  }
+  .quad:hover,.quad:focus-visible{border-color:var(--survey)}
+  .quad[aria-pressed="true"]{border-color:var(--survey);box-shadow:inset 0 0 0 1px var(--survey)}
+  .quad .q-tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;color:var(--survey);text-transform:uppercase}
+  .quad h4{font-family:var(--serif);font-size:17.5px;margin:6px 0 4px}
+  .quad p{margin:0;font-size:14px;color:var(--ink-soft);line-height:1.6}
+  .quad-answer{
+    border-left:3px solid var(--survey);background:var(--survey-soft);
+    border-radius:0 4px 4px 0;padding:14px 18px;margin-top:14px;font-size:14.5px;min-height:52px;
+  }
+  .quad-answer em{font-style:normal;color:var(--survey);font-weight:600}
+  .balance{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:30px}
+  @media(max-width:600px){.balance{grid-template-columns:1fr}}
+  .balance .cell{border:1px solid var(--line);border-radius:4px;padding:16px 18px;background:var(--paper-raised);font-size:14.5px}
+  .balance .cell b{display:block;font-family:var(--serif);font-size:16px;margin-bottom:4px}
+  .balance-key{margin-top:14px;padding:16px 18px;border:1px dashed var(--contour);border-radius:4px;font-size:15px;background:transparent}
+
+  /* ---------- phase groups & cards ---------- */
+  .phase{margin-top:44px}
+  .phase-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .phase-head .ph-no{font-family:var(--mono);font-size:12px;color:var(--paper);background:var(--survey);border-radius:3px;padding:2px 9px;letter-spacing:.08em}
+  .phase-head h3{margin:0}
+  .phase-lede{color:var(--ink-soft);font-size:14.5px;margin:4px 0 22px;max-width:44em}
+  .card{
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;
+    box-shadow:var(--shadow);margin-bottom:22px;overflow:hidden;
+  }
+  .card-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;padding:18px 22px 0}
+  .card-no{font-family:var(--mono);font-size:13px;color:var(--contour)}
+  .card-head h4{font-family:var(--serif);font-size:20px;margin:0}
+  .card-head .en{font-size:13px;color:var(--ink-faint);font-family:var(--mono)}
+  .chip{font-size:11.5px;font-family:var(--mono);border:1px solid var(--line);border-radius:99px;padding:2px 10px;color:var(--ink-soft);margin-left:auto}
+  .card-body{padding:12px 22px 20px}
+  .when{font-size:14.5px;color:var(--ink-soft);margin:4px 0 14px}
+  .when b{color:var(--ink)}
+  .promptbox{position:relative;margin:0 0 14px}
+  .promptbox pre{
+    margin:0;background:var(--mono-bg);border:1px solid var(--line);border-radius:4px;
+    padding:14px 16px;padding-right:74px;font-family:var(--mono);font-size:13px;line-height:1.6;
+    white-space:pre-wrap;overflow-x:auto;color:var(--ink);
+  }
+  .copy{
+    position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11.5px;
+    border:1px solid var(--line);background:var(--paper-raised);color:var(--ink-soft);
+    border-radius:3px;padding:4px 10px;cursor:pointer;
+  }
+  .copy:hover{border-color:var(--survey);color:var(--survey)}
+  .copy.done{border-color:var(--good);color:var(--good)}
+  .accept{font-size:14px;color:var(--ink-soft);margin:0;padding-left:0;list-style:none}
+  .accept li{padding-left:20px;position:relative;margin-bottom:5px}
+  .accept li::before{content:"▸";position:absolute;left:2px;color:var(--survey)}
+  .keyline{
+    margin:14px 0 0;border-left:3px solid var(--contour);padding:6px 14px;
+    font-size:13.5px;color:var(--ink-soft);font-style:italic;
+  }
+
+  /* ---------- patterns ---------- */
+  .pattern-list{counter-reset:pat;list-style:none;padding:0;margin:0;display:grid;gap:12px}
+  .pattern-list li{
+    counter-increment:pat;background:var(--paper-raised);border:1px solid var(--line);
+    border-radius:4px;padding:16px 18px 16px 58px;position:relative;font-size:14.5px;color:var(--ink-soft);
+  }
+  .pattern-list li::before{
+    content:counter(pat,decimal-leading-zero);position:absolute;left:18px;top:16px;
+    font-family:var(--mono);font-size:13px;color:var(--contour);
+  }
+  .pattern-list b{color:var(--ink);display:block;font-size:15.5px;margin-bottom:3px;font-family:var(--serif)}
+
+  /* ---------- decision table ---------- */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:5px;background:var(--paper-raised)}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);text-align:left;font-weight:500}
+  th,td{padding:11px 16px;border-bottom:1px solid var(--line)}
+  tr:last-child td{border-bottom:none}
+  td:last-child{white-space:nowrap}
+  td a{text-decoration:none;font-family:var(--mono);font-size:13px}
+  td a:hover{text-decoration:underline}
+  .habit{margin-top:22px;padding:16px 18px;border-left:3px solid var(--good);background:var(--good-soft);border-radius:0 4px 4px 0;font-size:14.5px}
+
+  /* ---------- quiz ---------- */
+  .quiz-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+  .quiz-card .q-no{font-family:var(--mono);font-size:12px;color:var(--contour);letter-spacing:.1em}
+  .quiz-card p.q{font-size:15.5px;margin:8px 0 14px;font-weight:600}
+  .opts{display:grid;gap:8px}
+  .opt{
+    text-align:left;font:inherit;font-size:14.5px;line-height:1.55;color:var(--ink);
+    background:transparent;border:1px solid var(--line);border-radius:4px;
+    padding:10px 14px;cursor:pointer;transition:border-color .12s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--survey)}
+  .opt:disabled{cursor:default;opacity:.92}
+  .opt.right{border-color:var(--good);background:var(--good-soft)}
+  .opt.wrong{border-color:var(--marker);background:var(--bad-soft)}
+  .fb{display:none;margin-top:12px;font-size:14px;border-radius:4px;padding:12px 15px;line-height:1.6}
+  .fb.show{display:block}
+  .fb.ok{background:var(--good-soft);border-left:3px solid var(--good)}
+  .fb.no{background:var(--bad-soft);border-left:3px solid var(--marker)}
+  .fb a{font-weight:600}
+  .verdict{display:none;border-radius:5px;padding:24px;margin-top:26px}
+  .verdict.show{display:block}
+  .verdict.pass{background:var(--good-soft);border:1px solid var(--good)}
+  .verdict.retry{background:var(--bad-soft);border:1px solid var(--marker)}
+  .verdict h3{margin:0 0 10px;font-family:var(--serif)}
+  .verdict ul{margin:8px 0 0;padding-left:20px;font-size:14.5px}
+  .verdict li{margin-bottom:5px}
+  .reset{
+    font:inherit;font-size:14px;margin-top:14px;cursor:pointer;
+    border:1px solid var(--line);background:var(--paper-raised);color:var(--ink);
+    border-radius:4px;padding:8px 18px;
+  }
+  .reset:hover{border-color:var(--survey);color:var(--survey)}
+  .score-rail{position:sticky;bottom:14px;display:flex;justify-content:center;pointer-events:none;margin-top:20px}
+  .score-pill{
+    pointer-events:auto;font-family:var(--mono);font-size:12.5px;
+    background:var(--ink);color:var(--paper);border-radius:99px;padding:7px 18px;box-shadow:var(--shadow);
+  }
+
+  footer{padding:44px 0 64px;color:var(--ink-faint);font-size:13.5px}
+  footer p{margin:4px 0}
+</style>
+
+
+</head>
+<body>
+<header class="hero">
+  <svg class="contours" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1">
+    <ellipse cx="720" cy="90" rx="300" ry="130"/>
+    <ellipse cx="720" cy="90" rx="240" ry="100"/>
+    <ellipse cx="720" cy="90" rx="180" ry="72"/>
+    <ellipse cx="720" cy="90" rx="120" ry="46"/>
+    <ellipse cx="720" cy="90" rx="65" ry="24"/>
+    <ellipse cx="120" cy="360" rx="260" ry="110"/>
+    <ellipse cx="120" cy="360" rx="195" ry="80"/>
+    <ellipse cx="120" cy="360" rx="130" ry="52"/>
+    <ellipse cx="120" cy="360" rx="70" ry="27"/>
+  </svg>
+  <div class="wrap">
+    <p class="eyebrow">Field Guide · 未知项野外指南</p>
+    <h1>地图不是疆域，<br>差距叫作未知项</h1>
+    <p class="thesis">提示词、skill、上下文是你交给 Claude 的<strong>地图</strong>；代码库和现实约束才是<strong>疆域</strong>。Claude 每遇到一个未知项，就只能按对你意图的最佳猜测行事——任务越长，静默猜测积累越多。<strong>工作质量的瓶颈，是你澄清未知项的能力。</strong></p>
+    <p class="credit">整理自 Claude Code 工程师 Thariq Shihipar《A Field Guide to Fable: Finding Your Unknowns》及其 <a href="https://thariqs.github.io/html-effectiveness/unknowns/">11 个配套演示</a>。提示词均为演示页逐字原文。</p>
+    <nav class="legend" aria-label="页面导航">
+      <a href="#model"><span class="dot"></span>心智模型</a>
+      <a href="#techniques"><span class="dot"></span>11 个技巧与提示词</a>
+      <a href="#patterns"><span class="dot"></span>横向规律</a>
+      <a href="#decide"><span class="dot"></span>决策表</a>
+      <a href="#quiz"><span class="dot"></span>自测（8 题）</a>
+    </nav>
+  </div>
+</header>
+
+<section id="model">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§1</span><h2>先认识你的四种未知</h2></div>
+    <p class="sec-lede">带着问题来找 Claude 时，从四个角度拆解它。点击每个象限，看对症的技巧是什么。</p>
+    <div class="quad-grid" role="group" aria-label="未知项四象限">
+      <button class="quad" data-a="写清楚了就好。真正的功夫在另外三格。" aria-pressed="false">
+        <span class="q-tag">Known · Known</span>
+        <h4>已知的已知</h4>
+        <p>基本上就是你写进提示词里的内容——你告诉智能体你想要什么。</p>
+      </button>
+      <button class="quad" data-a="用 <em>06 访谈</em>让 Claude 一次一题地问你，或用 <em>05 头脑风暴</em>把方案空间摊开。" aria-pressed="false">
+        <span class="q-tag">Known · Unknown</span>
+        <h4>已知的未知</h4>
+        <p>有哪些事情你还没弄清楚，但你知道自己还没弄清楚？</p>
+      </button>
+      <button class="quad" data-a="“看到才认得”——用 <em>03 四个设计方向</em>、<em>04 假原型</em>让 Claude 先产出可反应的东西，或用 <em>07 参照实现</em>直接指给它看。" aria-pressed="false">
+        <span class="q-tag">Unknown · Known</span>
+        <h4>未知的已知</h4>
+        <p>对你显而易见到根本不会写下来，但一看就能认出来的标准。</p>
+      </button>
+      <button class="quad" data-a="最危险的一格。用 <em>01 盲点扫描</em>扫代码库、<em>02 教我词汇</em>补领域语言，实现中靠 <em>09 实现笔记</em>兜底。" aria-pressed="false">
+        <span class="q-tag">Unknown · Unknown</span>
+        <h4>未知的未知</h4>
+        <p>完全没考虑过的事。你甚至不知道一件事可以做到多好。</p>
+      </button>
+    </div>
+    <div class="quad-answer" id="quadAnswer">☝ 点一个象限，看对症的技巧。</div>
+
+    <h3>提示的平衡难题</h3>
+    <div class="balance">
+      <div class="cell"><b>太具体</b>即使转向另一种方案更合适，Claude 也会严格照着你的指令执行。</div>
+      <div class="cell"><b>太模糊</b>Claude 基于“行业最佳实践”做选择和假设——不一定适合你的任务。</div>
+    </div>
+    <div class="balance-key">解法不是找到完美的具体度，而是<strong>在 prompt 里指定产出物的形态与验收结构</strong>——“先给我语义地图”“按改动概率排序”“记在 Deviations 下”“底部附我必须通过的测验”。让结构替你把未知项暴露出来。</div>
+  </div>
+</section>
+
+<section id="techniques">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§2</span><h2>11 个技巧，按阶段编队</h2></div>
+    <p class="sec-lede">不必每次全用，把它们当作一组可调用的方法储备。每张卡的英文提示词都是演示页逐字原文，可直接复制改场景。</p>
+
+    <div class="phase" id="pre">
+      <div class="phase-head"><span class="ph-no">实现前</span><h3>最便宜的发现时机</h3></div>
+      <p class="phase-lede">代码写下之前，是发现未知项成本最低的地方。规格上的小变化会导致实现的巨大差异，让智能体回退也更困难。</p>
+
+      <article class="card" id="t01">
+        <div class="card-head"><span class="card-no">01</span><h4>盲点扫描</h4><span class="en">Blindspot pass</span><span class="chip">未知的未知</span></div>
+        <div class="card-body">
+          <p class="when"><b>何时用</b>：进入陌生模块或陌生领域动手之前。直接使用 “blindspot pass”“unknown unknowns” 这些字眼，并告诉它你是谁、你知道什么。</p>
+          <div class="promptbox"><pre>I'm adding a new SSO auth provider to Acme but I've never touched the auth module. Do a blindspot pass: find my unknown unknowns in this part of the codebase, explain each one, and tell me how to prompt you better for the implementation.</pre><button class="copy" type="button">copy</button></div>
+          <ul class="accept">
+            <li>产出不是知识清单，而是<b>每个盲区一条可注入下一个 prompt 的约束句</b>（暗坑 / 历史 / 惯例 / 缺失概念分类）</li>
+            <li>最后合成一份改进版 prompt，直接用于实现</li>
+          </ul>
+          <p class="keyline">“这 7 句约束你今早根本写不出来——每一句都是别人半天踩坑的代价换来的。”</p>
+        </div>
+      </article>
+
+      <article class="card" id="t02">
+        <div class="card-head"><span class="card-no">02</span><h4>教我词汇</h4><span class="en">Teach me my unknowns</span><span class="chip">未知的未知</span></div>
+        <div class="card-body">
+          <p class="when"><b>何时用</b>：要做完全不懂的领域工作（调色、法务、音频……），连提需求的语言都没有。先学行话，再谈要求。</p>
+          <div class="promptbox"><pre>I don't know what color grading is but I need to grade the Acme launch video. Teach me color grading well enough that I understand my unknown unknowns and can prompt you with real vocabulary.</pre><button class="copy" type="button">copy</button></div>
+          <ul class="accept">
+            <li>要求：心智模型图 + 词汇阶梯（每个术语配一条 “say →” 示例句）+ “什么算好”清单</li>
+            <li>学成标志：从 “make the video look nicer” 升级为 “push the lift slightly teal, gain slightly warm — subtle, not music-video”</li>
+          </ul>
+          <p class="keyline">学词汇不是为了自己动手，而是为了能下达精确指令。</p>
+        </div>
+      </article>
+
+      <article class="card" id="t03">
+        <div class="card-head"><span class="card-no">03</span><h4>四个设计方向</h4><span class="en">Four design directions</span><span class="chip">未知的已知</span></div>
+        <div class="card-body">
+          <p class="when"><b>何时用</b>：视觉、风格类决策，“看到才知道要什么”。要求方向<b>互斥</b>（wildly different）而非四个变体，且用<b>同一份数据</b>渲染，让设计成为唯一变量。</p>
+          <div class="promptbox"><pre>I want a review-queue dashboard for Acme but I have no visual taste and don't know what's possible. Make me one HTML page with 4 wildly different design directions so I can react to them.</pre><button class="copy" type="button">copy</button></div>
+          <ul class="accept">
+            <li>逐方向挑拣细节：<b>steal 这个 / skip 那个</b></li>
+            <li>回复格式：Go with Direction 2. Steal: …; Skip: … —— Claude 把偷来的细节融进胜出方向再精修</li>
+          </ul>
+          <p class="keyline">Reacting is easier than imagining. 反应比想象容易。</p>
+        </div>
+      </article>
+
+      <article class="card" id="t04">
+        <div class="card-head"><span class="card-no">04</span><h4>先做假原型</h4><span class="en">Mock before you wire</span><span class="chip">未知的已知</span></div>
+        <div class="card-body">
+          <p class="when"><b>何时用</b>：改动会牵动真实代码，但布局和交互还没定。一次性 HTML + 假数据，绝不接真后端、不碰前端状态。</p>
+          <div class="promptbox"><pre>Before wiring anything up, make a single HTML file mocking Acme's new frame-annotation toolbar with fake data. I want to react to the layout before you touch the real app.</pre><button class="copy" type="button">copy</button></div>
+          <ul class="accept">
+            <li>能点击的 mock + 可切换的布局变体（每种附量化 trade-off）</li>
+            <li>关键在于 Claude 会主动列出它<b>“不想替你猜”的开放问题</b>，逼你在写码前拍板</li>
+          </ul>
+          <p class="keyline">能点击的那一刻你才知道自己要什么——而不是三个 PR 之后。</p>
+        </div>
+      </article>
+
+      <article class="card" id="t05">
+        <div class="card-head"><span class="card-no">05</span><h4>头脑风暴干预点</h4><span class="en">Brainstorm the intervention</span><span class="chip">已知的未知</span></div>
+        <div class="card-body">
+          <p class="when"><b>何时用</b>：只有粗糙问题，还没定方案。三要素：粗糙问题 + 要求<b>搜索代码库</b>落地 + 按成本排序并预告“我会告诉你哪些 resonate”（决策权留给自己）。</p>
+          <div class="promptbox"><pre>Here's my rough problem: Acme users churn after onboarding. Search the codebase and brainstorm 10 places we could intervene, from cheapest to most ambitious. I'll tell you which ones resonate.</pre><button class="copy" type="button">copy</button></div>
+          <ul class="accept">
+            <li>每个选项锚到真实文件路径 / flag / TODO 证据，不是空想清单</li>
+            <li>常见发现：最便宜的方案是<b>接线</b>（机制已存在但没连上）而非新建</li>
+          </ul>
+          <p class="keyline">作者几乎每次编码会话开头都先探索或头脑风暴——防止范围一开始就过窄或过宽。</p>
+        </div>
+      </article>
+
+      <article class="card" id="t06">
+        <div class="card-head"><span class="card-no">06</span><h4>访谈</h4><span class="en">The interview</span><span class="chip">已知的未知</span></div>
+        <div class="card-body">
+          <p class="when"><b>何时用</b>：头脑风暴之后仍有歧义。与其让 Claude 静默猜，不如让它问你——排序标准是<b>答案对架构的改变程度</b>（blast radius），不是重要性直觉。</p>
+          <div class="promptbox"><pre>Interview me one question at a time about anything still ambiguous in the annotation-export feature. Prioritize questions where my answer would change the architecture.</pre><button class="copy" type="button">copy</button></div>
+          <ul class="accept">
+            <li>一次一题；每题解释“这个答案会决定什么”；选项自带 trade-off</li>
+            <li>结束生成决策表 + 实现 prompt，显式区分<b>固定约束</b>（架构/数据模型）与<b>可协商项</b>（冲突时先报告）</li>
+          </ul>
+          <p class="keyline">“下面每个答案，本来都会在实现过程中被静默猜掉。”</p>
+        </div>
+      </article>
+
+      <article class="card" id="t07">
+        <div class="card-head"><span class="card-no">07</span><h4>指向参照实现</h4><span class="en">Point at a reference</span><span class="chip">未知的已知</span></div>
+        <div class="card-body">
+          <p class="when"><b>何时用</b>：说不清想要什么，但存在一个“就是它”的实现——哪怕是另一种语言。最好的参考资料是源代码，不是截图。</p>
+          <div class="promptbox"><pre>This Rust crate in vendor/rate-limiter implements the exact backoff behavior I want. Read it and reimplement the same semantics in our TypeScript API client — but first show me a semantics map so I can confirm you understood it.</pre><button class="copy" type="button">copy</button></div>
+          <ul class="accept">
+            <li>语义地图 = 行为要点 + 两侧代码对照与陷阱边注 + <b>Preserved / Changed / Dropped 三栏清单</b> + 边界情况表</li>
+            <li>签字（“semantics confirmed”）之前不写一行代码；纠错成本从改代码降为改一行地图</li>
+          </ul>
+          <p class="keyline">移植任务的最大未知：模型是否真理解了语义，而非表面 API。</p>
+        </div>
+      </article>
+
+      <article class="card" id="t08">
+        <div class="card-head"><span class="card-no">08</span><h4>可调整的计划</h4><span class="en">The tweakable plan</span><span class="chip">收束决策</span></div>
+        <div class="card-body">
+          <p class="when"><b>何时用</b>：准备动手前的最后一步。让计划<b>按“你多可能想改它”排序</b>而不是执行顺序，并明说哪部分你选择信任。</p>
+          <div class="promptbox"><pre>Write an implementation plan for annotation export as HTML, but lead with the decisions I'm most likely to tweak: data model changes, new type interfaces, and anything user-facing. Bury the mechanical refactoring at the bottom — I trust you on that part.</pre><button class="copy" type="button">copy</button></div>
+          <ul class="accept">
+            <li>判断点做成带备选方案的选择卡（“Pick this if: …”），并标出<b>计划中最弱的一环</b></li>
+            <li>机械工作折叠沉底；结尾给出“最值得改的三件事”一句话回复模板</li>
+          </ul>
+          <p class="keyline">计划的价值不在完整，而在把值得人拍板的部分放到人眼前。</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="phase" id="during">
+      <div class="phase-head"><span class="ph-no">实现中</span><h3>未知的未知总会潜伏</h3></div>
+      <p class="phase-lede">无论规划多充分，智能体都可能在实现深处撞上边界情况、被迫换思路。别让这些发现消失在滚动的终端输出里。</p>
+
+      <article class="card" id="t09">
+        <div class="card-head"><span class="card-no">09</span><h4>实现笔记</h4><span class="en">Implementation notes</span><span class="chip">未知的未知</span></div>
+        <div class="card-body">
+          <p class="when"><b>何时用</b>：每个长时间自主构建任务开始时顺手加上。三段式指令同时解决自主性（不停下来问）与可审计性（不静默决策）。</p>
+          <div class="promptbox"><pre>Keep an implementation-notes file as you build the export feature. If you hit an edge case that forces you to deviate from the plan, pick the conservative option, log it under 'Deviations', and keep going.</pre><button class="copy" type="button">copy</button></div>
+          <ul class="accept">
+            <li>条目四分类：按计划完成 / 新发现 / <b>偏离</b> / 需要人拍板</li>
+            <li>每条偏离固定四字段：计划怎么说 / 代码揭示了什么 / 选了什么保守方案 / 欠什么回访</li>
+            <li>收尾把偏离<b>蒸馏成下一轮 plan 的前置条件</b>——本次的未知项成为下次的地图</li>
+          </ul>
+          <p class="keyline">Pick the conservative option, log it, keep going.</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="phase" id="post">
+      <div class="phase-head"><span class="ph-no">实现后</span><h3>别人会继承你的未知项</h3></div>
+      <p class="phase-lede">发布意味着评审者、审批人带着他们自己的未知项进场；而你自己对变更的理解也可能比想象中浅。</p>
+
+      <article class="card" id="t10">
+        <div class="card-head"><span class="card-no">10</span><h4>争取支持文档</h4><span class="en">The buy-in doc</span><span class="chip">他人的未知</span></div>
+        <div class="card-body">
+          <p class="when"><b>何时用</b>：功能完成要拿 sign-off、跨团队汇报。在异议被提出之前就回答它。</p>
+          <div class="promptbox"><pre>Package the prototype, the spec, and the implementation notes into a single doc I can drop in Slack to get buy-in on shipping annotation export. Lead with the demo.</pre><button class="copy" type="button">copy</button></div>
+          <ul class="accept">
+            <li>顺序即决策者心智：先看 demo 跑起来 → 一段式 pitch（痛点锚数据）→ <b>“评审者会问什么”逐条预答</b>（带出处链接）→ 决策速览表 → 风险 / 回滚 / 精确到人的审批请求</li>
+            <li>目标：90 秒读完，把审批从“读完再想想”变成“回一个 ✓”</li>
+          </ul>
+          <p class="keyline">“Lead with the demo” 一句话就能扭转文档的默认信息顺序。</p>
+        </div>
+      </article>
+
+      <article class="card" id="t11">
+        <div class="card-head"><span class="card-no">11</span><h4>合并前先考我</h4><span class="en">Quiz me before I merge</span><span class="chip">自己的未知</span></div>
+        <div class="card-body">
+          <p class="when"><b>何时用</b>：长会话结束、diff 很大（尤其 AI 生成的）。只看 diff 只能获得浅层理解——很多行为取决于既有代码路径。<b>不通过测验不 merge。</b></p>
+          <div class="promptbox"><pre>I want to make sure I understand everything that happened in this change before I merge. Give me an HTML report on the export-feature diff — context, intuition, what was done — with a quiz at the bottom that I must pass.</pre><button class="copy" type="button">copy</button></div>
+          <ul class="accept">
+            <li>报告：before/after 心智模型图 + “不显眼的刻意设计”（What / Why / 文件:行号）+ 这个 diff 悄悄依赖的既有行为</li>
+            <li>测验出<b>场景题</b>（on-call 时必须答对的判断）而非背诵题；答错链回报告原文；全对才解锁 merge checklist</li>
+          </ul>
+          <p class="keyline">理解是可以被测量的。</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="patterns">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§3</span><h2>横向规律：比单招更重要</h2></div>
+    <p class="sec-lede">11 个演示反复出现的六个设计原语——你可以把它们迁移到任何自创的澄清手法里。</p>
+    <ol class="pattern-list">
+      <li><b>回复生成器范式</b>每个 artifact 的终点都是一段可复制回聊天的文本。人只负责反应（点选、勾选、挑拣），表达工作交给结构。</li>
+      <li><b>指定产出物形态，胜过指定任务</b>prompt 里最有杠杆的是对结构的要求：“先给我语义地图”“按改动概率排序”“记在 Deviations 下”“附我必须通过的测验”。</li>
+      <li><b>编号坐标系</b>note 5、Choice ①、row 名……给你精确引用纠错的坐标，把一轮反馈压缩成一句话。</li>
+      <li><b>显式三分类</b>Preserved / Changed / Dropped，Plan / Deviation / For-you——强迫模型把隐性决定摊开，不许糊成散文。</li>
+      <li><b>门禁式确认</b>awaiting confirmation → semantics confirmed；quiz 全对 → cleared to merge。让“完成感”和“真实确认”对齐。</li>
+      <li><b>闭环</b>实现中发现的偏离要蒸馏回下一轮的 plan——地图持续逼近疆域。</li>
+    </ol>
+  </div>
+</section>
+
+<section id="decide">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§4</span><h2>遇到什么，用哪招</h2></div>
+    <p class="sec-lede">先自问：我的未知项在哪个象限？再按情境取用。</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>情境</th><th>技巧</th><th>跳转</th></tr></thead>
+        <tbody>
+          <tr><td>陌生代码库要动手</td><td>盲点扫描</td><td><a href="#t01">01 →</a></td></tr>
+          <tr><td>陌生领域，连行话都不会</td><td>教我词汇</td><td><a href="#t02">02 →</a></td></tr>
+          <tr><td>视觉 / 品味，看到才认得</td><td>四个设计方向</td><td><a href="#t03">03 →</a></td></tr>
+          <tr><td>布局交互没定，不想碰真代码</td><td>先做假原型</td><td><a href="#t04">04 →</a></td></tr>
+          <tr><td>只有粗糙问题，没有方案</td><td>头脑风暴（锚代码证据）</td><td><a href="#t05">05 →</a></td></tr>
+          <tr><td>需求仍有歧义</td><td>访谈（按爆炸半径）</td><td><a href="#t06">06 →</a></td></tr>
+          <tr><td>有现成参照实现</td><td>语义地图确认后再动手</td><td><a href="#t07">07 →</a></td></tr>
+          <tr><td>准备动手，计划待审</td><td>可调整的计划</td><td><a href="#t08">08 →</a></td></tr>
+          <tr><td>启动长任务</td><td>实现笔记（一句话成本）</td><td><a href="#t09">09 →</a></td></tr>
+          <tr><td>做完了，要人支持</td><td>争取支持文档</td><td><a href="#t10">10 →</a></td></tr>
+          <tr><td>merge 之前</td><td>合并前先考我</td><td><a href="#t11">11 →</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="habit">几乎零成本的三个默认习惯：<b>每次会话开头先探索 / 头脑风暴</b>；<b>每个长任务带上 09 那句话</b>；<b>每个大 diff 用 11 收尾</b>。</div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§5</span><h2>自测：通过才算学会</h2></div>
+    <p class="sec-lede">按第 11 招的规矩办事——8 道场景题，答错会告诉你去重读哪一节。全对解锁落地清单。</p>
+    <div id="quizRoot"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="score-rail"><span class="score-pill" id="scorePill">0 / 8 已作答</span></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><a href="../">← 返回学习主页</a></p>
+    <p>原文：A Field Guide to Fable: Finding Your Unknowns — Thariq Shihipar（Claude Code 团队）</p>
+    <p>演示：<a href="https://thariqs.github.io/html-effectiveness/unknowns/">thariqs.github.io/html-effectiveness/unknowns</a> · 中文全文与实操手册见 Obsidian vault：<span style="font-family:var(--mono)">LLM-WIKI/wiki/syntheses/2026-07-06-finding-unknowns-playbook</span></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // quadrant
+  var quads=document.querySelectorAll('.quad');
+  var ans=document.getElementById('quadAnswer');
+  quads.forEach(function(q){
+    q.addEventListener('click',function(){
+      quads.forEach(function(o){o.setAttribute('aria-pressed','false')});
+      q.setAttribute('aria-pressed','true');
+      ans.innerHTML=q.getAttribute('data-a');
+    });
+  });
+
+  // copy buttons
+  document.querySelectorAll('.promptbox').forEach(function(box){
+    var btn=box.querySelector('.copy'),pre=box.querySelector('pre');
+    btn.addEventListener('click',function(){
+      var t=pre.textContent;
+      function done(){btn.textContent='copied ✓';btn.classList.add('done');
+        setTimeout(function(){btn.textContent='copy';btn.classList.remove('done')},1600);}
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(t).then(done,function(){fallback()});
+      }else{fallback()}
+      function fallback(){
+        var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);
+        ta.select();try{document.execCommand('copy');done()}catch(e){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  // quiz
+  var QS=[
+    {q:'你要在一个从没碰过的 auth 模块里加 SSO 支持。动手前第一步用哪招？',
+     opts:['让 Claude 访谈我，一次一个问题','盲点扫描：让它找出这块代码里我的 unknown unknowns','直接让它写实现计划供我审阅','把需求写得尽量详细再开工'],
+     a:1,anchor:'#t01',tech:'01 盲点扫描',
+     ok:'对。陌生模块意味着大量“未知的未知”——你连该问什么都不知道，访谈和计划都建立在你已知道问题在哪的前提上。先扫盲区，产出是可注入 prompt 的约束句。',
+     no:'陌生模块的问题是你连该问什么都不知道——访谈、计划都假设你已经知道问题在哪。正确做法是先做盲点扫描。'},
+    {q:'“把这个视频调得好看点”——你完全不懂调色，也说不出标准。按文中作者的亲身经历，最有效的做法是？',
+     opts:['让 Claude 出几个版本供我挑选','让 Claude 教我调色词汇，先理解自己的未知','给它一个我喜欢的参考视频','让它按行业最佳实践直接调'],
+     a:1,anchor:'#t02',tech:'02 教我词汇',
+     ok:'对。作者第一次正是让 Claude 生成版本来挑，然后意识到：不知道什么算“好”时，挑选也是盲选。先学词汇，才能给出“lift 偏 teal、gain 偏暖”这种可执行反馈。',
+     no:'作者本人先试了“出几个版本我来挑”，然后意识到：不知道什么算“好”时，挑选也是盲选。他改为让 Claude 教他调色，先补上评价的语言。'},
+    {q:'让 Claude 访谈你澄清需求时，问题应该按什么顺序问？',
+     opts:['按实现的先后顺序','按我最可能答错的排前面','按答案对架构的改变程度（blast radius）','按重要性的直觉排序'],
+     a:2,anchor:'#t06',tech:'06 访谈',
+     ok:'对。按爆炸半径排序保证即使访谈中途停下，最贵的假设已经被消灭了。',
+     no:'排序标准是 blast radius：答案会改变架构的先问。这样即使中途停下，最贵的假设已被消灭。'},
+    {q:'你让 Claude 把一个 Rust crate 的行为移植到 TypeScript。在它写第一行代码之前，应该要求什么？',
+     opts:['先写测试，测试通过才算完成','先给出语义地图，我确认它真理解了才开工','先做一个假数据 mock','先列出所有要改的文件'],
+     a:1,anchor:'#t07',tech:'07 指向参照',
+     ok:'对。移植的最大未知是“它是否真理解了参照实现的语义”。语义地图（含 Preserved/Changed/Dropped 三栏）把理解验证前置，纠错成本从改代码降为改一行地图。',
+     no:'移植的最大未知是“模型是否真理解了语义”。测试和文件清单都验证不了这一点——要先要一份可逐条否决的语义地图，签字确认再动工。'},
+    {q:'让 Claude 写实现计划时，最有杠杆的要求是什么？',
+     opts:['要求尽量详细，覆盖所有步骤','要求按执行顺序排列并附时间估算','要求把我最可能想改的决策放最前面，机械工作沉底','要求先写伪代码'],
+     a:2,anchor:'#t08',tech:'08 可调计划',
+     ok:'对。计划的价值不在完整性，而在把值得人拍板的判断点放到人眼前——并明说哪部分你选择信任。',
+     no:'详细和按序恰恰会把关键判断点淹没在机械步骤里。正确做法：按“你多可能改它”排序，判断点带备选方案置顶，机械工作折叠沉底。'},
+    {q:'长任务跑到一半，Claude 撞上迫使它偏离计划的边界情况。第 9 招给它的指令是什么？',
+     opts:['停下来问我再继续','自行选最优方案，改完再汇报','选保守方案，记录在 Deviations 下，继续推进','回滚到上一个检查点重来'],
+     a:2,anchor:'#t09',tech:'09 实现笔记',
+     ok:'对。三段式同时解决自主性（不停下来问）和可审计性（不静默决策）；偏离最后还要蒸馏成下一轮 plan 的前置条件。',
+     no:'停下来问牺牲自主性，自选最优则是静默决策。三段式是：pick the conservative option, log it under Deviations, keep going。'},
+    {q:'提示词“太具体”和“太模糊”分别导致什么失败？',
+     opts:['太具体浪费 token；太模糊产出太短','太具体会死板照做（即使换方案更好）；太模糊会套用不一定适合你的“最佳实践”','太具体让模型拒绝执行；太模糊触发澄清提问','两者其实都没问题，模型会自我修正'],
+     a:1,anchor:'#model',tech:'§1 心智模型',
+     ok:'对。两种失败的共同根源都是没考虑自己的未知项。解法不是找完美具体度，而是指定产出物的形态与验收结构。',
+     no:'太具体 → 即使转向更合适 Claude 也严格照做；太模糊 → 套用通用最佳实践。共同根源是未知项没被处理，解法是指定产出物的结构。'},
+    {q:'第 11 招（merge 前测验）里，什么样的测验题才有效？',
+     opts:['考察 diff 中改了哪些文件和行数','考察 commit message 的规范','场景题：incident 或 review 中你必须答对的判断，答错链回讲解原文','越难越好，防止侥幸通过'],
+     a:2,anchor:'#t11',tech:'11 测验',
+     ok:'对。题目对准不显眼的设计决策与故障场景（“worker OOM 后会发生什么”），不是背诵 trivia；错题反向链接到报告锚点，全对才解锁 merge。',
+     no:'文件行数是 diff 扫读就能看到的浅层信息。有效的题是场景题——on-call 时你必须答对的决策——且答错要能链回讲解原文。'}
+  ];
+  var root=document.getElementById('quizRoot'),pill=document.getElementById('scorePill'),verdict=document.getElementById('verdict');
+  var answered=0,correct=0;
+  function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+  function build(){
+    answered=0;correct=0;root.innerHTML='';verdict.className='verdict';verdict.innerHTML='';
+    pill.textContent='0 / '+QS.length+' 已作答';
+    QS.forEach(function(item,qi){
+      var card=document.createElement('div');card.className='quiz-card';
+      var h='<span class="q-no">QUESTION '+String(qi+1).padStart(2,'0')+' · '+esc(item.tech)+'</span>'+
+            '<p class="q">'+esc(item.q)+'</p><div class="opts">';
+      item.opts.forEach(function(o,oi){
+        h+='<button class="opt" type="button" data-q="'+qi+'" data-o="'+oi+'">'+esc(o)+'</button>';
+      });
+      h+='</div><div class="fb"></div>';
+      card.innerHTML=h;root.appendChild(card);
+    });
+    root.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var qi=+btn.getAttribute('data-q'),oi=+btn.getAttribute('data-o');
+        var item=QS[qi],card=btn.closest('.quiz-card');
+        var opts=card.querySelectorAll('.opt'),fb=card.querySelector('.fb');
+        opts.forEach(function(o){o.disabled=true});
+        opts[item.a].classList.add('right');
+        answered++;
+        if(oi===item.a){
+          correct++;fb.className='fb show ok';
+          fb.innerHTML='✓ '+esc(item.ok);
+        }else{
+          btn.classList.add('wrong');fb.className='fb show no';
+          fb.innerHTML='✗ '+esc(item.no)+' <a href="'+item.anchor+'">重读 '+esc(item.tech)+' →</a>';
+        }
+        pill.textContent=correct+' 对 / '+answered+' 已答 / 共 '+QS.length+' 题';
+        if(answered===QS.length)finish();
+      });
+    });
+  }
+  function finish(){
+    if(correct===QS.length){
+      verdict.className='verdict show pass';
+      verdict.innerHTML='<h3>✓ Cleared — 你已经掌握这套方法</h3>'+
+        '<p>接下来把它变成肌肉记忆，落地清单：</p><ul>'+
+        '<li>下一个进入陌生模块的任务，先跑一次 <b>blindspot pass</b>（01）</li>'+
+        '<li>把 09 的那句 implementation-notes 指令加进你的长任务默认开场（可写入 CLAUDE.md 或常用片段）</li>'+
+        '<li>下一个大 diff，merge 前用 11 让 Claude 考你一次</li>'+
+        '<li>提示词库随取随用：Obsidian 笔记 <span style="font-family:var(--mono);font-size:13px">2026-07-06-finding-unknowns-playbook</span></li></ul>';
+    }else{
+      verdict.className='verdict show retry';
+      verdict.innerHTML='<h3>Not yet — 还差 '+(QS.length-correct)+' 题</h3>'+
+        '<p>按上面错题里的链接回去重读对应小节，然后重考。按第 11 招的规矩：不过关，不算学会。</p>'+
+        '<button class="reset" type="button" id="retryBtn">重置测验</button>';
+      var rb=document.getElementById('retryBtn');
+      if(rb)rb.addEventListener('click',function(){build();document.getElementById('quiz').scrollIntoView();});
+    }
+  }
+  build();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="zbisure 的学习地图：交互式学习页合集，持续更新。">
+<title>学习地图 · zbisure</title>
+<style>
+  :root{
+    --paper:#F3F5F1; --paper-raised:#FBFCFA; --ink:#20302E; --ink-soft:#5A6B67;
+    --ink-faint:#8B9995; --line:#D8DED8; --contour:#B5A488; --survey:#28599C;
+    --shadow:0 1px 2px rgba(32,48,46,.06),0 6px 20px rgba(32,48,46,.07);
+    --serif:"Songti SC","Georgia","Times New Roman",serif;
+    --sans:"PingFang SC",-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    --mono:"SF Mono","Menlo","Consolas",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#151B1B; --paper-raised:#1D2525; --ink:#DCE3DF; --ink-soft:#96A5A0;
+      --ink-faint:#687571; --line:#2E3938; --contour:#6E6350; --survey:#7FA9E4;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding:76px 0 52px}
+  .hero svg{position:absolute;inset:0;width:100%;height:100%;color:var(--contour);opacity:.28;pointer-events:none}
+  .hero .wrap{position:relative}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--survey);margin:0 0 16px}
+  h1{font-family:var(--serif);font-size:clamp(32px,5.5vw,48px);line-height:1.25;margin:0 0 14px;text-wrap:balance}
+  .hero p{max-width:36em;color:var(--ink-soft);margin:0}
+  main{padding:52px 0 80px}
+  .cards{display:grid;gap:18px}
+  .topic{
+    display:block;text-decoration:none;color:inherit;
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;
+    box-shadow:var(--shadow);padding:22px 24px;transition:border-color .15s;
+  }
+  .topic:hover{border-color:var(--survey)}
+  .topic .meta{font-family:var(--mono);font-size:12px;color:var(--ink-faint);display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  .topic h2{font-family:var(--serif);font-size:22px;margin:0 0 6px;text-wrap:balance}
+  .topic h2 span{color:var(--survey)}
+  .topic p{margin:0;font-size:14.5px;color:var(--ink-soft)}
+  footer{border-top:1px solid var(--line);padding:28px 0 56px;color:var(--ink-faint);font-size:13.5px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <svg viewBox="0 0 900 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1">
+    <ellipse cx="740" cy="60" rx="300" ry="130"/>
+    <ellipse cx="740" cy="60" rx="230" ry="97"/>
+    <ellipse cx="740" cy="60" rx="165" ry="66"/>
+    <ellipse cx="740" cy="60" rx="102" ry="39"/>
+    <ellipse cx="740" cy="60" rx="48" ry="17"/>
+    <ellipse cx="90" cy="290" rx="250" ry="105"/>
+    <ellipse cx="90" cy="290" rx="180" ry="73"/>
+    <ellipse cx="90" cy="290" rx="112" ry="44"/>
+  </svg>
+  <div class="wrap">
+    <p class="eyebrow">Learning Map · 学习地图</p>
+    <h1>把学到的东西，<br>做成可以再走一遍的地图</h1>
+    <p>交互式学习页合集：每个主题一张“野外指南”——心智模型、可复制的实操模板、通关自测。持续增补。</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="cards">
+
+      <!-- 新增主题时复制这个卡片模板：
+      <a class="topic" href="话题目录/">
+        <div class="meta"><span>NN</span><span>YYYY-MM</span><span>标签</span></div>
+        <h2>中文标题 <span>· English name</span></h2>
+        <p>一两句描述。</p>
+      </a>
+      -->
+
+      <a class="topic" href="unknowns/">
+        <div class="meta"><span>01</span><span>2026-07</span><span>Claude Code · 方法论</span></div>
+        <h2>未知项野外指南 <span>· Finding Your Unknowns</span></h2>
+        <p>地图不是疆域：四象限识别你的未知项，11 个技巧（附逐字提示词原文）在实现前、实现中、实现后持续澄清它们。8 题场景自测，通过才算学会。</p>
+      </a>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">zbisure · 用 Claude Code 整理与构建</div>
+</footer>
+
+</body>
+</html>
