@@ -1,0 +1,667 @@
+<!-- Copyright 2026 Anthropic PBC · SPDX-License-Identifier: Apache-2.0 -->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>访谈 — 未知项野外指南</title>
+<style>
+  :root {
+    --ivory:  #FAF9F5;
+    --paper:  #FFFFFF;
+    --slate:  #141413;
+    --clay:   #D97757;
+    --clay-d: #B85C3E;
+    --oat:    #E3DACC;
+    --olive:  #788C5D;
+    --g100:   #F0EEE6;
+    --g200:   #E6E3DA;
+    --g300:   #D1CFC5;
+    --g500:   #87867F;
+    --g700:   #3D3D3A;
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ivory);
+    color: var(--slate);
+    font-family: var(--sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px 100px; }
+
+  /* ── header ─────────────────────────── */
+  header { padding: 56px 0 8px; position: relative; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--g500);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before { content: ""; width: 24px; height: 1.5px; background: var(--clay); flex: none; }
+  .backlink {
+    position: absolute; top: 60px; right: 0;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--g500); text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+  .backlink:hover { color: var(--clay); }
+  .top-nav {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding-top: 20px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+  }
+  .top-nav a { color: var(--g500); text-decoration: none; }
+  .top-nav a:hover { color: var(--clay); }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(34px, 5vw, 50px);
+    line-height: 1.08;
+    letter-spacing: -0.018em;
+    margin: 0 0 10px;
+  }
+  .lede { font-size: 16.5px; color: var(--g700); max-width: 640px; margin: 0 0 30px; }
+
+  /* ── prompt box ─────────────────────── */
+  .promptbox {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 14px;
+    padding: 22px 24px 20px;
+    position: relative;
+  }
+  .promptbox .label {
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--clay); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .promptbox .label::before { content: ""; width: 24px; height: 1.5px; background: var(--clay); flex: none; }
+  .promptbox blockquote {
+    margin: 0; padding: 0;
+    font-family: var(--serif); font-style: italic;
+    font-size: 17.5px; line-height: 1.5; color: var(--slate);
+    max-width: 46em;
+  }
+  .promptbox .prompt-zh {
+    margin: 12px 0 0; font-size: 13.5px; color: var(--g500); line-height: 1.55;
+  }
+  .copybtn {
+    position: absolute; top: 18px; right: 18px;
+    font-family: var(--mono); font-size: 11.5px;
+    letter-spacing: 0.04em;
+    background: var(--g100); color: var(--g700);
+    border: 1.5px solid var(--g300); border-radius: 7px;
+    padding: 5px 11px; cursor: pointer;
+  }
+  .copybtn:hover { border-color: var(--clay); color: var(--clay-d); }
+  .copybtn.done { background: var(--olive); border-color: var(--olive); color: #fff; }
+
+  /* ── divider ────────────────────────── */
+  .divider {
+    display: flex; align-items: center; gap: 16px;
+    margin: 44px 0 30px;
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--g500); white-space: nowrap;
+  }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--g300); }
+
+  /* ══ THE ARTIFACT ═════════════════════ */
+  .artifact {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .art-head {
+    padding: 16px 22px;
+    border-bottom: 1.5px solid var(--g200);
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+    background: var(--g100);
+  }
+  .art-head .t { font-family: var(--serif); font-weight: 500; font-size: 17px; letter-spacing: -0.01em; }
+  .art-head .s { font-family: var(--mono); font-size: 11.5px; color: var(--g500); }
+
+  .art-body { display: grid; grid-template-columns: 216px 1fr; min-height: 480px; }
+  @media (max-width: 720px) { .art-body { grid-template-columns: 1fr; min-height: 0; } }
+
+  /* rail */
+  .rail {
+    border-right: 1.5px solid var(--g200);
+    padding: 20px 16px;
+    background: var(--ivory);
+  }
+  @media (max-width: 720px) {
+    .rail { border-right: none; border-bottom: 1.5px solid var(--g200); padding: 14px 16px; }
+  }
+  .rail .rail-label {
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--g500); margin-bottom: 12px;
+  }
+  .rail-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 8px; margin: 0 -8px;
+    border-radius: 8px;
+    font-size: 12.5px; color: var(--g500);
+    cursor: default;
+    border: none; background: none; width: calc(100% + 16px);
+    text-align: left; font-family: var(--sans);
+  }
+  .rail-item.done { color: var(--g700); cursor: pointer; }
+  .rail-item.done:hover { background: var(--g100); }
+  .rail-item.current { color: var(--slate); font-weight: 600; background: var(--g100); }
+  .rail-dot {
+    width: 11px; height: 11px; border-radius: 50%; flex: none;
+    border: 2px solid var(--dotc, var(--g300));
+    background: transparent;
+  }
+  .rail-item.done .rail-dot { background: var(--dotc); }
+  .rail-item.current .rail-dot { box-shadow: 0 0 0 3px var(--g200); }
+  .rail-item .rail-q { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rail-item .tick { margin-left: auto; font-size: 11px; color: var(--olive); flex: none; }
+  .rail-meta {
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--g200);
+    font-family: var(--mono); font-size: 11px; color: var(--g500); line-height: 1.8;
+  }
+  .rail-meta b { color: var(--g700); font-weight: 600; }
+  @media (max-width: 720px) {
+    .rail .rail-q, .rail .tick, .rail-meta, .rail .rail-label { display: none; }
+    .rail { display: flex; align-items: center; gap: 10px; }
+    .rail-item { width: auto; padding: 4px; margin: 0; }
+  }
+
+  /* stage */
+  .stage { padding: 28px 30px 30px; position: relative; }
+  @media (max-width: 720px) { .stage { padding: 22px 18px 24px; } }
+  .qcard { animation: qin .28s ease both; }
+  .qcard.leaving { animation: qout .18s ease both; }
+  @keyframes qin  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes qout { from { opacity: 1; } to { opacity: 0; transform: translateY(-8px); } }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 5px;
+    color: #fff; background: var(--g500);
+    margin-bottom: 4px;
+  }
+  .qnum { font-family: var(--mono); font-size: 11.5px; color: var(--g500); margin-left: 10px; }
+  .qtext {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(20px, 3vw, 25px); line-height: 1.25;
+    letter-spacing: -0.012em;
+    margin: 10px 0 6px; max-width: 34em;
+  }
+  .why {
+    font-size: 13.5px; color: var(--g500); margin: 0 0 22px;
+    display: flex; gap: 8px; align-items: baseline;
+  }
+  .why::before { content: "↳"; color: var(--clay); flex: none; }
+
+  .opts { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 620px) { .opts { grid-template-columns: 1fr; } }
+  .opt {
+    text-align: left;
+    background: var(--ivory);
+    border: 1.5px solid var(--g300);
+    border-radius: 11px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-family: var(--sans);
+    color: var(--slate);
+    transition: border-color .12s, background .12s, transform .12s;
+  }
+  .opt:hover { border-color: var(--clay); background: var(--paper); transform: translateY(-1px); }
+  .opt.picked { border-color: var(--clay); background: var(--paper); box-shadow: 0 0 0 3px rgba(217,119,87,.15); }
+  .opt .ot { font-weight: 600; font-size: 14.5px; display: block; margin-bottom: 3px; }
+  .opt .od { font-size: 12.5px; color: var(--g500); line-height: 1.45; display: block; }
+
+  .otherrow { display: flex; gap: 8px; margin-top: 12px; }
+  .otherrow input {
+    flex: 1; min-width: 0;
+    font-family: var(--sans); font-size: 14px;
+    padding: 10px 13px;
+    border: 1.5px solid var(--g300); border-radius: 9px;
+    background: var(--ivory); color: var(--slate);
+  }
+  .otherrow input::placeholder { color: var(--g500); }
+  .otherrow input:focus { outline: none; border-color: var(--clay); background: var(--paper); }
+  .otherrow button {
+    font-family: var(--mono); font-size: 12px;
+    padding: 0 16px; border-radius: 9px; cursor: pointer;
+    border: 1.5px solid var(--g300); background: var(--g100); color: var(--g700);
+  }
+  .otherrow button:hover { border-color: var(--clay); color: var(--clay-d); }
+
+  .navrow { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+  .backbtn {
+    font-family: var(--mono); font-size: 12px;
+    background: none; border: none; cursor: pointer;
+    color: var(--g500); padding: 6px 0;
+  }
+  .backbtn:hover { color: var(--clay-d); }
+  .backbtn[disabled] { visibility: hidden; }
+  .navhint { font-family: var(--mono); font-size: 11px; color: var(--g500); }
+
+  /* summary */
+  .sum-h { font-family: var(--serif); font-weight: 500; font-size: 24px; letter-spacing: -0.012em; margin: 4px 0 4px; }
+  .sum-sub { font-size: 14px; color: var(--g500); margin: 0 0 20px; }
+  .dtable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .dtable-scroll { overflow-x: auto; }
+  .dtable th {
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--g500); font-weight: 500;
+    text-align: left; padding: 8px 12px 8px 0;
+    border-bottom: 1.5px solid var(--g300);
+    white-space: nowrap;
+  }
+  .dtable td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--g200); vertical-align: top; }
+  .dtable tr:last-child td { border-bottom: none; }
+  .dtable .pill {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #fff; padding: 2px 7px; border-radius: 4px; white-space: nowrap;
+  }
+  .dtable .topic { color: var(--g500); white-space: nowrap; }
+  .dtable .dec { font-weight: 600; }
+  .dtable .redo {
+    font-family: var(--mono); font-size: 11px; color: var(--g500);
+    background: none; border: none; cursor: pointer; padding: 0;
+  }
+  .dtable .redo:hover { color: var(--clay-d); }
+
+  .genblock { margin-top: 26px; }
+  .genblock .gb-label {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--clay); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .genblock .gb-label::before { content: ""; width: 18px; height: 1.5px; background: var(--clay); flex: none; }
+  .genwrap { position: relative; }
+  .genwrap pre {
+    margin: 0;
+    background: var(--slate);
+    color: var(--g200);
+    border-radius: 11px;
+    padding: 18px 20px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .genwrap .copybtn { top: 12px; right: 12px; background: var(--g700); border-color: var(--g700); color: var(--g300); }
+  .genwrap .copybtn:hover { color: var(--paper); border-color: var(--g500); }
+  .genwrap .copybtn.done { background: var(--olive); border-color: var(--olive); color: #fff; }
+  .restart {
+    margin-top: 18px;
+    font-family: var(--mono); font-size: 12px;
+    background: none; border: none; cursor: pointer;
+    color: var(--g500); padding: 0;
+  }
+  .restart:hover { color: var(--clay-d); }
+
+  footer {
+    margin-top: 56px; padding-top: 22px;
+    border-top: 1px solid var(--g300);
+    font-size: 13px; color: var(--g500);
+  }
+  footer a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+  footer a:hover { text-decoration-color: var(--clay); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="top-nav">
+    <a href="../">&larr; 返回未知项野外指南</a>
+    <a href="https://thariqs.github.io/html-effectiveness/unknowns/06-interview.html">英文原版 &#8599;</a>
+  </nav>
+
+  <header>
+    <div class="eyebrow">未知项野外指南 · 实现之前</div>
+    <a class="backlink" href="index.html">← 所有示例</a>
+    <h1>访谈</h1>
+    <p class="lede">与其对着模糊的需求瞎猜，不如让 Claude 来访谈你——一次只问一个问题，按答案对架构的改变程度排序。</p>
+
+    <div class="promptbox">
+      <div class="label">提示词</div>
+      <button class="copybtn" id="copyPrompt">复制提示词</button>
+      <blockquote id="promptText">Interview me one question at a time about anything still ambiguous in the annotation-export feature. Prioritize questions where my answer would change the architecture.</blockquote>
+      <p class="prompt-zh">中文大意：就标注导出功能里所有仍然模糊的地方，一次一个问题地访谈我。优先问那些我的答案会改变架构的问题。</p>
+    </div>
+  </header>
+
+  <div class="divider">Claude 的产出</div>
+
+  <div class="artifact">
+    <div class="art-head">
+      <span class="t">标注导出 — 需求访谈</span>
+      <span class="s">acme/web · 7 个待定问题 · 按爆炸半径排序</span>
+    </div>
+    <div class="art-body">
+      <nav class="rail" id="rail" aria-label="访谈进度"></nav>
+      <div class="stage" id="stage"></div>
+    </div>
+  </div>
+
+  <footer>本页属于 <a href="index.html">未知项野外指南</a> —— 博客文章的配套示例。</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var RADII = {
+    arch:  { label: "架构",     color: "var(--clay)" },
+    data:  { label: "数据模型", color: "var(--clay-d)" },
+    ux:    { label: "UX",       color: "var(--olive)" },
+    pol:   { label: "打磨",     color: "var(--g500)" }
+  };
+
+  var QUESTIONS = [
+    {
+      id: "runtime",
+      radius: "arch",
+      short: "导出在哪运行",
+      topic: "Execution model",
+      topicZh: "执行模型",
+      q: "导出的生成过程究竟应该在哪里运行？",
+      why: "这决定了我们要不要任务队列、通知链路和产物存储桶——还是全都不需要。其余一切都叠在这个决定之上。",
+      opts: [
+        { t: "Synchronously in the API request", d: "（在 API 请求内同步执行）最简单，但一条 2 小时粗剪上带 400 条评论的审阅会轻松超出网关的 30 秒超时。" },
+        { t: "Background job via the existing sidekiq queue", d: "（走现有 sidekiq 队列的后台任务）复用代理转码用过的 jobs/export_worker 模式；需要一个“已就绪”通知。" },
+        { t: "Entirely client-side from the annotations API", d: "（完全在客户端基于标注 API 生成）零新增后端，但格式受限于浏览器能拼装的范围，日后支持团队也查不到任何服务端记录。" }
+      ]
+    },
+    {
+      id: "scope",
+      radius: "arch",
+      short: "导出范围",
+      topic: "Scope of one export",
+      topicZh: "单次导出的范围",
+      q: "一次导出的基本单位是什么？",
+      why: "项目级导出意味着跨视频扇出、分页和一种清单格式——工作面大约是按视频导出的 3 倍。",
+      opts: [
+        { t: "One video at a time", d: "（一次一个视频）贴合审片页的心智模型；项目导出眼下就是多点 N 次而已。" },
+        { t: "A whole project (all videos)", d: "（整个项目的所有视频）Meridian Post 这个客户提的需求；意味着要做 zip 打包和每个视频一份清单。" },
+        { t: "Arbitrary user-picked selection", d: "（用户任意勾选）最灵活也最费 UI；需要一套目前哪里都还不存在的选择模型。" }
+      ]
+    },
+    {
+      id: "drawings",
+      radius: "data",
+      short: "画笔标注要吗？",
+      topic: "Drawing annotations",
+      topicZh: "画笔标注",
+      q: "帧上的画笔标注要导出吗，还是只导出文字评论？",
+      why: "画笔内容以 canvas 笔画 JSON 的形式存在 annotation_shapes 里；要包含它们，就得在服务端栅格化，或者直接输出原始矢量数据。",
+      opts: [
+        { t: "Text comments only (v1)", d: "（v1 只导出文字评论）出货最快；画笔标注会显示为 “[drawing on frame 4211]” 这样的占位符。" },
+        { t: "Rasterize drawings to PNG stills", d: "（把画笔栅格化成 PNG 静帧）最适合 PDF 报告；需要一步无头渲染——缩略图 worker 很接近，但并不完全一样。" },
+        { t: "Include raw stroke JSON", d: "（附带原始笔画 JSON）无损又省事，但只对要把数据重新导回 Acme 的人有用。" }
+      ]
+    },
+    {
+      id: "timecode",
+      radius: "data",
+      short: "时间戳格式",
+      topic: "Timestamp representation",
+      topicZh: "时间戳表示",
+      q: "导出文件里的标注时间戳该怎么表示？",
+      why: "我们存的是毫秒，而剪辑师的世界是 SMPTE 时间码。换算需要源片 fps，可 3% 的历史上传里这个字段是空的。",
+      opts: [
+        { t: "SMPTE timecode (HH:MM:SS:FF)", d: "（SMPTE 时间码）Resolve 和 Premiere 认的就是它；需要给历史视频补一遍 fps。" },
+        { t: "Plain seconds / milliseconds", d: "（纯秒 / 毫秒）没有换算风险，但每个剪辑师都得手工换算，总有人会算错。" },
+        { t: "Both columns, always", d: "（永远两列都给）文件稍微宽一点，但再也没人需要问哪一列才算数。" }
+      ]
+    },
+    {
+      id: "formats",
+      radius: "ux",
+      short: "v1 首发格式",
+      topic: "Export formats",
+      topicZh: "导出格式",
+      q: "v1 首发要带上哪些格式？",
+      why: "每种格式基本都是独立的工作量，但这个选择表明了功能是做给谁的——制片、剪辑师，还是客户。",
+      opts: [
+        { t: "CSV only", d: "（只做 CSV）管线搭好之后就是一个下午的活儿；制片想怎么做透视表都随意。" },
+        { t: "PDF review report", d: "（PDF 审片报告）面向客户、带缩略图的成品；只有画笔标注能栅格化时才有意义。" },
+        { t: "NLE marker file (EDL / Resolve CSV)", d: "（NLE 标记文件，EDL / Resolve CSV）论坛帖子里重度用户点名要的；时间码那个问题因此变得举足轻重。" },
+        { t: "CSV + NLE markers, PDF later", d: "（CSV + NLE 标记，PDF 以后再说）同时覆盖内部和剪辑师两条工作流，还不会被栅格化卡住。" }
+      ]
+    },
+    {
+      id: "access",
+      radius: "ux",
+      short: "谁能导出",
+      topic: "Export permissions",
+      topicZh: "导出权限",
+      q: "允许谁来导出？",
+      why: "访客审片人用的是免登录分享链接——如果他们也能导出，标注就会悄无声息地越过权限边界外流。",
+      opts: [
+        { t: "Anyone who can view the video", d: "（能看视频的人都行）包括分享链接访客；规则最简单，数据外流面也最大。" },
+        { t: "Project members only", d: "（仅限项目成员）访客照样能评论，但没法批量提取；UI 里得解释按钮为何是禁用状态。" },
+        { t: "Owner and admins only", d: "（仅所有者和管理员）最保守；多半会催生“能帮我导一份吗”这类杂活。" }
+      ]
+    },
+    {
+      id: "naming",
+      radius: "pol",
+      short: "文件与命名",
+      topic: "File naming & bundling",
+      topicZh: "文件命名与打包",
+      q: "导出文件怎么命名、怎么打包？",
+      why: "纯粹是约定问题，但上线后的第一张工单永远是“哪个文件对应哪一版剪辑”。",
+      opts: [
+        { t: "{project}_{video}_{date}.csv, flat", d: "（平铺的 {project}_{video}_{date}.csv）可预测、好 grep；过长的标题会在 80 个字符处截断。" },
+        { t: "Zip per export with a manifest.json", d: "（每次导出一个 zip，内附 manifest.json）无论范围多大都只产出一个文件；单文件场景稍显繁琐。" },
+        { t: "Let the user pick at export time", d: "（导出时让用户自己选）为一个几乎没人会改的东西专门做一层设置界面。" }
+      ]
+    }
+  ];
+
+  var answers = new Array(QUESTIONS.length).fill(null); // {text, custom}
+  var current = 0;   // index, or QUESTIONS.length => summary
+  var rail = document.getElementById("rail");
+  var stage = document.getElementById("stage");
+
+  function answeredCount() {
+    return answers.filter(function (a) { return a !== null; }).length;
+  }
+
+  function esc(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function renderRail() {
+    var html = '<div class="rail-label">访谈进度</div>';
+    QUESTIONS.forEach(function (q, i) {
+      var r = RADII[q.radius];
+      var cls = "rail-item" + (i === current ? " current" : "") + (answers[i] ? " done" : "");
+      html += '<button type="button" class="' + cls + '" data-i="' + i + '" style="--dotc:' + r.color + '"' +
+        (answers[i] ? '' : ' tabindex="-1"') + '>' +
+        '<span class="rail-dot"></span><span class="rail-q">' + esc(q.short) + '</span>' +
+        (answers[i] ? '<span class="tick">✓</span>' : '') + '</button>';
+    });
+    html += '<div class="rail-meta">已回答 <b>' + answeredCount() + '</b> / 7 题<br>' +
+      '<span style="color:var(--clay)">●</span> 架构 &nbsp;' +
+      '<span style="color:var(--clay-d)">●</span> 数据<br>' +
+      '<span style="color:var(--olive)">●</span> UX &nbsp;' +
+      '<span style="color:var(--g500)">●</span> 打磨</div>';
+    rail.innerHTML = html;
+    rail.querySelectorAll(".rail-item.done").forEach(function (el) {
+      el.addEventListener("click", function () { go(parseInt(el.dataset.i, 10)); });
+    });
+  }
+
+  function renderQuestion() {
+    var q = QUESTIONS[current];
+    var r = RADII[q.radius];
+    var picked = answers[current];
+    var html = '<div class="qcard">' +
+      '<span class="badge" style="background:' + r.color + '">' + esc(r.label) + '</span>' +
+      '<span class="qnum">第 ' + (current + 1) + ' 题 / 共 ' + QUESTIONS.length + ' 题</span>' +
+      '<h2 class="qtext">' + esc(q.q) + '</h2>' +
+      '<p class="why">' + esc(q.why) + '</p>' +
+      '<div class="opts">';
+    q.opts.forEach(function (o, oi) {
+      var isPicked = picked && !picked.custom && picked.text === o.t;
+      html += '<button type="button" class="opt' + (isPicked ? ' picked' : '') + '" data-oi="' + oi + '">' +
+        '<span class="ot">' + esc(o.t) + '</span><span class="od">' + esc(o.d) + '</span></button>';
+    });
+    html += '</div>' +
+      '<div class="otherrow">' +
+      '<input type="text" id="otherInput" placeholder="其他——输入你自己的答案…" value="' +
+        (picked && picked.custom ? esc(picked.text) : '') + '">' +
+      '<button type="button" id="otherGo">回答 ↵</button></div>' +
+      '<div class="navrow">' +
+      '<button type="button" class="backbtn" id="backBtn"' + (current === 0 ? ' disabled' : '') + '>← 上一题</button>' +
+      '<span class="navhint">选一张卡片继续</span>' +
+      '</div></div>';
+    stage.innerHTML = html;
+
+    stage.querySelectorAll(".opt").forEach(function (el) {
+      el.addEventListener("click", function () {
+        var o = q.opts[parseInt(el.dataset.oi, 10)];
+        answers[current] = { text: o.t, custom: false };
+        el.classList.add("picked");
+        renderRail();
+        setTimeout(function () { go(current + 1); }, 240);
+      });
+    });
+    var input = stage.querySelector("#otherInput");
+    function submitOther() {
+      var v = input.value.trim();
+      if (!v) { input.focus(); return; }
+      answers[current] = { text: v, custom: true };
+      renderRail();
+      go(current + 1);
+    }
+    stage.querySelector("#otherGo").addEventListener("click", submitOther);
+    input.addEventListener("keydown", function (e) { if (e.key === "Enter") submitOther(); });
+    stage.querySelector("#backBtn").addEventListener("click", function () { go(current - 1); });
+  }
+
+  function buildFollowupPrompt() {
+    var lines = [
+      "Here's what we decided in the interview — implement the",
+      "annotation-export feature with these constraints:",
+      ""
+    ];
+    QUESTIONS.forEach(function (q, i) {
+      var a = answers[i];
+      lines.push((i + 1) + ". " + q.topic + ": " + (a ? a.text : "(unanswered — use your judgment)") +
+        (a && a.custom ? " [my own wording — ask if unclear]" : ""));
+    });
+    lines.push("");
+    lines.push("Treat the architecture and data-model decisions (1–4) as fixed.");
+    lines.push("If anything in 5–7 conflicts with them, flag it before writing code.");
+    lines.push("Start with a short plan, then implement.");
+    return lines.join("\n");
+  }
+
+  function renderSummary() {
+    var rows = "";
+    QUESTIONS.forEach(function (q, i) {
+      var r = RADII[q.radius];
+      var a = answers[i];
+      rows += "<tr>" +
+        '<td><span class="pill" style="background:' + r.color + '">' + esc(r.label) + '</span></td>' +
+        '<td class="topic">' + esc(q.topicZh || q.topic) + '</td>' +
+        '<td class="dec">' + (a ? esc(a.text) + (a.custom ? ' <span style="font-weight:400;color:var(--g500)">（你的原话）</span>' : '') : '<span style="color:var(--g500)">—</span>') + '</td>' +
+        '<td><button type="button" class="redo" data-i="' + i + '">修改</button></td>' +
+        "</tr>";
+    });
+    stage.innerHTML = '<div class="qcard">' +
+      '<span class="badge" style="background:var(--olive)">访谈完成</span>' +
+      '<h2 class="sum-h">七个决定，零个假设。</h2>' +
+      '<p class="sum-sub">下面每一个答案，原本都会在实现过程中被悄悄猜掉。</p>' +
+      '<div class="dtable-scroll"><table class="dtable"><thead><tr>' +
+      '<th>爆炸半径</th><th>问题</th><th>决定</th><th></th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<div class="genblock">' +
+      '<div class="gb-label">自动生成的后续实现 prompt</div>' +
+      '<div class="genwrap"><button type="button" class="copybtn" id="copyGen">复制</button>' +
+      '<pre id="genPre">' + esc(buildFollowupPrompt()) + '</pre></div>' +
+      '</div>' +
+      '<button type="button" class="restart" id="restartBtn">↺ 重新开始</button>' +
+      '</div>';
+
+    stage.querySelectorAll(".redo").forEach(function (el) {
+      el.addEventListener("click", function () { go(parseInt(el.dataset.i, 10)); });
+    });
+    wireCopy(stage.querySelector("#copyGen"), function () { return buildFollowupPrompt(); });
+    stage.querySelector("#restartBtn").addEventListener("click", function () {
+      answers = new Array(QUESTIONS.length).fill(null);
+      go(0);
+    });
+  }
+
+  function go(idx) {
+    var card = stage.querySelector(".qcard");
+    var doRender = function () {
+      current = idx;
+      renderRail();
+      if (current >= QUESTIONS.length) renderSummary();
+      else renderQuestion();
+    };
+    if (card) {
+      card.classList.add("leaving");
+      setTimeout(doRender, 160);
+    } else {
+      doRender();
+    }
+  }
+
+  function wireCopy(btn, getText) {
+    btn.addEventListener("click", function () {
+      var text = getText();
+      var done = function () {
+        var orig = btn.textContent;
+        btn.textContent = "已复制 ✓";
+        btn.classList.add("done");
+        setTimeout(function () { btn.textContent = orig; btn.classList.remove("done"); }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); done(); });
+      } else {
+        fallbackCopy(text); done();
+      }
+    });
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  wireCopy(document.getElementById("copyPrompt"), function () {
+    return document.getElementById("promptText").textContent;
+  });
+
+  renderRail();
+  renderQuestion();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,614 @@
+<!-- Copyright 2026 Anthropic PBC · SPDX-License-Identifier: Apache-2.0 -->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>教我认识我的未知 — 认识你的未知</title>
+<style>
+  :root {
+    --ivory:  #FAF9F5;
+    --paper:  #FFFFFF;
+    --slate:  #141413;
+    --clay:   #D97757;
+    --clay-d: #B85C3E;
+    --oat:    #E3DACC;
+    --olive:  #788C5D;
+    --g100:   #F0EEE6;
+    --g200:   #E6E3DA;
+    --g300:   #D1CFC5;
+    --g500:   #87867F;
+    --g700:   #3D3D3A;
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ivory);
+    color: var(--slate);
+    font-family: var(--sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px 100px; }
+
+  /* ── header ─────────────────────────── */
+  header { padding: 56px 0 8px; position: relative; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--g500);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before { content: ""; width: 24px; height: 1.5px; background: var(--clay); flex: none; }
+  .backlink {
+    position: absolute; top: 60px; right: 0;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--g500); text-decoration: none;
+  }
+  .backlink:hover { color: var(--clay); }
+  .topnav {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 20px 0 0;
+    font-family: var(--mono); font-size: 12px;
+  }
+  .topnav a { color: var(--g500); text-decoration: none; }
+  .topnav a:hover { color: var(--clay); }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(32px, 5vw, 46px);
+    line-height: 1.08;
+    letter-spacing: -0.018em;
+    margin: 0 0 10px;
+  }
+  .lede { font-size: 16.5px; color: var(--g700); max-width: 640px; margin: 0 0 28px; }
+
+  h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -0.012em; }
+
+  .card {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 14px;
+  }
+
+  /* prompt box */
+  .promptbox { padding: 22px 26px 24px; position: relative; margin-bottom: 44px; }
+  .promptbox .label {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--clay); margin-bottom: 10px;
+  }
+  .promptbox blockquote {
+    margin: 0; padding: 0 0 0 18px;
+    border-left: 3px solid var(--oat);
+    font-family: var(--serif); font-style: italic;
+    font-size: 17.5px; line-height: 1.5; color: var(--slate);
+  }
+  .copybtn {
+    position: absolute; top: 18px; right: 18px;
+    font-family: var(--mono); font-size: 11.5px;
+    background: var(--g100); color: var(--g700);
+    border: 1.5px solid var(--g300); border-radius: 8px;
+    padding: 6px 12px; cursor: pointer;
+  }
+  .copybtn:hover { border-color: var(--clay); color: var(--clay-d); }
+  .copybtn.done { background: var(--olive); border-color: var(--olive); color: #fff; }
+  .promptbox .prompt-zh {
+    margin: 12px 0 0; padding-left: 21px;
+    font-size: 13.5px; color: var(--g500);
+  }
+
+  /* divider */
+  .divider {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--g500);
+    margin: 0 0 40px;
+  }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1.5px; background: var(--g300); }
+
+  /* ── artifact ─────────────────────────── */
+  .artifact h2 { font-size: 27px; margin: 0 0 6px; }
+  .artifact .sub { color: var(--g700); font-size: 15px; max-width: 640px; margin: 0 0 26px; }
+  .sec-eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--g500);
+    display: flex; align-items: center; gap: 12px; margin: 44px 0 14px;
+  }
+  .sec-eyebrow::before { content: ""; width: 24px; height: 1.5px; background: var(--clay); flex: none; }
+
+  /* mental model strip */
+  .pipeline { display: flex; gap: 0; align-items: stretch; flex-wrap: wrap; margin-bottom: 8px; }
+  .pipe-step {
+    flex: 1 1 150px; background: var(--paper); border: 1.5px solid var(--g300);
+    border-radius: 12px; padding: 12px 14px; margin: 0 10px 10px 0;
+    position: relative;
+  }
+  .pipe-step b { display: block; font-size: 14px; }
+  .pipe-step span { font-size: 12.5px; color: var(--g500); }
+  .pipe-step.hot { border-color: var(--clay); }
+  .pipe-step.hot b { color: var(--clay-d); }
+
+  /* vocab ladder */
+  .ladder { display: grid; gap: 12px; }
+  .rung { padding: 16px 20px 15px; display: grid; grid-template-columns: 158px 1fr; gap: 4px 22px; }
+  @media (max-width: 640px) { .rung { grid-template-columns: 1fr; } }
+  .rung .term { font-family: var(--serif); font-size: 17px; font-weight: 500; }
+  .rung .term small { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--g500); margin-top: 2px; }
+  .rung .def { font-size: 14.5px; color: var(--g700); }
+  .rung .say {
+    grid-column: 2; font-family: var(--mono); font-size: 12.5px; color: var(--clay-d);
+    background: var(--g100); border-radius: 8px; padding: 7px 11px; margin-top: 6px;
+  }
+  @media (max-width: 640px) { .rung .say { grid-column: 1; } }
+  .rung .say::before { content: "say → "; color: var(--g500); }
+  .rung .say-zh {
+    grid-column: 2; margin: 4px 0 0; padding: 0 11px;
+    font-size: 12.5px; color: var(--g500);
+  }
+  @media (max-width: 640px) { .rung .say-zh { grid-column: 1; } }
+
+  /* grading console */
+  .console { overflow: hidden; }
+  .console-head {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    padding: 14px 20px; border-bottom: 1.5px solid var(--g200); background: var(--g100);
+  }
+  .console-head .fname { font-family: var(--mono); font-size: 12px; color: var(--g700); }
+  .console-head .fname i { font-style: normal; color: var(--g500); }
+  .presets { display: flex; gap: 8px; flex-wrap: wrap; }
+  .presets button {
+    font-family: var(--mono); font-size: 11.5px; padding: 6px 12px;
+    background: var(--paper); border: 1.5px solid var(--g300); border-radius: 999px;
+    color: var(--g700); cursor: pointer;
+  }
+  .presets button:hover { border-color: var(--clay); }
+  .presets button.on { background: var(--slate); border-color: var(--slate); color: var(--ivory); }
+
+  .frame-wrap { position: relative; background: var(--slate); user-select: none; }
+  .frame-stack { position: relative; aspect-ratio: 16/9; overflow: hidden; }
+  .frame-stack svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #gradeLayer { position: absolute; inset: 0; }
+  #tempOverlay, #splitTone { position: absolute; inset: 0; pointer-events: none; }
+  #tempOverlay { mix-blend-mode: soft-light; opacity: 0; }
+  #splitTone { mix-blend-mode: soft-light; opacity: 0;
+    background: radial-gradient(circle at 72% 34%, rgba(255,166,87,.95) 0%, rgba(255,166,87,0) 42%),
+                linear-gradient(rgba(38,86,97,.85), rgba(38,86,97,.85)); }
+  .split-handle {
+    position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(250,249,245,.9);
+    box-shadow: 0 0 6px rgba(0,0,0,.5); pointer-events: none;
+  }
+  .split-handle::after {
+    content: "◂ ▸"; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    background: var(--ivory); color: var(--slate); font-size: 10px;
+    padding: 3px 7px; border-radius: 999px; white-space: nowrap;
+    font-family: var(--mono); letter-spacing: 0.05em;
+  }
+  #splitRange {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    opacity: 0; cursor: ew-resize; margin: 0; -webkit-appearance: none; appearance: none;
+  }
+  .frame-tag {
+    position: absolute; top: 10px; font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.12em; padding: 3px 8px; border-radius: 4px;
+    background: rgba(20,20,19,.55); color: rgba(250,249,245,.9); pointer-events: none;
+  }
+  .frame-tag.before { left: 10px; }
+  .frame-tag.after { right: 10px; }
+
+  .sliders {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px;
+    padding: 18px 20px 20px; border-top: 1.5px solid var(--g200);
+  }
+  @media (max-width: 640px) { .sliders { grid-template-columns: 1fr; } }
+  .sl-row label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--g700); margin-bottom: 4px;
+  }
+  .sl-row label output { color: var(--clay-d); text-transform: none; }
+  .sl-row input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 22px;
+    background: transparent; cursor: pointer; margin: 0;
+  }
+  .sl-row input[type=range]::-webkit-slider-runnable-track {
+    height: 4px; border-radius: 2px; background: var(--g200);
+  }
+  .sl-row input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 16px; height: 16px; margin-top: -6px;
+    border-radius: 50%; background: var(--clay); border: 2px solid var(--paper);
+    box-shadow: 0 1px 3px rgba(20,20,19,.25);
+  }
+  .sl-row input[type=range]::-moz-range-track {
+    height: 4px; border-radius: 2px; background: var(--g200);
+  }
+  .sl-row input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px; border-radius: 50%; background: var(--clay);
+    border: 2px solid var(--paper); box-shadow: 0 1px 3px rgba(20,20,19,.25);
+  }
+  .console-foot {
+    font-size: 13px; color: var(--g500); padding: 0 20px 16px;
+  }
+  .console-foot b { color: var(--g700); font-weight: 600; }
+  .resetbtn {
+    font-family: var(--mono); font-size: 11px; background: none; border: none;
+    color: var(--g500); text-decoration: underline; cursor: pointer; padding: 0;
+  }
+  .resetbtn:hover { color: var(--clay); }
+
+  /* checklist */
+  .checklist { padding: 6px 22px 10px; }
+  .checklist ul { list-style: none; margin: 12px 0 14px; padding: 0; display: grid; gap: 10px; }
+  .checklist li { display: flex; gap: 12px; font-size: 14.5px; color: var(--g700); }
+  .checklist li::before {
+    content: "✓"; flex: none; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--olive); color: #fff; font-size: 12px; line-height: 20px;
+    text-align: center; margin-top: 2px;
+  }
+  .checklist li b { color: var(--slate); font-weight: 600; }
+  .checklist li.warn::before { content: "!"; background: var(--clay); }
+
+  /* prompts card */
+  .prompts-card { border-color: var(--slate); padding: 22px 24px 20px; }
+  .prompts-card h3 { margin: 0 0 4px; font-size: 21px; }
+  .prompts-card .note { font-size: 13.5px; color: var(--g500); margin: 0 0 16px; }
+  .pgrid { display: grid; gap: 10px; }
+  .pgrid .p {
+    font-family: var(--mono); font-size: 13px; line-height: 1.6;
+    background: var(--g100); border-left: 3px solid var(--clay);
+    border-radius: 0 10px 10px 0; padding: 12px 16px; color: var(--g700);
+  }
+  .pgrid .p b { color: var(--slate); font-weight: 600; }
+  .pgrid .p .zh {
+    display: block; font-family: var(--sans); font-size: 12.5px;
+    color: var(--g500); margin-top: 6px;
+  }
+
+  footer {
+    margin-top: 72px; padding-top: 24px; border-top: 1.5px solid var(--g300);
+    font-size: 13.5px; color: var(--g500);
+  }
+  footer a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topnav">
+    <a href="../">← 返回未知项野外指南</a>
+    <a href="https://thariqs.github.io/html-effectiveness/unknowns/02-color-grading-explainer.html">英文原版 ↗</a>
+  </nav>
+
+  <header>
+    <div class="eyebrow">认识你的未知 · 动手之前</div>
+    <a class="backlink" href="index.html">← 全部示例</a>
+    <h1>教我认识我的未知</h1>
+    <p class="lede">在做不熟悉的工作之前，先让 Claude 教你这个领域的词汇——这样你的下一条提示词，用的就是专业人士会用的说法。</p>
+
+    <div class="card promptbox">
+      <div class="label">提示词原文</div>
+      <blockquote id="promptText">I don't know what color grading is but I need to grade the Acme launch video. Teach me color grading well enough that I understand my unknown unknowns and can prompt you with real vocabulary.</blockquote>
+      <p class="prompt-zh">中文大意：我不知道什么是调色（color grading），但我需要给 Acme 的发布视频调色。请把调色教到这样的程度：让我能意识到自己"未知的未知"，并能用真正的行业词汇向你提需求。</p>
+      <button class="copybtn" id="copyBtn" type="button">复制提示词</button>
+    </div>
+  </header>
+
+  <div class="divider">Claude 生成的内容</div>
+
+  <main class="artifact">
+    <h2>一次学会调色</h2>
+    <p class="sub">给 <em>acme-launch-v3.mp4</em> 调色所需的一切——至少能让你向真正动手的人提出精准的意见。先做校正，再做创意风格。玩一玩下面的画面，直到每个滑块的作用都一目了然。</p>
+
+    <!-- mental model -->
+    <div class="sec-eyebrow">思维模型</div>
+    <div class="pipeline">
+      <div class="pipe-step"><b>1 · 素材导入</b><span>素材到手时是"灰片"（log 格式）——发灰、寡淡，这是有意为之：为了保留最多细节。</span></div>
+      <div class="pipe-step hot"><b>2 · 校正</b><span>先修好曝光和白平衡，让画面看起来<em>真实</em>。枯燥、必要，放在第一步。</span></div>
+      <div class="pipe-step hot"><b>3 · 调色</b><span>再加上<em>风格</em>：对比度形态、色彩倾向、情绪。这才是创作的部分。</span></div>
+      <div class="pipe-step"><b>4 · 镜头匹配</b><span>让整条片子里的每个镜头颜色统一，看起来浑然一体。</span></div>
+    </div>
+
+    <!-- vocab ladder -->
+    <div class="sec-eyebrow">词汇阶梯</div>
+    <div class="ladder">
+      <div class="card rung">
+        <div class="term">曝光<small>Exposure · 整体亮度</small></div>
+        <div class="def">整幅画面的明暗程度，以"档"（stop）为单位——每一档等于光量翻倍或减半。曝光不对 = 细节丢失：要么高光过曝死白，要么阴影糊成一团。</div>
+        <div class="say">"the interview shots look a half-stop underexposed — bring them up"</div>
+        <p class="say-zh">中文大意：采访镜头看起来欠曝了半档——把它们提亮。</p>
+      </div>
+      <div class="card rung">
+        <div class="term">白平衡<small>White balance · 色温</small></div>
+        <div class="def">白色的东西看起来是不是真的白。以开尔文（Kelvin）为单位：数值低 = 暖/偏橙（钨丝灯），数值高 = 冷/偏蓝（日光）。混合光源是最经典的坑。</div>
+        <div class="say">"the office footage reads too warm — cool it toward neutral, protect skin tones"</div>
+        <p class="say-zh">中文大意：办公室素材偏暖——往中性方向调冷一点，注意保护肤色。</p>
+      </div>
+      <div class="card rung">
+        <div class="term">对比度曲线<small>Contrast curve · 影调响应</small></div>
+        <div class="def">一条从阴影到高光的 S 形映射曲线。曲线越陡，画面越"冲"；越平缓越柔和、越有"胶片感"。专业做法是去弯这条曲线，而不是简单拉一个滑块。</div>
+        <div class="say">"add a gentle S-curve — richer blacks but don't crush shadow detail"</div>
+        <p class="say-zh">中文大意：加一条平缓的 S 曲线——黑位更厚重，但别压掉阴影细节。</p>
+      </div>
+      <div class="card rung">
+        <div class="term">Lift / Gamma / Gain<small>三路校色</small></div>
+        <div class="def">分别独立控制阴影（lift）、中间调（gamma）、高光（gain）的颜色与亮度。专业调色师说的"阴影压青、高光偏暖"，靠的就是它。</div>
+        <div class="say">"push the lift slightly teal and the gain slightly warm — subtle, not music-video"</div>
+        <p class="say-zh">中文大意：把 lift 稍微推向青色、gain 稍微偏暖——要克制，别调成 MV 风。</p>
+      </div>
+      <div class="card rung">
+        <div class="term">饱和度与自然饱和度<small>Saturation vs vibrance · 色彩浓度</small></div>
+        <div class="def">饱和度（saturation）会把<em>所有</em>颜色一起加强（肤色很快就变橙）。自然饱和度（vibrance）只加强偏淡的颜色，并保护肤色。几乎任何时候都应该先用 vibrance。</div>
+        <div class="say">"use vibrance not saturation — the UI screenshots can pop but faces stay natural"</div>
+        <p class="say-zh">中文大意：用 vibrance 而不是 saturation——UI 截图可以更鲜亮，但人脸保持自然。</p>
+      </div>
+      <div class="card rung">
+        <div class="term">LUT<small>look-up table · 查找表</small></div>
+        <div class="def">保存好的色彩变换文件（.cube），一步套用一整套颜色处理——可以是技术性的（log 转 Rec.709，即网络与高清视频的标准色彩空间），也可以是创意性的（一种风格化调色）。先校正再套用，然后把强度调低。</div>
+        <div class="say">"apply the Rec.709 conversion LUT first, then a creative LUT at ~60% strength"</div>
+        <p class="say-zh">中文大意：先套用 Rec.709 转换 LUT，再叠一个创意 LUT，强度约 60%。</p>
+      </div>
+    </div>
+
+    <!-- interactive console -->
+    <div class="sec-eyebrow">亲手试试——给一帧画面调色</div>
+    <div class="card console">
+      <div class="console-head">
+        <span class="fname">acme-launch-v3.mp4 <i>· 帧 01:47:12 · 拖动分割线对比前后</i></span>
+        <div class="presets">
+          <button type="button" data-preset="flat">灰片（Flat / log）</button>
+          <button type="button" data-preset="corporate" class="on">企业干净风</button>
+          <button type="button" data-preset="teal">电影感青橙调</button>
+        </div>
+      </div>
+
+      <div class="frame-wrap">
+        <div class="frame-stack">
+          <!-- scene definition -->
+          <svg viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" aria-label="未调色的风景画面">
+            <defs>
+              <g id="scene">
+                <rect width="640" height="360" fill="#9DB3B8"/>
+                <circle cx="462" cy="118" r="34" fill="#EFD79A"/>
+                <path d="M0 190 L120 96 L238 190 Z" fill="#77857D"/>
+                <path d="M150 190 L300 66 L470 190 Z" fill="#5F6F66"/>
+                <path d="M400 190 L520 110 L640 190 L640 200 L400 200 Z" fill="#77857D"/>
+                <rect y="190" width="640" height="80" fill="#8AA39E"/>
+                <path d="M300 214 L470 190 L462 152 L448 190 Z" fill="#71898A" opacity="0.5"/>
+                <circle cx="462" cy="216" r="22" fill="#D9C08A" opacity="0.55"/>
+                <rect y="262" width="640" height="98" fill="#55614C"/>
+                <path d="M0 262 C 140 244, 300 276, 640 254 L640 360 L0 360 Z" fill="#4A5542"/>
+                <g fill="#3E4A38">
+                  <path d="M70 262 L86 210 L102 262 Z"/><rect x="83" y="258" width="6" height="16"/>
+                  <path d="M112 268 L126 224 L140 268 Z"/><rect x="123" y="264" width="5" height="14"/>
+                  <path d="M560 258 L578 202 L596 258 Z"/><rect x="575" y="254" width="6" height="18"/>
+                </g>
+                <g fill="#2E2E2A">
+                  <circle cx="332" cy="284" r="7"/>
+                  <path d="M326 291 C 326 302, 338 302, 338 291 L337 316 L333 316 L332 300 L331 316 L327 316 Z"/>
+                </g>
+                <path d="M0 356 L640 356" stroke="#39422F" stroke-width="8"/>
+              </g>
+            </defs>
+            <use href="#scene"/>
+          </svg>
+
+          <!-- graded copy, clipped to the right of the split -->
+          <div id="gradeLayer">
+            <svg viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <use href="#scene"/>
+            </svg>
+            <div id="tempOverlay"></div>
+            <div id="splitTone"></div>
+          </div>
+
+          <span class="frame-tag before">未调色</span>
+          <span class="frame-tag after">已调色</span>
+          <div class="split-handle" id="splitHandle"></div>
+          <input type="range" id="splitRange" min="4" max="96" value="42" aria-label="前后对比分割线位置">
+        </div>
+
+        <div class="sliders">
+          <div class="sl-row">
+            <label for="sExp">曝光 <output id="oExp">+0.2 EV</output></label>
+            <input type="range" id="sExp" min="-50" max="50" value="10">
+          </div>
+          <div class="sl-row">
+            <label for="sTemp">色温 <output id="oTemp">+8 暖</output></label>
+            <input type="range" id="sTemp" min="-50" max="50" value="8">
+          </div>
+          <div class="sl-row">
+            <label for="sCon">对比度 <output id="oCon">+12</output></label>
+            <input type="range" id="sCon" min="-50" max="50" value="12">
+          </div>
+          <div class="sl-row">
+            <label for="sSat">饱和度 <output id="oSat">+8</output></label>
+            <input type="range" id="sSat" min="-50" max="50" value="8">
+          </div>
+        </div>
+      </div>
+
+      <div class="console-foot">
+        <span id="presetNote"><b>企业干净风：</b>曝光略微提亮，色温接近中性，对比度适中——明亮、可信。产品发布视频的默认选择。</span>
+        · <button class="resetbtn" type="button" id="resetBtn">重置为未调色</button>
+      </div>
+    </div>
+
+    <!-- checklist -->
+    <div class="sec-eyebrow">好的调色长什么样</div>
+    <div class="card checklist">
+      <ul>
+        <li><b>肤色始终可信。</b>任何创意风格都要绕着人脸走，绝不能从脸上碾过去。如果创始人看起来像晕船或晒伤，这版调色就是错的。</li>
+        <li><b>黑位厚重但不死黑。</b>暗部仍能看清细节（头发、00:42 处的藏青色连帽衫）。直方图整个贴死在左边缘，意味着信息已经丢了。</li>
+        <li><b>白色不过曝。</b>Acme 的 UI 界面大面积是白色——一旦冲到纯 100%，按钮边框和文字就会消失。让高光始终留在天花板之下。</li>
+        <li><b>镜头之间保持一致。</b>从办公室采访切到屏幕录制，不应该像换了个频道。镜头匹配占了这份工作的一半。</li>
+        <li><b>风格为叙事服务。</b>发布视频要的是干净、自信，而不是阴郁的惊悚片。如果观众先注意到调色而不是产品，就该收着点。</li>
+        <li class="warn"><b>在不止一块屏幕上检查。</b>你的笔记本屏幕会骗人。签收前先在手机上、最好也在电视上预览——并确认按 Rec.709 导出，用于网络投放。</li>
+      </ul>
+    </div>
+
+    <!-- prompts you couldn't have written -->
+    <div class="sec-eyebrow">回报</div>
+    <div class="card prompts-card">
+      <h3>一小时前你还写不出来的提示词</h3>
+      <p class="note">一小时前，你顶多只能说 "make the video look nicer"（把视频弄好看点）。现在你可以这样说：</p>
+      <div class="pgrid">
+        <div class="p">"The interview footage was shot in <b>log</b> — apply the camera's <b>Rec.709 conversion LUT</b> first, then grade on top of that, not on the raw flat image."<span class="zh">中文大意：采访素材是用 log 拍的——先套用相机自带的 Rec.709 转换 LUT，然后在这个基础上调色，别直接在原始灰片上调。</span></div>
+        <div class="p">"Give the whole cut a restrained <b>teal-orange</b> look: push the <b>lift</b> slightly teal, <b>gain</b> slightly warm, keep <b>gamma</b> neutral so midtone skin stays natural."<span class="zh">中文大意：给整条片子做一个克制的青橙风格：lift 稍微推向青色，gain 稍微偏暖，gamma 保持中性，让中间调的肤色自然。</span></div>
+        <div class="p">"Shot 14 is about <b>2/3 of a stop underexposed</b> and too warm versus shot 13 — match its <b>exposure</b> and <b>white balance</b> to shot 13, then A/B them at the cut point."<span class="zh">中文大意：第 14 号镜头比第 13 号欠曝约 2/3 档且偏暖——把它的曝光和白平衡匹配到 13 号镜头，然后在剪辑点做 A/B 对比。</span></div>
+        <div class="p">"Add a soft <b>S-curve</b> for contrast and lift color intensity with <b>vibrance rather than saturation</b>, so the product UI pops without turning faces orange."<span class="zh">中文大意：加一条柔和的 S 曲线提升对比度，用 vibrance 而不是 saturation 提色彩浓度，让产品 UI 更亮眼而人脸不发橙。</span></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>本页属于<a href="index.html">《认识你的未知》</a>系列——博客文章的配套示例。</footer>
+</div>
+
+<script>
+(function () {
+  // ---- copy prompt ----
+  var copyBtn = document.getElementById('copyBtn');
+  var promptText = document.getElementById('promptText').textContent.trim();
+  copyBtn.addEventListener('click', function () {
+    function done() {
+      copyBtn.textContent = '已复制';
+      copyBtn.classList.add('done');
+      setTimeout(function () {
+        copyBtn.textContent = '复制提示词';
+        copyBtn.classList.remove('done');
+      }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(promptText).then(done, fallback);
+    } else { fallback(); }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = promptText;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      done();
+    }
+  });
+
+  // ---- grading console ----
+  var sExp = document.getElementById('sExp'),
+      sTemp = document.getElementById('sTemp'),
+      sCon = document.getElementById('sCon'),
+      sSat = document.getElementById('sSat');
+  var oExp = document.getElementById('oExp'),
+      oTemp = document.getElementById('oTemp'),
+      oCon = document.getElementById('oCon'),
+      oSat = document.getElementById('oSat');
+  var gradeLayer = document.getElementById('gradeLayer');
+  var gradeSvg = gradeLayer.querySelector('svg');
+  var tempOverlay = document.getElementById('tempOverlay');
+  var splitTone = document.getElementById('splitTone');
+  var splitRange = document.getElementById('splitRange');
+  var splitHandle = document.getElementById('splitHandle');
+  var presetNote = document.getElementById('presetNote');
+  var presetBtns = document.querySelectorAll('.presets button');
+  var splitToneOn = false;
+
+  var presets = {
+    flat: {
+      exp: 6, temp: 0, con: -38, sat: -45, split: false,
+      note: '<b>灰片（Flat / log）：</b>低对比、低饱和——这大致就是 log 模式拍摄的相机直出素材的样子。丑是故意的：为调色保留最多细节。'
+    },
+    corporate: {
+      exp: 10, temp: 8, con: 12, sat: 8, split: false,
+      note: '<b>企业干净风：</b>曝光略微提亮，色温接近中性，对比度适中——明亮、可信。产品发布视频的默认选择。'
+    },
+    teal: {
+      exp: 4, temp: -22, con: 26, sat: 14, split: true,
+      note: '<b>电影感青橙调：</b>阴影推向青色，光源周围保留一圈暖光，对比更强。大片式的调子——发布视频大概用到这个强度的 40% 就够了。'
+    }
+  };
+
+  function fmtSigned(v) { return (v > 0 ? '+' : '') + v; }
+
+  function update() {
+    var exp = +sExp.value, temp = +sTemp.value, con = +sCon.value, sat = +sSat.value;
+
+    // filter math: sliders are -50..50
+    var brightness = 1 + exp / 100;          // 0.5 .. 1.5
+    var contrast = 1 + con / 100;            // 0.5 .. 1.5
+    var saturate = 1 + sat / 62.5;           // 0.2 .. 1.8
+    var sepia = temp > 0 ? temp / 50 * 0.22 : 0;
+
+    gradeSvg.style.filter =
+      'brightness(' + brightness.toFixed(3) + ') ' +
+      'contrast(' + contrast.toFixed(3) + ') ' +
+      'saturate(' + saturate.toFixed(3) + ')' +
+      (sepia ? ' sepia(' + sepia.toFixed(3) + ')' : '');
+
+    // temperature wash overlay
+    if (temp === 0) {
+      tempOverlay.style.opacity = 0;
+    } else if (temp > 0) {
+      tempOverlay.style.background = '#E8955C';
+      tempOverlay.style.opacity = (temp / 50 * 0.55).toFixed(3);
+    } else {
+      tempOverlay.style.background = '#3E7286';
+      tempOverlay.style.opacity = (-temp / 50 * 0.6).toFixed(3);
+    }
+
+    splitTone.style.opacity = splitToneOn ? 0.75 : 0;
+
+    // readouts
+    oExp.textContent = (exp >= 0 ? '+' : '−') + Math.abs(exp / 50).toFixed(1) + ' EV';
+    oTemp.textContent = temp === 0 ? '中性' : fmtSigned(temp) + (temp > 0 ? ' 暖' : ' 冷');
+    oCon.textContent = fmtSigned(con);
+    oSat.textContent = fmtSigned(sat);
+  }
+
+  [sExp, sTemp, sCon, sSat].forEach(function (s) {
+    s.addEventListener('input', function () {
+      splitToneOn = false;                    // manual moves drop the split-tone extra
+      presetBtns.forEach(function (b) { b.classList.remove('on'); });
+      update();
+    });
+  });
+
+  presetBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var p = presets[btn.dataset.preset];
+      sExp.value = p.exp; sTemp.value = p.temp; sCon.value = p.con; sSat.value = p.sat;
+      splitToneOn = p.split;
+      presetBtns.forEach(function (b) { b.classList.toggle('on', b === btn); });
+      presetNote.innerHTML = p.note;
+      update();
+    });
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    sExp.value = 0; sTemp.value = 0; sCon.value = 0; sSat.value = 0;
+    splitToneOn = false;
+    presetBtns.forEach(function (b) { b.classList.remove('on'); });
+    presetNote.innerHTML = '<b>未调色：</b>所有校正已归零——"已调色"一侧现在与源画面完全一致。';
+    update();
+  });
+
+  // before/after split
+  function updateSplit() {
+    var pct = +splitRange.value;
+    gradeLayer.style.clipPath = 'inset(0 0 0 ' + pct + '%)';
+    splitHandle.style.left = pct + '%';
+  }
+  splitRange.addEventListener('input', updateSplit);
+
+  update();
+  updateSplit();
+})();
+</script>
+</body>
+</html>

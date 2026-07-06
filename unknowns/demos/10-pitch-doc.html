@@ -1,0 +1,587 @@
+<!-- Copyright 2026 Anthropic PBC · SPDX-License-Identifier: Apache-2.0 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>争取支持的文档 — 未知项野外指南</title>
+<style>
+  :root {
+    --ivory:#FAF9F5; --paper:#FFFFFF; --slate:#141413; --clay:#D97757; --clay-d:#B85C3E;
+    --oat:#E3DACC; --olive:#788C5D; --g100:#F0EEE6; --g200:#E6E3DA; --g300:#D1CFC5;
+    --g500:#87867F; --g700:#3D3D3A;
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--ivory); color: var(--slate);
+    font-family: var(--sans); line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -0.015em; }
+
+  /* ---------- page header ---------- */
+  header.page { padding: 56px 0 40px; border-bottom: 1.5px solid var(--g300); position: relative; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--g500); margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before { content: ""; width: 24px; height: 1.5px; background: var(--clay); flex: none; }
+  .backlink {
+    position: absolute; top: 60px; right: 0;
+    font-family: var(--mono); font-size: 12px; color: var(--g500); text-decoration: none;
+  }
+  .backlink:hover { color: var(--clay-d); }
+  .topnav {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding-top: 20px;
+    font-family: var(--mono); font-size: 12px;
+  }
+  .topnav a { color: var(--g500); text-decoration: none; }
+  .topnav a:hover { color: var(--clay-d); }
+  .promptcard .prompt-zh { margin: 12px 0 0; font-size: 13.5px; color: var(--g500); }
+  header.page h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1.08; margin: 0 0 10px; }
+  .lede { font-size: 16.5px; color: var(--g700); max-width: 640px; }
+
+  /* ---------- prompt box ---------- */
+  .promptcard {
+    background: var(--paper); border: 1.5px solid var(--g300); border-radius: 14px;
+    padding: 22px 26px; margin: 30px 0 0; position: relative;
+  }
+  .promptcard .label {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--clay); margin-bottom: 12px;
+  }
+  .promptcard blockquote {
+    font-family: var(--serif); font-style: italic; font-size: 17.5px;
+    line-height: 1.5; color: var(--slate); max-width: 720px;
+  }
+  .copybtn {
+    position: absolute; top: 18px; right: 18px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.04em;
+    background: var(--g100); color: var(--g700); border: 1.5px solid var(--g300);
+    border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  }
+  .copybtn:hover { border-color: var(--clay); color: var(--clay-d); }
+  .copybtn.done { background: var(--olive); border-color: var(--olive); color: #fff; }
+
+  /* ---------- divider ---------- */
+  .divider {
+    display: flex; align-items: center; gap: 16px; margin: 44px 0 36px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--g500);
+  }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--g300); }
+
+  /* ================= ARTIFACT ================= */
+  .artifact {
+    background: var(--paper); border: 1.5px solid var(--g300); border-radius: 14px;
+    padding: clamp(22px, 4vw, 44px); margin-bottom: 48px;
+  }
+  .doc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
+  .doc-eyebrow {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--g500);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .doc-eyebrow::before { content: ""; width: 24px; height: 1.5px; background: var(--clay); flex: none; }
+  .timechip {
+    font-family: var(--mono); font-size: 11.5px; color: var(--g700);
+    background: var(--oat); border-radius: 999px; padding: 5px 13px; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .timechip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--clay); }
+  .artifact h2.doc-title { font-size: clamp(26px, 3.6vw, 36px); line-height: 1.12; margin: 10px 0 4px; }
+  .doc-sub { color: var(--g500); font-size: 14px; margin-bottom: 26px; }
+  .doc-sub strong { color: var(--g700); font-weight: 600; }
+
+  .artifact h3.sec {
+    font-size: 21px; margin: 38px 0 14px; padding-top: 26px;
+    border-top: 1.5px solid var(--g200);
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .artifact h3.sec .n { font-family: var(--mono); font-size: 12px; color: var(--clay); font-weight: 400; }
+
+  /* ---------- demo player ---------- */
+  .demo-shell { position: relative; }
+  .demo {
+    background: var(--g100); border: 1.5px solid var(--g300); border-radius: 12px;
+    overflow: hidden; user-select: none;
+  }
+  .bl-titlebar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--paper); border-bottom: 1.5px solid var(--g200);
+    padding: 9px 14px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--g300); flex: none; }
+  .bl-name { font-family: var(--mono); font-size: 11px; color: var(--g500); margin-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bl-body { display: grid; grid-template-columns: 1fr 232px; min-height: 268px; }
+  @media (max-width: 620px) { .bl-body { grid-template-columns: 1fr; } .bl-panel { border-left: none !important; border-top: 1.5px solid var(--g200); } }
+
+  /* video pane */
+  .bl-stage { position: relative; padding: 16px 16px 12px; display: flex; flex-direction: column; }
+  .bl-video {
+    flex: 1; min-height: 148px; border-radius: 8px; position: relative;
+    background:
+      radial-gradient(120px 80px at 68% 34%, #4a4b45 0%, transparent 70%),
+      linear-gradient(160deg, #3D3D3A 0%, #232322 100%);
+    border: 1.5px solid var(--g300);
+  }
+  .bl-play {
+    position: absolute; left: 12px; bottom: 10px; width: 0; height: 0;
+    border-left: 11px solid rgba(250,249,245,.85); border-top: 7px solid transparent; border-bottom: 7px solid transparent;
+  }
+  .bl-tc { position: absolute; right: 12px; bottom: 8px; font-family: var(--mono); font-size: 10.5px; color: rgba(250,249,245,.7); }
+  .bl-pin {
+    position: absolute; top: -7px; width: 14px; height: 14px; border-radius: 50% 50% 50% 2px;
+    background: var(--g500); transform: rotate(45deg); transition: background .25s;
+  }
+  .bl-pin.on { background: var(--clay); }
+  .bl-timeline { position: relative; height: 26px; margin-top: 14px; }
+  .bl-track { position: absolute; left: 0; right: 0; top: 11px; height: 4px; border-radius: 2px; background: var(--g300); }
+  .bl-track .fill { width: 34%; height: 100%; border-radius: 2px; background: var(--g500); }
+
+  /* annotation panel */
+  .bl-panel { background: var(--paper); border-left: 1.5px solid var(--g200); padding: 12px 12px 10px; display: flex; flex-direction: column; }
+  .bl-panel-head {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--g500); display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px;
+  }
+  .bl-count { color: var(--clay-d); }
+  .bl-ann {
+    display: flex; gap: 9px; align-items: flex-start; padding: 8px 8px;
+    border-radius: 8px; border: 1.5px solid transparent; transition: background .25s, border-color .25s;
+  }
+  .bl-ann.sel { background: var(--g100); border-color: var(--g300); }
+  .bl-check {
+    width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid var(--g300);
+    background: var(--paper); flex: none; margin-top: 2px; position: relative; transition: background .2s, border-color .2s;
+  }
+  .bl-ann.sel .bl-check { background: var(--clay); border-color: var(--clay); }
+  .bl-ann.sel .bl-check::after {
+    content: ""; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px;
+    border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+  }
+  .bl-ann .who { font-size: 11.5px; font-weight: 600; line-height: 1.35; }
+  .bl-ann .who .t { font-family: var(--mono); font-weight: 400; font-size: 10px; color: var(--g500); margin-left: 5px; }
+  .bl-ann .txt { font-size: 11px; color: var(--g700); line-height: 1.4; }
+  .bl-export {
+    margin-top: auto; align-self: stretch; text-align: center;
+    font-family: var(--sans); font-size: 12.5px; font-weight: 600; color: #fff;
+    background: var(--slate); border: none; border-radius: 8px; padding: 9px 0;
+    transition: background .2s, transform .12s; pointer-events: none;
+  }
+  .bl-export.armed { background: var(--clay); }
+  .bl-export.pressed { background: var(--clay-d); transform: scale(.965); }
+
+  /* progress overlay */
+  .bl-progress {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(20,20,19,.38); opacity: 0; pointer-events: none; transition: opacity .3s;
+  }
+  .bl-progress.show { opacity: 1; }
+  .bl-prog-card {
+    background: var(--paper); border-radius: 12px; padding: 20px 24px; width: min(300px, 84%);
+    box-shadow: 0 12px 32px rgba(20,20,19,.22);
+  }
+  .bl-prog-card .pt { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .bl-prog-card .ps { font-family: var(--mono); font-size: 10.5px; color: var(--g500); margin-bottom: 12px; min-height: 14px; }
+  .bl-bar { height: 6px; border-radius: 3px; background: var(--g200); overflow: hidden; }
+  .bl-bar .b { width: 0%; height: 100%; background: var(--clay); border-radius: 3px; transition: width 1.7s cubic-bezier(.3,.7,.3,1); }
+
+  /* toast */
+  .bl-toast {
+    position: absolute; left: 50%; bottom: 14px; transform: translate(-50%, 16px);
+    background: var(--slate); color: var(--ivory); border-radius: 10px;
+    padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+    opacity: 0; transition: opacity .35s, transform .35s; max-width: 92%;
+    box-shadow: 0 10px 26px rgba(20,20,19,.3);
+  }
+  .bl-toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .bl-tick {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--olive); flex: none; position: relative;
+  }
+  .bl-tick::after {
+    content: ""; position: absolute; left: 6px; top: 3.5px; width: 4px; height: 8px;
+    border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+  }
+  .bl-toast .m { font-size: 12px; white-space: nowrap; }
+  .bl-chip {
+    font-family: var(--mono); font-size: 10.5px; background: rgba(250,249,245,.14);
+    border: 1px solid rgba(250,249,245,.25); border-radius: 6px; padding: 3px 8px; white-space: nowrap;
+  }
+  .demo-caption {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--g500);
+  }
+  .replay {
+    font-family: var(--mono); font-size: 11px; background: none; border: 1.5px solid var(--g300);
+    border-radius: 8px; color: var(--g700); padding: 5px 12px; cursor: pointer;
+  }
+  .replay:hover { border-color: var(--clay); color: var(--clay-d); }
+
+  /* ---------- pitch ---------- */
+  .pitch { font-family: var(--serif); font-size: 17.5px; line-height: 1.6; max-width: 46em; }
+  .pitch strong { font-weight: 600; }
+
+  /* ---------- objections ---------- */
+  .obj { border: 1.5px solid var(--g200); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+  .obj summary {
+    list-style: none; cursor: pointer; padding: 12px 16px; display: flex; gap: 12px; align-items: baseline;
+    font-weight: 600; font-size: 14.5px;
+  }
+  .obj summary::-webkit-details-marker { display: none; }
+  .obj summary .q { font-family: var(--mono); font-size: 11px; color: var(--clay); flex: none; }
+  .obj summary::after { content: "+"; margin-left: auto; font-family: var(--mono); color: var(--g500); flex: none; }
+  .obj[open] summary::after { content: "–"; }
+  .obj[open] summary { border-bottom: 1.5px solid var(--g200); background: var(--g100); }
+  .obj .a { padding: 13px 16px 14px 16px; font-size: 14px; color: var(--g700); }
+  .obj .ref {
+    display: inline-block; margin-top: 8px; font-family: var(--mono); font-size: 11.5px;
+    color: var(--clay-d); text-decoration: none; border-bottom: 1px dashed var(--g300);
+  }
+  .obj .ref:hover { border-bottom-color: var(--clay-d); }
+
+  /* ---------- spec table ---------- */
+  .tblwrap { overflow-x: auto; border: 1.5px solid var(--g200); border-radius: 10px; }
+  table.spec { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 560px; }
+  table.spec th, table.spec td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--g200); vertical-align: top; }
+  table.spec tr:last-child td { border-bottom: none; }
+  table.spec th {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--g500); font-weight: 400; background: var(--g100);
+  }
+  table.spec td:first-child { font-weight: 600; white-space: nowrap; width: 140px; }
+  table.spec code, .a code, .risk code, .need code {
+    font-family: var(--mono); font-size: 0.88em; background: var(--g100);
+    border: 1px solid var(--g200); border-radius: 4px; padding: 1px 5px; white-space: nowrap;
+  }
+  .specref { font-family: var(--mono); font-size: 11px; color: var(--g500); }
+
+  /* ---------- risk + needs cards ---------- */
+  .cardgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .cardgrid { grid-template-columns: 1fr; } }
+  .risk, .need {
+    border: 1.5px solid var(--g300); border-radius: 12px; padding: 18px 20px; background: var(--ivory);
+  }
+  .risk { border-left: 4px solid var(--clay); }
+  .need { border-left: 4px solid var(--olive); }
+  .risk h4, .need h4 {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    font-weight: 400; margin-bottom: 12px;
+  }
+  .risk h4 { color: var(--clay-d); }
+  .need h4 { color: var(--olive); }
+  .risk ul { list-style: none; }
+  .risk li { font-size: 13.5px; color: var(--g700); padding-left: 18px; position: relative; margin-bottom: 9px; }
+  .risk li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 7px; height: 2px; background: var(--clay); }
+  .risk li strong { color: var(--slate); }
+
+  .approver { display: flex; gap: 11px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--g200); }
+  .approver:last-child { border-bottom: none; }
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex: none;
+    background: var(--oat); color: var(--clay-d);
+    font-family: var(--mono); font-size: 11px; display: flex; align-items: center; justify-content: center;
+  }
+  .approver .info { font-size: 13px; line-height: 1.4; }
+  .approver .info b { display: block; font-size: 13.5px; }
+  .approver .info .role { font-family: var(--mono); font-size: 10.5px; color: var(--g500); }
+  .approver .info .asks { color: var(--g700); margin-top: 2px; }
+
+  .bottomline {
+    margin-top: 34px; padding: 16px 20px; background: var(--oat); border-radius: 10px;
+    font-family: var(--serif); font-size: 16px;
+  }
+
+  footer {
+    padding: 26px 0 56px; font-size: 13px; color: var(--g500);
+    border-top: 1.5px solid var(--g300);
+  }
+  footer a { color: var(--clay-d); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topnav">
+    <a href="../">&larr; 返回未知项野外指南</a>
+    <a href="https://thariqs.github.io/html-effectiveness/unknowns/10-pitch-doc.html">英文原版 &#8599;</a>
+  </nav>
+
+  <header class="page">
+    <a class="backlink" href="../">&larr; 全部示例</a>
+    <div class="eyebrow">未知项野外指南 &middot; 实现之后</div>
+    <h1>争取支持的文档</h1>
+    <p class="lede">活儿干完之后，最后一个未知项是其他人——让 Claude 把原型、规格说明和实现笔记打包成一份能快速读完的文档，在异议被提出之前就先把它们答掉。</p>
+
+    <div class="promptcard">
+      <div class="label">提示词</div>
+      <button class="copybtn" id="copyBtn">复制提示词</button>
+      <blockquote id="promptText">&ldquo;Package the prototype, the spec, and the implementation notes into a single doc I can drop in Slack to get buy-in on shipping annotation export. Lead with the demo.&rdquo;</blockquote>
+      <p class="prompt-zh">中文大意：把原型、规格说明和实现笔记打包成一份文档，让我可以直接丢进 Slack，为上线「标注导出」争取大家的支持。开头先放演示。</p>
+    </div>
+  </header>
+
+  <div class="divider">Claude 的产出</div>
+
+  <!-- ================= ARTIFACT ================= -->
+  <article class="artifact">
+    <div class="doc-top">
+      <div class="doc-eyebrow">上线提案 &middot; Acme</div>
+      <span class="timechip">90 秒读完</span>
+    </div>
+    <h2 class="doc-title">标注导出已经可以上线了</h2>
+    <p class="doc-sub">原型、规格说明和放量计划都在这一份里。<strong>请求：</strong>周五前拿到四个签核，功能开关周一开始放量。</p>
+
+    <!-- 1 · DEMO -->
+    <h3 class="sec"><span class="n">01</span> 看它跑起来</h3>
+    <div class="demo-shell">
+      <div class="demo" id="demo" aria-label="Acme 中标注导出流程的动画演示">
+        <div class="bl-titlebar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="bl-name">Acme — q3_launch_teaser_v4.mp4 · 审阅</span>
+        </div>
+        <div class="bl-body">
+          <div class="bl-stage">
+            <div class="bl-video">
+              <span class="bl-play"></span>
+              <span class="bl-tc">00:42 / 02:05</span>
+            </div>
+            <div class="bl-timeline">
+              <div class="bl-track"><div class="fill"></div></div>
+              <span class="bl-pin" id="pin1" style="left: 18%;"></span>
+              <span class="bl-pin" id="pin2" style="left: 41%;"></span>
+              <span class="bl-pin" id="pin3" style="left: 73%;"></span>
+            </div>
+          </div>
+          <div class="bl-panel">
+            <div class="bl-panel-head"><span>标注</span><span class="bl-count" id="selCount">已选 0 条</span></div>
+            <div class="bl-ann" id="ann1">
+              <span class="bl-check"></span>
+              <div>
+                <div class="who">Maya R. <span class="t">00:23</span></div>
+                <div class="txt">Logo 出现得太晚了——往前提 8 帧？</div>
+              </div>
+            </div>
+            <div class="bl-ann" id="ann2">
+              <span class="bl-check"></span>
+              <div>
+                <div class="who">Devon P. <span class="t">00:51</span></div>
+                <div class="txt">这里的颜色和母版调色有偏差</div>
+              </div>
+            </div>
+            <div class="bl-ann" id="ann3">
+              <span class="bl-check"></span>
+              <div>
+                <div class="who">Maya R. <span class="t">01:30</span></div>
+                <div class="txt">通过——结尾的 CTA 观感很好</div>
+              </div>
+            </div>
+            <button class="bl-export" id="exportBtn" tabindex="-1">导出所选</button>
+          </div>
+        </div>
+        <div class="bl-progress" id="progress">
+          <div class="bl-prog-card">
+            <div class="pt">正在导出 3 条标注</div>
+            <div class="ps" id="progStatus">正在收集标注…</div>
+            <div class="bl-bar"><div class="b" id="progBar"></div></div>
+          </div>
+        </div>
+        <div class="bl-toast" id="toast">
+          <span class="bl-tick"></span>
+          <span class="m">导出已就绪</span>
+          <span class="bl-chip">q3_teaser_notes.srt · 3 条字幕</span>
+        </div>
+      </div>
+      <div class="demo-caption">
+        <span id="demoState">选择 &rarr; 导出 &rarr; 完成 · 自动循环播放</span>
+        <button class="replay" id="replayBtn">&#8635; 重播</button>
+      </div>
+    </div>
+
+    <!-- 2 · PITCH -->
+    <h3 class="sec"><span class="n">02</span> 提案陈述</h3>
+    <p class="pitch">审阅者在 Acme 里留下反馈之后，还得把这些内容重新敲进邮件、Notion 和剪辑室软件——<strong>这是流失访谈中被提及最多的一个缺口（41% 的流失团队都点了名）</strong>。标注导出可以把任选的一组评论和涂画一键转成 SRT、CSV 或 PDF，用的全是我们已经在运行的基础设施。它已经开发完成、挂在功能开关后面、通过了单会话 1.2 万条标注的压测，而且一个开关就能回滚。从这里到上线，只差下面这四个签核。</p>
+
+    <!-- 3 · OBJECTIONS -->
+    <h3 class="sec"><span class="n">03</span> 评审人会问什么</h3>
+    <details class="obj" open>
+      <summary><span class="q">Q1</span>这会不会把仅限内部的评论泄露给客户？</summary>
+      <div class="a">不会。导出走的是和审阅页面同一个可见性解析器：标记为 <code>internal</code> 的标注一律被排除，除非导出者持有 <code>workspace:admin</code> 权限并通过带明确文字说明的复选框主动勾选。已由 14 个权限矩阵测试覆盖。
+        <br><a class="ref" href="#spec">&#8599; spec &sect;4.2 — 可见性与权限</a></div>
+    </details>
+    <details class="obj">
+      <summary><span class="q">Q2</span>碰上超大会话——几千条标注——会怎么样？</summary>
+      <div class="a">导出按每批 500 条标注分页，并以流式方式写出文件。用生产环境里最大的真实会话（一次包含 12,400 条标注的代理商审阅）做压测，3.1 秒完成；常规会话的 p95 是 340ms。
+        <br><a class="ref" href="#spec">&#8599; 实现笔记，06-24 — 压测结果</a></div>
+    </details>
+    <details class="obj">
+      <summary><span class="q">Q3</span>为什么做文件格式，而不是公开 API？</summary>
+      <div class="a">过去两个季度打了 <code>export-request</code> 标签的 212 张支持工单里，SRT + CSV + PDF 能覆盖 83%。API 适合作为第二阶段——它需要这次不涉及的鉴权作用域设计。文件能现在就解除用户的阻塞，又不会堵死 API 的设计空间。
+        <br><a class="ref" href="#spec">&#8599; 指标 — 支持工单标签分析，Q1&ndash;Q2</a></div>
+    </details>
+    <details class="obj">
+      <summary><span class="q">Q4</span>这会新增需要我们运维的基础设施吗？</summary>
+      <div class="a">零新增服务。SRT/CSV 在现有的 worker 池（<code>services/render-workers</code>）里内联渲染；PDF 复用已经在生成每周摘要的报表服务。没有新队列，没有新数据存储，没有 schema 迁移。
+        <br><a class="ref" href="#spec">&#8599; spec &sect;5.1 — 架构</a></div>
+    </details>
+    <details class="obj">
+      <summary><span class="q">Q5</span>导出的客户内容，合规上怎么交代？</summary>
+      <div class="a">每一次导出都会在文件元数据里盖上工作区 ID、发起用户和时间戳，并写入审计日志（<code>audit.annotation_export</code>）。文件通过会过期的签名 URL（24 小时）分发，过期后绝不留存。
+        <br><a class="ref" href="#spec">&#8599; spec &sect;6 — 审计与留存</a></div>
+    </details>
+
+    <!-- 4 · SPEC SUMMARY -->
+    <h3 class="sec" id="spec"><span class="n">04</span> 规格速览</h3>
+    <div class="tblwrap">
+      <table class="spec">
+        <thead><tr><th>方面</th><th>决策</th><th>出处</th></tr></thead>
+        <tbody>
+          <tr><td>格式</td><td>SRT（带时间码的字幕）、CSV（扁平结构，含涂画的包围盒）、PDF（帧缩略图 + 评论）</td><td class="specref">&sect;2</td></tr>
+          <tr><td>入口</td><td>标注面板 &rarr; 多选 &rarr; <b>导出所选</b>；会话菜单中另有「全部导出」</td><td class="specref">&sect;3.1</td></tr>
+          <tr><td>权限</td><td>需要 <code>session:comment</code> 或更高权限；<code>internal</code> 标注默认排除</td><td class="specref">&sect;4.2</td></tr>
+          <tr><td>限制</td><td>每批 500 条标注，流式输出；单次导出硬上限 2.5 万条，超限有清晰的错误提示</td><td class="specref">&sect;5.3</td></tr>
+          <tr><td>埋点</td><td><code>export_started</code>、<code>export_completed</code>（格式、条数、耗时）、<code>export_failed</code></td><td class="specref">&sect;7</td></tr>
+          <tr><td>功能开关</td><td><code>annotation_export</code> —— 两周内从关闭 &rarr; 5% &rarr; 50% &rarr; 100%</td><td class="specref">&sect;8</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 5 · RISK + NEEDS -->
+    <h3 class="sec"><span class="n">05</span> 风险、回滚，以及需要各位做的事</h3>
+    <div class="cardgrid">
+      <div class="risk">
+        <h4>风险与回滚</h4>
+        <ul>
+          <li><strong>回滚只需一个开关。</strong>把 <code>annotation_export</code> 关掉即可——没有发布任何 schema 迁移，没有需要回退的东西。</li>
+          <li><strong>影响范围有边界。</strong>导出跑在共享 worker 池里，单任务 30 秒超时；失控任务不可能拖垮审阅播放。</li>
+          <li><strong>最坏的可信故障：</strong>签名 URL 清理滞后时会留下孤儿导出文件——但无论如何它们都会在 24 小时后自行过期。</li>
+          <li><strong>已知缺口：</strong>涂画标注在 CSV 里会被压平成包围盒（完整矢量仅 PDF 支持）。产品内已有说明；列为第二阶段事项。</li>
+        </ul>
+      </div>
+      <div class="need">
+        <h4>需要各位做的事</h4>
+        <div class="approver">
+          <span class="avatar">PN</span>
+          <div class="info"><b>Priya Natarajan</b><span class="role">工程负责人，播放与审阅</span>
+            <div class="asks">签核复用渲染 worker 池这件事（spec &sect;5.1）——这是唯一的共享基础设施依赖。</div></div>
+        </div>
+        <div class="approver">
+          <span class="avatar">ES</span>
+          <div class="info"><b>Elena Sorokin</b><span class="role">安全</span>
+            <div class="asks">批准可见性规则与审计日志结构（spec &sect;4.2、&sect;6）。</div></div>
+        </div>
+        <div class="approver">
+          <span class="avatar">MW</span>
+          <div class="info"><b>Marcus Webb</b><span class="role">设计</span>
+            <div class="asks">对导出弹窗和错误状态做最后一轮把关——上面的原型就是当前最新版。</div></div>
+        </div>
+        <div class="approver">
+          <span class="avatar">DK</span>
+          <div class="info"><b>Dana Kim</b><span class="role">产品经理，协作方向</span>
+            <div class="asks">批准功能开关放量节奏（spec &sect;8），并负责 changelog 条目。</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottomline">以上所有内容都已在功能开关后面开发并测试完毕。请对你负责的部分回一个 &#10003;，或者到我的日历上约 15 分钟——<b>目标：周一开始放量。</b></div>
+  </article>
+
+  <footer>本页属于「<a href="../">未知项野外指南</a>」系列——博客文章的配套示例。</footer>
+</div>
+
+<script>
+(function () {
+  // ---------- copy prompt ----------
+  var PROMPT = "Package the prototype, the spec, and the implementation notes into a single doc I can drop in Slack to get buy-in on shipping annotation export. Lead with the demo.";
+  var copyBtn = document.getElementById("copyBtn");
+  copyBtn.addEventListener("click", function () {
+    function done() {
+      copyBtn.textContent = "已复制";
+      copyBtn.classList.add("done");
+      setTimeout(function () {
+        copyBtn.textContent = "复制提示词";
+        copyBtn.classList.remove("done");
+      }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(PROMPT).then(done, fallback);
+    } else { fallback(); }
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = PROMPT;
+      ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      done();
+    }
+  });
+
+  // ---------- demo animation ----------
+  var anns = [document.getElementById("ann1"), document.getElementById("ann2"), document.getElementById("ann3")];
+  var pins = [document.getElementById("pin1"), document.getElementById("pin2"), document.getElementById("pin3")];
+  var exportBtn = document.getElementById("exportBtn");
+  var progress = document.getElementById("progress");
+  var progBar = document.getElementById("progBar");
+  var progStatus = document.getElementById("progStatus");
+  var toast = document.getElementById("toast");
+  var selCount = document.getElementById("selCount");
+  var timers = [];
+
+  function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+
+  function reset() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    anns.forEach(function (a) { a.classList.remove("sel"); });
+    pins.forEach(function (p) { p.classList.remove("on"); });
+    exportBtn.classList.remove("armed", "pressed");
+    progress.classList.remove("show");
+    progBar.style.transition = "none";
+    progBar.style.width = "0%";
+    // force reflow so the next width change animates
+    void progBar.offsetWidth;
+    progBar.style.transition = "";
+    progStatus.textContent = "正在收集标注…";
+    toast.classList.remove("show");
+    selCount.textContent = "已选 0 条";
+  }
+
+  function play() {
+    reset();
+    [0, 1, 2].forEach(function (i) {
+      at(500 + i * 450, function () {
+        anns[i].classList.add("sel");
+        pins[i].classList.add("on");
+        selCount.textContent = "已选 " + (i + 1) + " 条";
+        if (i === 2) exportBtn.classList.add("armed");
+      });
+    });
+    at(2100, function () { exportBtn.classList.add("pressed"); });
+    at(2300, function () {
+      exportBtn.classList.remove("pressed");
+      progress.classList.add("show");
+    });
+    at(2450, function () { progBar.style.width = "100%"; });
+    at(3100, function () { progStatus.textContent = "正在渲染 SRT 字幕…"; });
+    at(3800, function () { progStatus.textContent = "正在为下载 URL 签名…"; });
+    at(4300, function () {
+      progress.classList.remove("show");
+      toast.classList.add("show");
+    });
+    at(7000, play); // loop
+  }
+
+  document.getElementById("replayBtn").addEventListener("click", play);
+  play();
+})();
+</script>
+</body>
+</html>

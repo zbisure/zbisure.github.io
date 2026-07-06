@@ -1,0 +1,656 @@
+<!-- Copyright 2026 Anthropic PBC · SPDX-License-Identifier: Apache-2.0 -->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>实现笔记 — 未知项野外指南</title>
+<style>
+  :root {
+    --ivory:  #FAF9F5;
+    --paper:  #FFFFFF;
+    --slate:  #141413;
+    --clay:   #D97757;
+    --clay-d: #B85C3E;
+    --oat:    #E3DACC;
+    --olive:  #788C5D;
+    --g100:   #F0EEE6;
+    --g200:   #E6E3DA;
+    --g300:   #D1CFC5;
+    --g500:   #87867F;
+    --g700:   #3D3D3A;
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ivory);
+    color: var(--slate);
+    font-family: var(--sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px 100px; }
+
+  /* ── header ── */
+  header.page { padding: 56px 0 8px; position: relative; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--g500);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .eyebrow::before { content: ""; width: 24px; height: 1.5px; background: var(--clay); flex: none; }
+  a.back {
+    position: absolute;
+    top: 60px; right: 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--g500);
+    text-decoration: none;
+  }
+  a.back:hover { color: var(--clay-d); }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(32px, 5vw, 46px);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    margin: 0 0 10px;
+  }
+  .lede { font-size: 16.5px; color: var(--g700); max-width: 640px; margin: 0 0 30px; }
+
+  /* ── prompt box ── */
+  .promptcard {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 14px;
+    padding: 22px 26px 24px;
+    position: relative;
+  }
+  .promptcard .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 12px;
+  }
+  .promptcard blockquote {
+    margin: 0;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17.5px;
+    line-height: 1.6;
+    color: var(--slate);
+    max-width: 62ch;
+  }
+  button.copybtn {
+    position: absolute;
+    top: 18px; right: 18px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--g700);
+    background: var(--g100);
+    border: 1.5px solid var(--g300);
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  button.copybtn:hover { border-color: var(--g500); }
+  button.copybtn.done { color: var(--olive); border-color: var(--olive); background: var(--paper); }
+
+  /* ── divider ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 48px 0 30px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--g500);
+    white-space: nowrap;
+  }
+  .divider::before, .divider::after { content: ""; height: 1.5px; background: var(--g300); flex: 1; }
+
+  /* ── artifact: notes document ── */
+  .doc {
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .doc-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    padding: 14px 22px;
+    border-bottom: 1.5px solid var(--g200);
+    background: var(--g100);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--g700);
+  }
+  .doc-head .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--olive); flex: none; }
+  .doc-head .path { overflow-wrap: anywhere; }
+  .doc-head .meta { margin-left: auto; color: var(--g500); }
+
+  .doc-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 22px 22px 0;
+  }
+  .stat {
+    flex: 1 1 130px;
+    background: var(--ivory);
+    border: 1.5px solid var(--g200);
+    border-radius: 10px;
+    padding: 12px 16px 10px;
+  }
+  .stat .n { font-family: var(--serif); font-weight: 500; font-size: 30px; line-height: 1.1; letter-spacing: -0.02em; }
+  .stat .t { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--g500); margin-top: 3px; }
+  .stat.dev .n { color: var(--clay-d); }
+  .stat.you .n { color: var(--slate); }
+  .stat.you { border-color: var(--oat); background: #F6F0E4; }
+
+  /* filter chips */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 18px 22px 4px;
+  }
+  .chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--g300);
+    background: var(--paper);
+    color: var(--g700);
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--g500); }
+  .chip.on { background: var(--slate); border-color: var(--slate); color: var(--ivory); }
+  .chip .ct { color: var(--g500); }
+  .chip.on .ct { color: var(--g300); }
+
+  /* timeline */
+  .timeline { padding: 16px 22px 26px; }
+  .entry {
+    display: grid;
+    grid-template-columns: 52px 14px 1fr;
+    gap: 0 14px;
+    position: relative;
+  }
+  .entry .ts {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--g500);
+    padding-top: 4px;
+    text-align: right;
+  }
+  .entry .rail { position: relative; }
+  .entry .rail::before {
+    content: "";
+    position: absolute;
+    left: 50%; top: 0; bottom: 0;
+    width: 1.5px;
+    background: var(--g200);
+    transform: translateX(-50%);
+  }
+  .entry.rail-first .rail::before { top: 10px; }
+  .entry.rail-last .rail::before { bottom: auto; height: 10px; }
+  .entry.rail-first.rail-last .rail::before { display: none; }
+  .entry .node {
+    position: absolute;
+    left: 50%; top: 8px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    background: var(--g300);
+    border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1.5px var(--g300);
+  }
+  .entry.t-plan .node    { background: var(--olive); box-shadow: 0 0 0 1.5px var(--olive); }
+  .entry.t-dev .node     { background: var(--clay);  box-shadow: 0 0 0 1.5px var(--clay); }
+  .entry.t-disc .node    { background: var(--oat);   box-shadow: 0 0 0 1.5px var(--g500); }
+  .entry.t-human .node   { background: var(--slate); box-shadow: 0 0 0 1.5px var(--slate); }
+  .entry .body { padding: 0 0 22px; min-width: 0; }
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2.5px 9px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+  .t-plan  .badge { color: var(--olive); background: #EEF1E8; border: 1px solid #C9D4B8; }
+  .t-dev   .badge { color: #fff; background: var(--clay); border: 1px solid var(--clay); }
+  .t-disc  .badge { color: var(--g700); background: var(--g100); border: 1px solid var(--g300); }
+  .t-human .badge { color: var(--ivory); background: var(--slate); border: 1px solid var(--slate); }
+  .entry h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0 0 4px;
+    letter-spacing: -0.005em;
+  }
+  .entry p { margin: 0; font-size: 14px; color: var(--g700); max-width: 68ch; }
+  .entry code, .devgrid code, .n2 code {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    background: var(--g100);
+    border: 1px solid var(--g200);
+    border-radius: 5px;
+    padding: 1px 5px;
+    overflow-wrap: anywhere;
+  }
+  .ts-mobile { display: none; }
+
+  /* deviation sub-fields */
+  .devgrid {
+    margin-top: 10px;
+    border: 1.5px solid var(--oat);
+    border-left: 3px solid var(--clay);
+    border-radius: 10px;
+    background: #FBF6EC;
+    overflow: hidden;
+  }
+  .devgrid .row {
+    display: grid;
+    grid-template-columns: 158px 1fr;
+    gap: 12px;
+    padding: 9px 14px;
+    font-size: 13.5px;
+    color: var(--g700);
+  }
+  .devgrid .row + .row { border-top: 1px solid #EFE5D2; }
+  .devgrid .k {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--clay-d);
+    padding-top: 2px;
+  }
+  .devgrid .row.chosen .k { color: var(--olive); }
+  .devgrid .row.chosen .v { color: var(--slate); font-weight: 500; }
+  @media (max-width: 560px) {
+    .devgrid .row { grid-template-columns: 1fr; gap: 2px; }
+    .entry { grid-template-columns: 14px 1fr; }
+    .entry .ts { display: none; }
+    .ts-mobile { display: inline; font-family: var(--mono); font-size: 11px; color: var(--g500); margin-left: 8px; }
+  }
+
+  /* attempt #2 block */
+  .next {
+    margin-top: 26px;
+    background: var(--paper);
+    border: 1.5px solid var(--g300);
+    border-radius: 14px;
+    padding: 24px 26px 22px;
+    position: relative;
+  }
+  .next .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 8px;
+  }
+  .next h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+  .next .sub { font-size: 14px; color: var(--g500); margin: 0 0 14px; max-width: 60ch; }
+  .next ol { margin: 0; padding-left: 22px; }
+  .next li { font-size: 14.5px; color: var(--g700); margin-bottom: 10px; max-width: 70ch; }
+  .next li strong { color: var(--slate); font-weight: 600; }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 22px;
+    border-top: 1.5px solid var(--g300);
+    font-size: 13.5px;
+    color: var(--g500);
+  }
+  footer a { color: var(--clay-d); text-decoration-color: var(--oat); text-underline-offset: 3px; }
+
+  /* ── zh additions: top nav + translation blocks ── */
+  .topnav {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 22px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .topnav a { color: var(--g500); text-decoration: none; }
+  .topnav a:hover { color: var(--clay-d); }
+  .promptcard .zh {
+    margin: 14px 0 0;
+    font-size: 13.5px;
+    color: var(--g500);
+    max-width: 62ch;
+  }
+  .next .zh {
+    margin-top: 16px;
+    padding: 14px 18px 12px;
+    background: var(--g100);
+    border: 1px solid var(--g200);
+    border-radius: 10px;
+  }
+  .next .zh .zh-t {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--g500);
+    margin: 0 0 8px;
+  }
+  .next .zh li { font-size: 13.5px; margin-bottom: 8px; }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topnav">
+    <a href="../">&larr; 返回未知项野外指南</a>
+    <a href="https://thariqs.github.io/html-effectiveness/unknowns/09-implementation-notes.html">英文原版 &#8599;</a>
+  </nav>
+
+  <header class="page">
+    <div class="eyebrow">未知项野外指南 &middot; 实现阶段</div>
+    <a class="back" href="index.html">&larr; 全部示例</a>
+    <h1>实现笔记</h1>
+    <p class="lede">别让构建途中的意外淹没在滚动的终端输出里——让 agent 在每次偏离计划的当下就把它记录下来，这些意外就会变成你下一次尝试的输入。</p>
+
+    <div class="promptcard">
+      <div class="label">提示词</div>
+      <button class="copybtn" id="copyPrompt">复制 prompt</button>
+      <blockquote id="promptText">&ldquo;Keep an implementation-notes file as you build the export feature. If you hit an edge case that forces you to deviate from the plan, pick the conservative option, log it under &lsquo;Deviations&rsquo;, and keep going.&rdquo;</blockquote>
+      <p class="zh">中文大意：在构建导出功能的过程中，持续维护一份实现笔记文件。如果遇到迫使你偏离计划的边界情况，就选保守的那个方案，记在「Deviations（偏离）」条目下，然后继续推进。</p>
+    </div>
+  </header>
+
+  <div class="divider">Claude 的产出</div>
+
+  <div class="doc">
+    <div class="doc-head">
+      <span class="dot"></span>
+      <span class="path">docs/notes/export-feature-implementation.md</span>
+      <span class="meta">运行开始 14:02 &middot; 最后写入 16:51 &middot; 分支 feat/review-export</span>
+    </div>
+
+    <div class="doc-summary">
+      <div class="stat"><div class="n">11</div><div class="t">条目</div></div>
+      <div class="stat dev"><div class="n">4</div><div class="t">偏离</div></div>
+      <div class="stat you"><div class="n">2</div><div class="t">需你拍板</div></div>
+    </div>
+
+    <div class="chips" role="tablist" aria-label="筛选条目">
+      <button class="chip on" data-f="all">全部 <span class="ct">11</span></button>
+      <button class="chip" data-f="dev">偏离 <span class="ct">4</span></button>
+      <button class="chip" data-f="human">待你处理 <span class="ct">2</span></button>
+    </div>
+
+    <div class="timeline" id="timeline">
+
+      <div class="entry t-plan" data-t="plan">
+        <div class="ts">14:02</div>
+        <div class="rail"><span class="node"></span></div>
+        <div class="body">
+          <span class="badge">按计划完成</span><span class="ts-mobile">14:02</span>
+          <h3>第 1 步 — 导出任务模型与队列接线，按计划进行</h3>
+          <p>在 <code>apps/api/src/exports/exportJob.ts</code> 中新增 <code>ExportJob</code>，挂到现有的 BullMQ <code>media-tasks</code> 队列上，使用专用的 <code>export</code> 任务名。Migration <code>0121_export_jobs</code> 与计划里的 schema 完全一致（status 枚举、<code>requested_by</code>、<code>review_id</code>、<code>format</code>）。</p>
+        </div>
+      </div>
+
+      <div class="entry t-plan" data-t="plan">
+        <div class="ts">14:18</div>
+        <div class="rail"><span class="node"></span></div>
+        <div class="body">
+          <span class="badge">按计划完成</span><span class="ts-mobile">14:18</span>
+          <h3>第 2 步 — <code>POST /api/v1/reviews/:id/export</code> 端点</h3>
+          <p>请求校验按计划复用了 <code>apps/api/src/validation/</code> 里的 zod schema。<code>format</code> 接受 <code>mp4-burnin | csv | bundle</code>。返回 <code>202</code> 和一个任务 id；轮询端点按计划推迟到第 6 步。</p>
+        </div>
+      </div>
+
+      <div class="entry t-disc" data-t="disc">
+        <div class="ts">14:29</div>
+        <div class="rail"><span class="node"></span></div>
+        <div class="body">
+          <span class="badge">新发现</span><span class="ts-mobile">14:29</span>
+          <h3><code>Review.duration_ms</code> 是反规范化字段，偶尔会过期</h3>
+          <p>有三条 fixture 评审的 <code>duration_ms</code> 与源资产的探测数据对不上（看起来是重新上传后一直没刷新它）。导出改从 <code>MediaAsset.probe.duration</code> 读取时长——与 <code>playbackManifest.ts</code> 已有的做法相同。不改计划，只是把这个坑记下来，提醒之后碰这块代码的人。</p>
+        </div>
+      </div>
+
+      <div class="entry t-dev" data-t="dev">
+        <div class="ts">14:41</div>
+        <div class="rail"><span class="node"></span></div>
+        <div class="body">
+          <span class="badge">偏离 1 / 4</span><span class="ts-mobile">14:41</span>
+          <h3>历史遗留批注不一定有帧时间戳</h3>
+          <div class="devgrid">
+            <div class="row"><div class="k">计划怎么说</div><div class="v">每条批注都有 <code>frame_ts</code>；烧录渲染器可以把它们全部排序并放上时间线。</div></div>
+            <div class="row"><div class="k">代码揭示了什么</div><div class="v"><code>annotations</code> 表约 12% 的行早于 migration <code>0087</code>，其 <code>frame_ts = NULL</code>——在逐帧批注出现之前，它们本是针对整个评审的一般性评论。</div></div>
+            <div class="row chosen"><div class="k">保守选择</div><div class="v">视频烧录中排除无时间戳的批注；把它们放进 CSV 附属文件，<code>frame_ts</code> 留空并加 <code>legacy_comment</code> 标记。导出包里没有任何内容被悄悄丢弃。</div></div>
+            <div class="row"><div class="k">待回头再议</div><div class="v">可以用 <code>created_at</code> 相对评审会话的偏移插值出一个时间戳——需要判断这种做法是否足够诚实、适不适合出现在视频里。</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="entry t-plan" data-t="plan">
+        <div class="ts">15:05</div>
+        <div class="rail"><span class="node"></span></div>
+        <div class="body">
+          <span class="badge">按计划完成</span><span class="ts-mobile">15:05</span>
+          <h3>第 3 步 — 用 ffmpeg <code>drawtext</code>/<code>drawbox</code> 烧录批注，按计划进行</h3>
+          <p>Filtergraph 构建器位于 <code>apps/worker/src/exports/burnin.ts</code>。计划中按批注设置叠加时间窗（<code>enable='between(t,a,b)'</code>）的做法可行；用 40 条批注的压力 fixture 验证过——在该 worker 实例规格上渲染耗时为实时的 1.4 倍，在计划 2 倍的预算之内。</p>
+        </div>
+      </div>
+
+      <div class="entry t-dev" data-t="dev">
+        <div class="ts">15:22</div>
+        <div class="rail"><span class="node"></span></div>
+        <div class="body">
+          <span class="badge">偏离 2 / 4</span><span class="ts-mobile">15:22</span>
+          <h3>队列一来一回，<code>Date</code> 对象变成了字符串</h3>
+          <div class="devgrid">
+            <div class="row"><div class="k">计划怎么说</div><div class="v"><code>ExportJobPayload.requestedAt: Date</code>，透传给 worker，并与评审的 <code>updated_at</code> 比较，用来检测过期导出。</div></div>
+            <div class="row"><div class="k">代码揭示了什么</div><div class="v">BullMQ 会把 payload 以 JSON 序列化后写入 Redis，所以 worker 收到的是 ISO 字符串而非 <code>Date</code>。这个过期比较在单元测试里靠隐式类型转换侥幸通过，却在集成测试的一次重投递任务上失败了。</div></div>
+            <div class="row chosen"><div class="k">保守选择</div><div class="v">把 payload 按线上传输格式定义类型（<code>requestedAt: string</code>，ISO-8601），在 <code>exportConsumer.ts</code> 的 worker 边界处只解析一次。不写自定义序列化器。</div></div>
+            <div class="row"><div class="k">待回头再议</div><div class="v">其他 <code>media-tasks</code> 的 payload 很可能潜伏着同样的 bug——给任务 payload 做一个共享的 zod codec，就能根治这一整类问题。</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="entry t-dev" data-t="dev">
+        <div class="ts">15:48</div>
+        <div class="rail"><span class="node"></span></div>
+        <div class="body">
+          <span class="badge">偏离 3 / 4</span><span class="ts-mobile">15:48</span>
+          <h3>流式 zip 早已存在——放弃了计划中的 <code>archiver</code> 依赖</h3>
+          <div class="devgrid">
+            <div class="row"><div class="k">计划怎么说</div><div class="v">引入 <code>archiver</code>，把导出包（视频 + CSV + 缩略图）打成 zip 流写入 S3。</div></div>
+            <div class="row"><div class="k">代码揭示了什么</div><div class="v"><code>packages/media/src/zipStream.ts</code> 已实现带背压处理的流式 zip——它支撑着批量资产下载功能，自三月起就在生产环境运行。</div></div>
+            <div class="row chosen"><div class="k">保守选择</div><div class="v">原样复用 <code>zipStream.ts</code>。少一个依赖，导出包还继承了与批量下载相同的、经过实战检验的背压行为。</div></div>
+            <div class="row"><div class="k">待回头再议</div><div class="v"><code>zipStream</code> 位于 <code>packages/media</code>，如今却被两个功能使用——值得在清理时把它提升到 <code>packages/shared</code>。</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="entry t-disc" data-t="disc">
+        <div class="ts">16:07</div>
+        <div class="rail"><span class="node"></span></div>
+        <div class="body">
+          <span class="badge">新发现</span><span class="ts-mobile">16:07</span>
+          <h3>websocket 进度频道已有现成约定</h3>
+          <p>转码流水线会发出 <code>media:progress:{assetId}</code> 事件。导出沿用了同一约定——发出 <code>export:progress:{jobId}</code>——这样前端就能复用 <code>apps/web/src/hooks/</code> 里的 <code>useProgressChannel()</code>，不必再做计划里草拟的轮询 UI。轮询端点也保留了，作为兜底。</p>
+        </div>
+      </div>
+
+      <div class="entry t-dev" data-t="dev">
+        <div class="ts">16:20</div>
+        <div class="rail"><span class="node"></span></div>
+        <div class="body">
+          <span class="badge">偏离 4 / 4</span><span class="ts-mobile">16:20</span>
+          <h3>访客评审员能查看评审，却不能下载资产</h3>
+          <div class="devgrid">
+            <div class="row"><div class="k">计划怎么说</div><div class="v">导出权限 = 评审级 ACL：能打开评审的人就能导出。</div></div>
+            <div class="row"><div class="k">代码揭示了什么</div><div class="v">工作区级的 <code>guest_reviewer</code> 角色授予评审访问权，但 <code>can_download_assets = false</code>——客户用它让外部干系人参与评论，同时不让媒体外流。若只检查评审级 ACL，访客就能借导出把源视频带出去。</div></div>
+            <div class="row chosen"><div class="k">保守选择</div><div class="v">对 <code>guest_reviewer</code> 的所有导出格式一律返回 <code>403</code>，与 <code>assetAccess.ts</code> 里已有的资产下载检查保持一致。这是最严格、也最站得住脚的解读。</div></div>
+            <div class="row"><div class="k">待回头再议</div><div class="v">或许访客仍应能拿到 CSV（只含批注、不含媒体）。这是产品决策，不该由我拍板——已记录在下方。</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="entry t-human" data-t="human">
+        <div class="ts">16:33</div>
+        <div class="rail"><span class="node"></span></div>
+        <div class="body">
+          <span class="badge">需人拍板</span><span class="ts-mobile">16:33</span>
+          <h3>定夺访客评审员的导出策略</h3>
+          <p>当前行为（来自偏离 4）：访客对任何导出格式都会收到 <code>403</code>。如果你希望访客能导出不含媒体的批注 CSV，改动大约 10 行（在 <code>exportPolicy.ts</code> 里）外加一个测试——但这会改变「不能下载资产」对客户的含义，所以应当由你来定。既不阻塞合并，也不阻塞 QA。</p>
+        </div>
+      </div>
+
+      <div class="entry t-human" data-t="human">
+        <div class="ts">16:51</div>
+        <div class="rail"><span class="node"></span></div>
+        <div class="body">
+          <span class="badge">需人拍板</span><span class="ts-mobile">16:51</span>
+          <h3>确认导出包的保留期限</h3>
+          <p>计划没有为生成的导出包指定 TTL。我把它们放在 S3 的 <code>exports/</code> 前缀下，配了 7 天生命周期规则，与分享链接的过期时间一致——足够保守，也没有任何面向客户的承诺超过这个期限。但如果合同或数据保留政策另有规定，只需改 <code>infra/s3.tf</code> 里生命周期规则那一行。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="next">
+    <div class="label">回灌到计划</div>
+    <h2>这些发现如何改变第二次尝试</h2>
+    <p class="sub">三行文字，粘进下一版计划或 prompt，下一次运行就不用重新发现今天的这些意外。三条要点保留英文原文以便直接粘贴使用，中文大意见下方。</p>
+    <button class="copybtn" id="copyNext">复制要点</button>
+    <ol id="nextList">
+      <li><strong>State the legacy-data caveat up front:</strong> ~12% of annotations (pre-migration-0087) have null <code>frame_ts</code>. Decide interpolate-vs-sidecar before implementation starts, not at 14:41 mid-build.</li>
+      <li><strong>Spec queue payloads as wire types:</strong> BullMQ round-trips through JSON, so payload interfaces should use ISO strings, never <code>Date</code> — and a shared zod codec for <code>media-tasks</code> payloads would retire the whole bug class.</li>
+      <li><strong>Inventory existing utilities before adding dependencies:</strong> <code>zipStream.ts</code> and <code>useProgressChannel()</code> both existed and both beat the plan's version. Add a &ldquo;search for prior art&rdquo; step to the plan template, and settle the guest-reviewer export policy before the next feature touches ACLs.</li>
+    </ol>
+    <aside class="zh">
+      <p class="zh-t">中文大意（「复制要点」按钮复制的是上方英文原文）</p>
+      <ol>
+        <li><strong>把遗留数据的坑提前写进计划：</strong>约 12% 的批注（早于 migration 0087）<code>frame_ts</code> 为 null。是插值还是放进附属 CSV，应在实现开始前定夺，而不是等构建进行到 14:41 才临场决定。</li>
+        <li><strong>把队列 payload 按线上传输类型来定义：</strong>BullMQ 经由 JSON 一来一回，payload 接口应使用 ISO 字符串，绝不要用 <code>Date</code>——再给 <code>media-tasks</code> 的 payload 配一个共享 zod codec，就能消灭这一整类 bug。</li>
+        <li><strong>加依赖之前先盘点现有工具：</strong><code>zipStream.ts</code> 和 <code>useProgressChannel()</code> 都已存在，而且都比计划里的方案好。给计划模板加一个「搜索既有实现」的步骤，并在下一个涉及 ACL 的功能之前敲定访客评审员的导出策略。</li>
+      </ol>
+    </aside>
+  </div>
+
+  <footer>
+    本页属于<a href="index.html">未知项野外指南（Know your unknowns）</a>——博客文章的配套示例。
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  // ── copy buttons ──
+  function wireCopy(btnId, getText) {
+    var btn = document.getElementById(btnId);
+    var original = btn.textContent;
+    btn.addEventListener('click', function () {
+      var text = getText();
+      function done() {
+        btn.textContent = '已复制';
+        btn.classList.add('done');
+        setTimeout(function () {
+          btn.textContent = original;
+          btn.classList.remove('done');
+        }, 1600);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
+      } else {
+        fallback(text); done();
+      }
+    });
+  }
+  function fallback(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  wireCopy('copyPrompt', function () {
+    return "Keep an implementation-notes file as you build the export feature. If you hit an edge case that forces you to deviate from the plan, pick the conservative option, log it under 'Deviations', and keep going.";
+  });
+
+  wireCopy('copyNext', function () {
+    var items = document.querySelectorAll('#nextList li');
+    var out = [];
+    items.forEach(function (li, i) { out.push((i + 1) + '. ' + li.textContent.replace(/\s+/g, ' ').trim()); });
+    return out.join('\n');
+  });
+
+  // ── filter chips ──
+  var chips = document.querySelectorAll('.chip');
+  var entries = document.querySelectorAll('.entry');
+  function markRailEnds() {
+    var visible = Array.prototype.filter.call(entries, function (e) {
+      return !e.classList.contains('hidden');
+    });
+    entries.forEach(function (e) {
+      e.classList.remove('rail-first', 'rail-last');
+    });
+    if (visible.length) {
+      visible[0].classList.add('rail-first');
+      visible[visible.length - 1].classList.add('rail-last');
+    }
+  }
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      chips.forEach(function (c) { c.classList.remove('on'); });
+      chip.classList.add('on');
+      var f = chip.getAttribute('data-f');
+      entries.forEach(function (e) {
+        var t = e.getAttribute('data-t');
+        var show = (f === 'all') || (f === 'dev' && t === 'dev') || (f === 'human' && t === 'human');
+        e.classList.toggle('hidden', !show);
+      });
+      markRailEnds();
+    });
+  });
+  markRailEnds();
+})();
+</script>
+</body>
+</html>
