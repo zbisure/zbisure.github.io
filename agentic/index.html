@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="《Agentic 之道》（彭超/ChaoGeek）的批判性精读：把每个概念对回一手出处（Anthropic、Karpathy、Every、Sam Altman），分清复述与自造，并用 METR、Anthropic 多 Agent 实测等硬证据做支持/质疑两面对冲。">
+<title>Agentic 之道 · 正本清源</title>
+<style>
+  :root{
+    --paper:#F3F5F1; --paper-raised:#FBFCFA; --ink:#20302E; --ink-soft:#5A6B67;
+    --ink-faint:#8B9995; --line:#D8DED8; --contour:#B5A488; --survey:#28599C;
+    --survey-soft:#DCE6F4; --marker:#B4452B; --good:#3D7A4E; --good-soft:#DFEDE2;
+    --bad-soft:#F4E2DC; --mono-bg:#E9EEE9;
+    --shadow:0 1px 2px rgba(32,48,46,.06),0 6px 20px rgba(32,48,46,.07);
+    --serif:"Songti SC","Georgia","Times New Roman",serif;
+    --sans:"PingFang SC",-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    --mono:"SF Mono","Menlo","Consolas",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#151B1B; --paper-raised:#1D2525; --ink:#DCE3DF; --ink-soft:#96A5A0;
+      --ink-faint:#687571; --line:#2E3938; --contour:#6E6350; --survey:#7FA9E4;
+      --survey-soft:#22334C; --marker:#D97B62; --good:#7FB98E; --good-soft:#243B2B;
+      --bad-soft:#462921; --mono-bg:#111716;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#151B1B; --paper-raised:#1D2525; --ink:#DCE3DF; --ink-soft:#96A5A0;
+    --ink-faint:#687571; --line:#2E3938; --contour:#6E6350; --survey:#7FA9E4;
+    --survey-soft:#22334C; --marker:#D97B62; --good:#7FB98E; --good-soft:#243B2B;
+    --bad-soft:#462921; --mono-bg:#111716;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --paper:#F3F5F1; --paper-raised:#FBFCFA; --ink:#20302E; --ink-soft:#5A6B67;
+    --ink-faint:#8B9995; --line:#D8DED8; --contour:#B5A488; --survey:#28599C;
+    --survey-soft:#DCE6F4; --marker:#B4452B; --good:#3D7A4E; --good-soft:#DFEDE2;
+    --bad-soft:#F4E2DC; --mono-bg:#E9EEE9;
+    --shadow:0 1px 2px rgba(32,48,46,.06),0 6px 20px rgba(32,48,46,.07);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+  a{color:var(--survey)}
+
+  /* hero */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding:72px 0 56px}
+  .hero svg.contours{position:absolute;inset:0;width:100%;height:100%;color:var(--contour);opacity:.28;pointer-events:none}
+  .hero .wrap{position:relative}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--survey);margin:0 0 18px}
+  h1{font-family:var(--serif);font-size:clamp(34px,6vw,54px);line-height:1.2;margin:0 0 20px;text-wrap:balance;font-weight:700}
+  .thesis{max-width:38em;font-size:17.5px;color:var(--ink-soft);margin:0 0 8px}
+  .thesis strong{color:var(--ink)}
+  .credit{font-size:13.5px;color:var(--ink-faint);margin-top:20px}
+  .credit a{color:var(--ink-faint)}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .legend a{font-family:var(--mono);font-size:12.5px;text-decoration:none;color:var(--ink-soft);
+    border:1px solid var(--line);background:var(--paper-raised);border-radius:3px;
+    padding:6px 12px;display:inline-flex;gap:8px;align-items:center}
+  .legend a:hover{border-color:var(--survey);color:var(--survey)}
+  .legend .dot{width:7px;height:7px;border-radius:50%;background:var(--survey)}
+
+  /* sections */
+  section{padding:60px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .sec-no{font-family:var(--mono);font-size:13px;color:var(--contour);letter-spacing:.1em}
+  h2{font-family:var(--serif);font-size:clamp(24px,3.6vw,32px);margin:0;text-wrap:balance}
+  .sec-lede{color:var(--ink-soft);max-width:42em;margin:10px 0 34px}
+  h3{font-family:var(--serif);font-size:20px;margin:36px 0 12px}
+
+  /* spine (主线) */
+  .spine{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:26px 0 6px}
+  @media(max-width:640px){.spine{grid-template-columns:1fr 1fr}}
+  .spine button{
+    text-align:left;font:inherit;color:inherit;cursor:pointer;position:relative;
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:4px;
+    padding:14px 14px;transition:border-color .15s;
+  }
+  .spine button:hover,.spine button:focus-visible{border-color:var(--survey)}
+  .spine button[aria-pressed="true"]{border-color:var(--survey);box-shadow:inset 0 0 0 1px var(--survey)}
+  .spine .s-no{font-family:var(--mono);font-size:11px;color:var(--contour)}
+  .spine .s-name{font-family:var(--serif);font-size:16px;display:block;margin-top:3px}
+  .spine .s-en{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);display:block;margin-top:2px}
+  .spine-answer{border-left:3px solid var(--survey);background:var(--survey-soft);
+    border-radius:0 4px 4px 0;padding:14px 18px;margin-top:16px;font-size:14.5px;min-height:52px}
+  .spine-answer em{font-style:normal;color:var(--survey);font-weight:600}
+
+  /* provenance cards (正本清源) */
+  .prov{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;
+    box-shadow:var(--shadow);margin-bottom:16px;padding:18px 22px 16px}
+  .prov-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px;margin-bottom:10px}
+  .prov-head h4{font-family:var(--serif);font-size:19px;margin:0}
+  .vchip{font-size:11px;font-family:var(--mono);border-radius:99px;padding:2px 11px;letter-spacing:.04em;margin-left:auto;white-space:nowrap;border:1px solid}
+  .vchip.real{color:var(--good);border-color:var(--good);background:var(--good-soft)}
+  .vchip.mix{color:var(--survey);border-color:var(--survey);background:var(--survey-soft)}
+  .vchip.coined{color:var(--marker);border-color:var(--marker);background:var(--bad-soft)}
+  .prov p{margin:0 0 8px;font-size:14.5px}
+  .prov .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-faint);text-transform:uppercase;margin-right:6px}
+  .prov .prov-claim{color:var(--ink-soft)}
+  .prov .prov-src{color:var(--ink)}
+  .prov .prov-note{margin:0;padding:8px 0 0;border-top:1px dashed var(--line);color:var(--ink-soft);font-size:13.5px;font-style:italic}
+
+  /* balance (支持 vs 质疑) */
+  .duel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}
+  @media(max-width:640px){.duel{grid-template-columns:1fr}}
+  .duel .cell{border:1px solid var(--line);border-radius:4px;padding:14px 16px;background:var(--paper-raised);font-size:14px;line-height:1.6}
+  .duel .for{border-left:3px solid var(--good)}
+  .duel .against{border-left:3px solid var(--marker)}
+  .duel .cell b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+  .duel .for b{color:var(--good)}
+  .duel .against b{color:var(--marker)}
+  .duel-topic{font-family:var(--serif);font-size:16.5px;margin:24px 0 0}
+
+  /* evidence anchors */
+  .ev{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:12px}
+  .ev li{background:var(--paper-raised);border:1px solid var(--line);border-radius:4px;
+    padding:16px 18px 16px 58px;position:relative;font-size:14.5px;color:var(--ink-soft)}
+  .ev li::before{content:"▲";position:absolute;left:20px;top:16px;color:var(--contour);font-size:13px}
+  .ev b{color:var(--ink);display:block;font-size:15.5px;margin-bottom:3px;font-family:var(--serif)}
+  .ev .num{color:var(--marker);font-weight:700;font-style:normal}
+  .ev a{font-family:var(--mono);font-size:12.5px}
+
+  /* verify block */
+  .verify{margin-top:6px;padding:16px 18px;border-left:3px solid var(--good);background:var(--good-soft);border-radius:0 4px 4px 0;font-size:14.5px}
+  .verify.warn{border-left-color:var(--contour);background:transparent;border:1px dashed var(--contour)}
+  .verify b{font-family:var(--serif)}
+
+  .keyline{margin:24px 0 0;border-left:3px solid var(--contour);padding:8px 16px;
+    font-size:15px;color:var(--ink-soft);font-style:italic}
+
+  /* quiz */
+  .quiz-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+  .quiz-card .q-no{font-family:var(--mono);font-size:12px;color:var(--contour);letter-spacing:.1em}
+  .quiz-card p.q{font-size:15.5px;margin:8px 0 14px;font-weight:600}
+  .opts{display:grid;gap:8px}
+  .opt{text-align:left;font:inherit;font-size:14.5px;line-height:1.55;color:var(--ink);
+    background:transparent;border:1px solid var(--line);border-radius:4px;padding:10px 14px;cursor:pointer;transition:border-color .12s}
+  .opt:hover:not(:disabled){border-color:var(--survey)}
+  .opt:disabled{cursor:default;opacity:.92}
+  .opt.right{border-color:var(--good);background:var(--good-soft)}
+  .opt.wrong{border-color:var(--marker);background:var(--bad-soft)}
+  .fb{display:none;margin-top:12px;font-size:14px;border-radius:4px;padding:12px 15px;line-height:1.6}
+  .fb.show{display:block}
+  .fb.ok{background:var(--good-soft);border-left:3px solid var(--good)}
+  .fb.no{background:var(--bad-soft);border-left:3px solid var(--marker)}
+  .fb a{font-weight:600}
+  .verdict{display:none;border-radius:5px;padding:24px;margin-top:26px}
+  .verdict.show{display:block}
+  .verdict.pass{background:var(--good-soft);border:1px solid var(--good)}
+  .verdict.retry{background:var(--bad-soft);border:1px solid var(--marker)}
+  .verdict h3{margin:0 0 10px;font-family:var(--serif)}
+  .verdict ul{margin:8px 0 0;padding-left:20px;font-size:14.5px}
+  .verdict li{margin-bottom:5px}
+  .reset{font:inherit;font-size:14px;margin-top:14px;cursor:pointer;
+    border:1px solid var(--line);background:var(--paper-raised);color:var(--ink);border-radius:4px;padding:8px 18px}
+  .reset:hover{border-color:var(--survey);color:var(--survey)}
+  .score-rail{position:sticky;bottom:14px;display:flex;justify-content:center;pointer-events:none;margin-top:20px}
+  .score-pill{pointer-events:auto;font-family:var(--mono);font-size:12.5px;
+    background:var(--ink);color:var(--paper);border-radius:99px;padding:7px 18px;box-shadow:var(--shadow)}
+
+  footer{padding:44px 0 64px;color:var(--ink-faint);font-size:13.5px}
+  footer p{margin:4px 0}
+  footer a{color:var(--ink-faint)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <svg class="contours" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1">
+    <ellipse cx="720" cy="90" rx="300" ry="130"/>
+    <ellipse cx="720" cy="90" rx="240" ry="100"/>
+    <ellipse cx="720" cy="90" rx="180" ry="72"/>
+    <ellipse cx="720" cy="90" rx="120" ry="46"/>
+    <ellipse cx="720" cy="90" rx="65" ry="24"/>
+    <ellipse cx="120" cy="360" rx="260" ry="110"/>
+    <ellipse cx="120" cy="360" rx="195" ry="80"/>
+    <ellipse cx="120" cy="360" rx="130" ry="52"/>
+    <ellipse cx="120" cy="360" rx="70" ry="27"/>
+  </svg>
+  <div class="wrap">
+    <p class="eyebrow">Critical Read · 批判性精读</p>
+    <h1>Agentic 之道，<br>把每句主张放回一手来源</h1>
+    <p class="thesis">彭超《Agentic 之道》是一篇<strong>命名密集的观点文</strong>：主线「代码 → Context → Agent Plan → 商业大脑 → OPC」方向站得住，但概念多为<strong>重新命名而非新发现</strong>，且几乎<strong>不给实证</strong>。这一页做两件原文没做的事——把每个概念对回 Anthropic / Karpathy / Every / Sam Altman 的一手出处，并补上支持与质疑的两面证据。</p>
+    <p class="credit">原文：<a href="https://mp.weixin.qq.com/s/btMZaBifixsnlogTDAZJhg">《Agentic 之道》· 公众号 ChaoGeek（彭超）</a>，2026-07-06，GTLC 杭州站演讲整理版。本页结论由多源检索交叉核实（Anthropic 官方博客、X 原帖、Every、HackerNews、METR、GitHub、企查查/天眼查、GTLC 官网），每条附一手链接。</p>
+    <nav class="legend" aria-label="页面导航">
+      <a href="#spine"><span class="dot"></span>主线全景</a>
+      <a href="#prov"><span class="dot"></span>七概念·正本清源</a>
+      <a href="#duel"><span class="dot"></span>支持 vs 质疑</a>
+      <a href="#evidence"><span class="dot"></span>原文缺的硬证据</a>
+      <a href="#verify"><span class="dot"></span>会议与作者核实</a>
+      <a href="#quiz"><span class="dot"></span>自测（8 题）</a>
+    </nav>
+  </div>
+</header>
+
+<section id="spine">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§1</span><h2>先看主线：一条五段式脊椎</h2></div>
+    <p class="sec-lede">全文围绕一条演进链展开。点每一段，看它到底在说什么——以及它是不是原文自己的说法。</p>
+    <div class="spine" role="group" aria-label="Agentic 主线五段">
+      <button aria-pressed="false" data-a="传统抓手。作者的起点承认：<em>代码只是最先被改变的地方</em>，不是终点。这一段无争议。"><span class="s-no">01</span><span class="s-name">代码</span><span class="s-en">Code</span></button>
+      <button aria-pressed="false" data-a="全文最扎实的一段。<em>「Prompt 不是资产，Context 才是资产」</em>直接对应业界的 context engineering 转向（Tobi Lütke → Karpathy → Anthropic）。判断成立，见 §2。"><span class="s-no">02</span><span class="s-name">Context</span><span class="s-en">上下文</span></button>
+      <button aria-pressed="false" data-a="把一次性任务变成可重复生产系统。五步闭环里只有 <em>Compound Loop</em> 有 Every 的出处，其余四个名字是作者自造；底层动作 = Anthropic 的 plan-act-reflect。见 §2。"><span class="s-no">03</span><span class="s-name">Agent Plan</span><span class="s-en">规划系统</span></button>
+      <button aria-pressed="false" data-a="把团队经验蒸馏成「可执行的经验」。<em>「商业大脑」是作者的隐喻</em>，非行业术语——好听，但没有对应的一手定义或方法。见 §2。"><span class="s-no">04</span><span class="s-name">商业大脑</span><span class="s-en">Business Brain</span></button>
+      <button aria-pressed="false" data-a="终点：<em>一个人拥有一家 AI 公司（OPC）</em>。内核 = Sam Altman 2024 的「一人十亿美元公司」预测，但这是全文争议最大、被 HN 拆得最狠的一段。见 §3。"><span class="s-no">05</span><span class="s-name">OPC</span><span class="s-en">一人公司</span></button>
+    </div>
+    <div class="spine-answer" id="spineAnswer">☝ 点一段主线，看它的实质与出处判定。</div>
+    <p class="keyline">一句话总览：底层判断都能对应到真实的一手来源，方向没错；但「自造命名的密度」远高于「一手实证的密度」——这正是它读起来「有道理却模糊」的原因。</p>
+  </div>
+</section>
+
+<section id="prov">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§2</span><h2>七个概念，各归其位</h2></div>
+    <p class="sec-lede">每张卡三行：<b>文章怎么说 → 一手出处是谁 → 判定</b>。绿标=复述已有行业概念，蓝标=改名/包装，红标=作者自造、无一手对应。</p>
+
+    <article class="prov">
+      <div class="prov-head"><h4>Context 才是资产</h4><span class="vchip real">复述·已有概念</span></div>
+      <p class="prov-claim"><span class="lbl">文章说</span>Prompt 是一次性对话；Context（你是谁、产品、用户、规则、禁区、品味）才随时间越攒越厚，是真正的资产。</p>
+      <p class="prov-src"><span class="lbl">一手出处</span>「context engineering」由 Shopify CEO Tobi Lütke 带火（<a href="https://x.com/tobi/status/1935533422589399127">X · 2025-06-19</a>），Karpathy 放大定义（<a href="https://x.com/karpathy/status/1937902205765607626">X · 2025-06-25</a>），Anthropic 官方定义为 prompt engineering 的「自然演进」（<a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">2025-09-29</a>）。</p>
+      <p class="prov-note">判断成立，是全文最扎实的一段；「资产」的对偶句是作者的修辞包装。注意：Anthropic 说的是「演进」不是「取代」。</p>
+    </article>
+
+    <article class="prov">
+      <div class="prov-head"><h4>Vibe Coding 让你快，不让你强</h4><span class="vchip real">复述·已有概念</span></div>
+      <p class="prov-claim"><span class="lbl">文章说</span>Vibe Coding 像许愿机：没记忆、没积累、不好管理，适合尝鲜不适合长期产品。</p>
+      <p class="prov-src"><span class="lbl">一手出处</span>Karpathy 造词原帖（<a href="https://x.com/karpathy/status/1886192184808149383">X · 2025-02-02</a>）本就把它限定为「throwaway weekend projects（一次性周末项目）」，核心是「不看 diff、全部接受」。</p>
+      <p class="prov-note">准确转述。造词者本人早已给它划了「不适合生产」的边界，作者的批评与原意一致。</p>
+    </article>
+
+    <article class="prov">
+      <div class="prov-head"><h4>GCC — Goal / Context / Constraints</h4><span class="vchip coined">作者自造·无一手出处</span></div>
+      <p class="prov-claim"><span class="lbl">文章说</span>Agent 要同时立住三件事：Goal（去哪）、Context（知道什么）、Constraints（不能乱来），翻车多半是三缺一。</p>
+      <p class="prov-src"><span class="lbl">一手出处</span>查无此三元组的行业出处。精神上与 context engineering、Anthropic 的 agent 设计原则相关，但「GCC」这个缩写是作者的原创归纳。</p>
+      <p class="prov-note">作为记忆抓手不错、也没错，但要当成「作者的框架」而非行业共识来引用。</p>
+    </article>
+
+    <article class="prov">
+      <div class="prov-head"><h4>Plan 五步闭环 + Compound Loop</h4><span class="vchip mix">半自造·一步有出处</span></div>
+      <p class="prov-claim"><span class="lbl">文章说</span>五步：Context Scout → Co-spark → Multi-lens Lock → Guarded Flow → Compound Loop（把结果/坑/模板写回 Context 形成复利）。</p>
+      <p class="prov-src"><span class="lbl">一手出处</span>只有第五步有出处：<b>compound engineering</b> 由 Every 的 Kieran Klaassen 提出（<a href="https://every.to/source-code/my-ai-had-already-fixed-the-code-before-i-saw-it">every.to · 2025-08-18</a>），原循环是 Plan→Work→Review→<b>Compound</b>→Repeat。前四个名字是作者对通用 agent 流程的重新命名。</p>
+      <p class="prov-note">「写回形成复利」是真 idea 且有出处（改名不改实质）；其余四步命名无外部来源。</p>
+    </article>
+
+    <article class="prov">
+      <div class="prov-head"><h4>Clawmancer（1 Lead + 6 Execute Agent）</h4><span class="vchip mix">品牌化·内核非原创</span></div>
+      <p class="prov-claim"><span class="lbl">文章说</span>作者的日常工作流：1 个 Lead 负责拆解编排 + 6 个 Execute Agent 负责执行复盘。</p>
+      <p class="prov-src"><span class="lbl">一手出处</span>架构本体 = Anthropic 官方的 <b>orchestrator-worker / lead+subagent</b> 模式（<a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective Agents · 2024-12-19</a>、<a href="https://www.anthropic.com/engineering/multi-agent-research-system">Multi-agent Research · 2025-06-13</a>）。GitHub 与全网搜索「Clawmancer」<b>0 结果</b>——非公开项目。</p>
+      <p class="prov-note">「Clawmancer」是作者的私有命名（Claw 影射 Claude）；「6 个」是个人配置不是行业定数。技术内核是标准多 Agent 拓扑。</p>
+    </article>
+
+    <article class="prov">
+      <div class="prov-head"><h4>商业大脑</h4><span class="vchip coined">作者隐喻·非行业概念</span></div>
+      <p class="prov-claim"><span class="lbl">文章说</span>不是知识库（存东西），而是把知识、流程、品味、约束交给 Agent 反复运行的动态执行系统；让团队最贵的认知「不随人走」。</p>
+      <p class="prov-src"><span class="lbl">一手出处</span>无对应行业术语。相关的真实工程是持久记忆层（Mem0、Letta/MemGPT、Graphiti、Cognee）+ harness 里的 <span style="font-family:var(--mono);font-size:12.5px">CLAUDE.md</span>/结果回写。</p>
+      <p class="prov-note">「商业大脑」是好用的隐喻，但它没有定义、没有方法、没有一手出处——是全文最「概念」的一处。</p>
+    </article>
+
+    <article class="prov">
+      <div class="prov-head"><h4>OPC — One Person Company / 一人公司</h4><span class="vchip mix">概念有源·缩写自造·争议大</span></div>
+      <p class="prov-claim"><span class="lbl">文章说</span>不是一个人辛苦干十个人的活，而是一个人拥有一家 AI 公司；人负责方向/判断/品味，Agent 团队负责执行。</p>
+      <p class="prov-src"><span class="lbl">一手出处</span>内核 = Sam Altman「一人十亿美元公司」预测（<a href="https://www.youtube.com/watch?v=Q5vsEUgxt3E">访谈 · 2024-02</a>，<a href="https://fortune.com/2024/02/04/sam-altman-one-person-unicorn-silicon-valley-founder-myth/">Fortune 报道</a>）+ Paul Jarvis《Company of One》(2019)。Altman 未用「OPC」缩写。</p>
+      <p class="prov-note">概念有源，但这是全文<b>争议最大</b>的一段——见 §3 的质疑与 §4 的反面证据。</p>
+    </article>
+  </div>
+</section>
+
+<section id="duel">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§3</span><h2>支持 vs 质疑：原文只讲了一面</h2></div>
+    <p class="sec-lede">文章是乐观的推介。把每个大主张的正反两面并排，你才看得到完整判断的空间。左绿=支持，右红=质疑。</p>
+
+    <p class="duel-topic">① Context engineering 是真趋势吗？</p>
+    <div class="duel">
+      <div class="cell for"><b>支持</b>Karpathy、DAIR.AI、Weaviate 等高信号账号一致认为是超越 prompt 的工程学科；Anthropic 出了官方定义与指南。</div>
+      <div class="cell against"><b>质疑</b>HN 最高赞（<a href="https://news.ycombinator.com/item?id=44427757">915 pts</a>）指为「失败的 prompt engineering 换名圈 VC 钱」；连倡导者 Simon Willison 都自认是 rebrand。</div>
+    </div>
+
+    <p class="duel-topic">② 多 Agent 编排（1 Lead + 6 Execute）值得追吗？</p>
+    <div class="duel">
+      <div class="cell for"><b>支持</b>Anthropic 实测：多 Agent（Opus 4 lead + Sonnet 4 子 Agent）在内部研究评测上比单 Agent <b>高 90.2%</b>。</div>
+      <div class="cell against"><b>质疑</b>同一篇 Anthropic 官方却说「<b>单 Agent 覆盖 80% 场景，别过度工程化</b>」；一线整理称 AutoGen/CrewAI「demo 好看、生产易崩，资深工程师已弃用」。</div>
+    </div>
+
+    <p class="duel-topic">③ Vibe Coding / Agentic Coding 能上生产吗？</p>
+    <div class="duel">
+      <div class="cell for"><b>支持</b>有人反对「vibe coding」这个贬义框架：认真用 Claude Code 建生产应用是可行的，「别再叫它 vibe coding，它就是 coding」。</div>
+      <div class="cell against"><b>质疑</b>金句「以 10 倍速度制造 10 倍技术债」；撞墙点在鉴权/安全/支付/并发；生成代码把 bug 伪装起来、审查常比手写更贵。</div>
+    </div>
+
+    <p class="duel-topic">④ OPC / 一人独角兽 是现实还是炒作？</p>
+    <div class="duel">
+      <div class="cell for"><b>支持</b>工具/基建在快速成熟（Cofounder、多 Agent 编排产品）；Dario Amodei 称第一家单人十亿公司「2026，置信 70–80%」。</div>
+      <div class="cell against"><b>质疑</b>十亿估值绕不开销售/信任/<b>法律责任</b>（AI 接不住）；最火的 Medvi 案例被拆是「减肥药引流站」；连 Altman 后来都改口说「<b>10 人</b>十亿公司」。</div>
+    </div>
+    <p class="keyline">规律：作者站在「工具在变强」的一面，而质疑几乎都站在「人要担的那部分（销售、信任、责任、维护）AI 接不住」的一面。两面都对，差别在你把赌注押在哪。</p>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§4</span><h2>原文缺的硬证据，补在这里</h2></div>
+    <p class="sec-lede">全文没有一个数字或对照实验。以下四条是这轮检索里最硬的一手证据——正反都有，恰恰是「缺实证」印象的解药。</p>
+    <ul class="ev">
+      <li><b>唯一严谨的对照实验，结论是反的</b>METR 随机对照实验（<a href="https://arxiv.org/abs/2507.09089">arXiv 2507.09089</a>）：资深开发者事前预测 AI 提速 24%、事后自估提速 20%，客观测量却是<span class="num">慢了 19%</span>。整场 AI 编码讨论里唯一接近科学方法的数据，方向与炒作相反。</li>
+      <li><b>多 Agent 确实更强，但也确实更贵</b>Anthropic <a href="https://www.anthropic.com/engineering/multi-agent-research-system">多 Agent 研究系统</a>：比单 Agent 高 <span class="num">90.2%</span>，但代价是 token 消耗约为普通对话的 <span class="num">15×</span>（单 Agent 约 4×）。「1 Lead + 6 Execute」不是免费的强。</li>
+      <li><b>官方自己主张「少即是多」</b>Anthropic《<a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective Agents</a>》：能用单 Agent 别上多 Agent，能用 workflow（预定义代码路径）别上 agent。与「上来就编排 6 个 Agent」的叙事相反。</li>
+      <li><b>概念在开源生态里都有真实落地</b>编排（LangGraph ~3.7w、CrewAI ~5.5w、AutoGen ~6w、OpenAI Agents SDK ~2.8w）、记忆（Mem0 ~6w、Letta ~2.4w）、harness（Claude Code ~13.7w、Cline 的 Plan/Act ~6.4w、Aider ~4.7w）。方向是真的，只是都不是新概念。</li>
+    </ul>
+    <p class="keyline">把这四条放回原文，「Agentic 之道」的判断依然站得住——但你会同时知道它的代价、边界和反例，而不只是它的好处。</p>
+  </div>
+</section>
+
+<section id="verify">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§5</span><h2>会议与作者：核实一下再信</h2></div>
+    <p class="sec-lede">既然要把它当学习材料，来源可信度也顺手查了。结论：真实，但有一处时间瑕疵。</p>
+    <div class="verify"><b>✓ 会议与嘉宾属实。</b> GTLC 是极客邦/InfoQ 旗下真实的技术领导者峰会。官方页面（<a href="https://gtlc.infoq.cn/2026/hangzhou">gtlc.infoq.cn/2026/hangzhou</a>）逐字核对：鲁肃（程立，蚂蚁/阿里前 CTO）、叶军（前阿里副总裁）、汪源（杭州久痕科技 CEO、前网易研究院院长）均在嘉宾名单。</div>
+    <div class="verify warn"><b>时间对不上（小瑕疵）。</b> 杭州站官方日期是 <b>2026-06-27</b>（分站，非「总站」），2026 年至今没有 7 月场次。而文章 07-06 发、称「上周六」——实际已过去约 10 天。不影响实质，但「上周六」是不准确的。</div>
+    <div class="verify"><b>作者可信度：有真实产品背书。</b> 公众号 ChaoGeek 背后主体为深圳拾音教育咨询有限公司，产品是 AI 英语口语陪练 app <b>OneOneTalk / 11Talk</b>（小米商店 + 隐私政策页核实）。不过所有公开工商/应用记录里查不到「彭超」实名——应是运营者的专业身份/笔名。<span style="color:var(--ink-faint)">（作者身份核实证据强度：中；他是真做 AI 产品的人，非纯内容营销号，但实名无法在公开渠道确证。）</span></div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§6</span><h2>自测：分得清「真概念」和「新名词」才算学会</h2></div>
+    <p class="sec-lede">8 道题，考的不是背诵原文，而是你能不能把主张对回一手来源、并守住批判视角。答错会告诉你回读哪一节。全对解锁一句话总结。</p>
+    <div id="quizRoot"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="score-rail"><span class="score-pill" id="scorePill">0 / 8 已作答</span></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><a href="../">← 返回学习主页</a></p>
+    <p>原文：《Agentic 之道》· 公众号 ChaoGeek（彭超），2026-07-06 · GTLC 杭州站演讲整理。</p>
+    <p>一手来源：Anthropic Engineering（context engineering / building effective agents / multi-agent research）· Karpathy、Tobi Lütke（X）· Every（compound engineering）· Sam Altman（one-person company）· METR（arXiv 2507.09089）· HackerNews · GitHub · GTLC 官网。</p>
+    <p>批判性精读与多源核实由 Claude Code 五路并行子 Agent 完成（一手溯源 / X / GitHub / HackerNews / 中文圈）。</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // spine
+  var sp=document.querySelectorAll('.spine button');
+  var sa=document.getElementById('spineAnswer');
+  sp.forEach(function(b){
+    b.addEventListener('click',function(){
+      sp.forEach(function(o){o.setAttribute('aria-pressed','false')});
+      b.setAttribute('aria-pressed','true');
+      sa.innerHTML=b.getAttribute('data-a');
+    });
+  });
+
+  // quiz
+  var QS=[
+    {q:'文章的核心口号「Prompt 不是资产，Context 才是资产」，最准确对应哪个已有行业概念？',
+     opts:['提示词工程（prompt engineering）的升级技巧','上下文工程（context engineering），由 Tobi Lütke / Karpathy 带火、Anthropic 定义','RAG 检索增强生成','作者原创、没有对应的行业概念'],
+     a:1,anchor:'#prov',tech:'§2 Context',
+     ok:'对。这是全文最扎实的一段，直接对应 context engineering 转向。注意 Anthropic 的定性是 prompt engineering 的「自然演进」而非取代。',
+     no:'它对应的是 context engineering（Tobi Lütke 2025-06 带火、Anthropic 2025-09 定义），不是 prompt 技巧、也不是 RAG，更不是无出处的原创。'},
+
+    {q:'作者的工作流「Clawmancer（1 Lead + 6 Execute Agent）」，在工程上其实是什么？',
+     opts:['一个可在 GitHub 找到的开源多 Agent 框架','Anthropic 早已描述的 orchestrator-worker / lead+subagent 标准拓扑','作者原创、业界没有类似结构的编排方式','LangGraph 的官方推荐配置'],
+     a:1,anchor:'#prov',tech:'§2 Clawmancer',
+     ok:'对。技术内核就是 Anthropic《Building Effective Agents》和多 Agent 研究里的 orchestrator-worker 模式。「Clawmancer」是作者的私有命名，GitHub 搜索 0 结果；「6 个」是个人配置不是行业定数。',
+     no:'搜「Clawmancer」全网 0 结果——它不是开源框架。其内核是 Anthropic 早已描述的 orchestrator-worker（lead + 并行 subagent）标准模式，作者做的是品牌化命名。'},
+
+    {q:'关于「多 Agent 编排」，Anthropic 官方《Building Effective Agents》的立场其实是？',
+     opts:['能编排越多 Agent 越好','单 Agent 能覆盖约 80% 场景，能不上多 Agent 就别上，避免过度工程化','多 Agent 是唯一正确的生产架构','Agent 不如预定义 workflow'],
+     a:1,anchor:'#evidence',tech:'§4 硬证据',
+     ok:'对。这正是对文章「上来就编排 6 个 Agent」叙事的重要对冲——官方主张「少即是多」，多 Agent 虽在研究评测上高 90.2%，但 token 成本约是对话的 15×。',
+     no:'Anthropic 官方主张「少即是多」：单 Agent 覆盖约 80% 场景，能不上多 Agent 就别上。多 Agent 更强（+90.2%）但也更贵（约 15× token），不是无脑越多越好。'},
+
+    {q:'Vibe Coding 的造词者 Karpathy，最初把它限定用于什么场景？',
+     opts:['企业生产系统','一次性的周末抛弃型项目','团队协作的长期产品','安全关键型代码'],
+     a:1,anchor:'#prov',tech:'§2 Vibe Coding',
+     ok:'对。Karpathy 原帖（2025-02）就说「not too bad for throwaway weekend projects」，核心是「不看 diff、全部接受」。作者「不适合长期产品」的批评与原意一致。',
+     no:'Karpathy 造词原帖明确限定为「throwaway weekend projects（一次性周末项目）」，并说自己认真写代码时会逐行看 diff。它天生不是为生产设计的。'},
+
+    {q:'关于「AI 让开发者更快」，目前唯一接近严谨的对照实验（METR RCT）结论是？',
+     opts:['客观提速约 24%，与开发者预期一致','客观提速约 20%','客观上反而慢了约 19%，尽管开发者自以为更快了','没有可测量的差异'],
+     a:2,anchor:'#evidence',tech:'§4 硬证据',
+     ok:'对。METR（arXiv 2507.09089）：开发者事前预测提速 24%、事后自估 20%，实测却慢了 19%。这是整场讨论里唯一接近科学方法的数据，且方向与炒作相反。',
+     no:'METR 随机对照实验测出的是「慢了约 19%」——而且开发者主观以为自己快了 20%。主观体感与客观测量的背离，正是这条证据的价值。'},
+
+    {q:'对「OPC / 一人独角兽」，最有分量的质疑是什么？',
+     opts:['AI 还不够便宜','一个人打字太慢','十亿估值绕不开销售、信任与法律责任，而这些 AI 接不住','没有足够的多 Agent 框架可用'],
+     a:2,anchor:'#duel',tech:'§3 支持 vs 质疑',
+     ok:'对。核心质疑是「能委派权力，但没法把法律与道德责任委派给 AI」；十亿估值绕不开销售团队与客户信任。最火的 Medvi 案例还被拆穿是营销引流站，连 Altman 都改口说「10 人」。',
+     no:'最硬的质疑不在算力或速度，而在「人要担的那部分」——销售、客户信任、法律/道德责任，AI 接不住。这也是 HN 拆一人独角兽叙事的主线。'},
+
+    {q:'下列哪一组，属于作者自造、在业界查不到一手出处的框架/术语？',
+     opts:['context engineering、vibe coding、compound engineering','GCC（Goal/Context/Constraints）、商业大脑、五步闭环的前四步命名','orchestrator-worker、lead agent、subagent','RAG、long context、memory'],
+     a:1,anchor:'#prov',tech:'§2 正本清源',
+     ok:'对。GCC、商业大脑、以及五步闭环里除 Compound Loop 外的命名，都是作者的原创归纳，应标注为「个人框架」而非行业共识——这正是全文「概念密度高于实证密度」的来源。',
+     no:'A、C、D 都是有一手出处的行业概念。真正自造的是 GCC、商业大脑、以及五步闭环前四步的命名——它们没有外部一手来源。'},
+
+    {q:'核实文章来源后，最准确的结论是？',
+     opts:['会议和嘉宾都是虚构的','会议、嘉宾真实，但官方日期是 2026-06-27，与文章暗示的「上周六/7 月」对不上','作者彭超的实名和履历都已在工商记录核实','整篇文章不可信'],
+     a:1,anchor:'#verify',tech:'§5 核实',
+     ok:'对。GTLC 杭州站与三位嘉宾经官网逐字核实属实（真实来源）；但官方日期是 06-27、非 7 月，「上周六」不准确。作者背后是真 AI 产品公司（OneOneTalk），但「彭超」实名在公开渠道查不到。',
+     no:'会议和嘉宾是真的（GTLC 官网可核对），瑕疵只在时间：官方是 2026-06-27，非文章暗示的 7 月。作者有真实产品背书，但「彭超」实名无法在工商/应用记录里确证。'}
+  ];
+  var root=document.getElementById('quizRoot'),pill=document.getElementById('scorePill'),verdict=document.getElementById('verdict');
+  var answered=0,correct=0;
+  function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+  function build(){
+    answered=0;correct=0;root.innerHTML='';verdict.className='verdict';verdict.innerHTML='';
+    pill.textContent='0 / '+QS.length+' 已作答';
+    QS.forEach(function(item,qi){
+      var card=document.createElement('div');card.className='quiz-card';
+      var h='<span class="q-no">QUESTION '+String(qi+1).padStart(2,'0')+' · '+esc(item.tech)+'</span>'+
+            '<p class="q">'+esc(item.q)+'</p><div class="opts">';
+      item.opts.forEach(function(o,oi){
+        h+='<button class="opt" type="button" data-q="'+qi+'" data-o="'+oi+'">'+esc(o)+'</button>';
+      });
+      h+='</div><div class="fb"></div>';
+      card.innerHTML=h;root.appendChild(card);
+    });
+    root.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var qi=+btn.getAttribute('data-q'),oi=+btn.getAttribute('data-o');
+        var item=QS[qi],card=btn.closest('.quiz-card');
+        var opts=card.querySelectorAll('.opt'),fb=card.querySelector('.fb');
+        opts.forEach(function(o){o.disabled=true});
+        opts[item.a].classList.add('right');
+        answered++;
+        if(oi===item.a){
+          correct++;fb.className='fb show ok';
+          fb.innerHTML='✓ '+esc(item.ok);
+        }else{
+          btn.classList.add('wrong');fb.className='fb show no';
+          fb.innerHTML='✗ '+esc(item.no)+' <a href="'+item.anchor+'">重读 '+esc(item.tech)+' →</a>';
+        }
+        pill.textContent=correct+' 对 / '+answered+' 已答 / 共 '+QS.length+' 题';
+        if(answered===QS.length)finish();
+      });
+    });
+  }
+  function finish(){
+    if(correct===QS.length){
+      verdict.className='verdict show pass';
+      verdict.innerHTML='<h3>✓ Cleared — 你能分清「道」与「名词」了</h3>'+
+        '<p>一句话总结这篇文章：</p><ul>'+
+        '<li><b>方向对</b>：Context 比 Prompt 重要、Plan 化、多 Agent 编排、复利式工程、一人公司趋势——都有一手来源支撑。</li>'+
+        '<li><b>但缺实证</b>：GCC、商业大脑、五步命名、Clawmancer 是自造包装；原文没引任何数字（Anthropic 90.2%/15×、METR −19% 它都没提）。</li>'+
+        '<li><b>该怎么用</b>：拿它当「记忆抓手」可以，但真要落地，回到一手来源（Anthropic context engineering / building effective agents）和反面证据（METR、HN），自己称重。</li></ul>';
+    }else{
+      verdict.className='verdict show retry';
+      verdict.innerHTML='<h3>Not yet — 还差 '+(QS.length-correct)+' 题</h3>'+
+        '<p>按错题链接回去重读对应小节再重考。分清「有一手出处的真概念」和「作者自造的新名词」，是读这类观点文的核心技能。</p>'+
+        '<button class="reset" type="button" id="retryBtn">重置测验</button>';
+      var rb=document.getElementById('retryBtn');
+      if(rb)rb.addEventListener('click',function(){build();document.getElementById('quiz').scrollIntoView();});
+    }
+  }
+  build();
+})();
+</script>
+</body>
+</html>
