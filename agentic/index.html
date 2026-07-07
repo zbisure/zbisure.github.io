@@ -136,6 +136,33 @@
   .keyline{margin:24px 0 0;border-left:3px solid var(--contour);padding:8px 16px;
     font-size:15px;color:var(--ink-soft);font-style:italic}
 
+  /* inline code */
+  code{font-family:var(--mono);font-size:.85em;background:var(--mono-bg);border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--ink);word-break:break-word}
+  /* GCC big cards */
+  .gcc{background:var(--paper-raised);border:1px solid var(--line);border-left:3px solid var(--survey);border-radius:5px;box-shadow:var(--shadow);margin-bottom:16px;padding:20px 22px 16px}
+  .gcc-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:6px}
+  .gcc-letter{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--survey);line-height:1;flex:none;width:34px;text-align:center}
+  .gcc-head h4{font-family:var(--serif);font-size:18.5px;margin:0 0 3px;text-wrap:balance}
+  .gcc-sub{margin:0;font-size:13.5px;color:var(--ink-soft)}
+  .gcc-src,.pract .gcc-src{margin:12px 0 0;padding-top:10px;border-top:1px dashed var(--line);font-size:12px;font-family:var(--mono);color:var(--ink-faint);line-height:1.9}
+  .gcc-src a{color:var(--ink-faint)}
+  /* practice cards */
+  .pract{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);margin-bottom:16px;padding:18px 22px 16px}
+  .pract-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:2px}
+  .pract-head h4{font-family:var(--serif);font-size:18px;margin:0;text-wrap:balance}
+  .pract-tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--survey);text-transform:uppercase;width:100%}
+  /* do lists */
+  .do{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:9px}
+  .do li{padding-left:18px;position:relative;font-size:14px;line-height:1.64;color:var(--ink-soft)}
+  .do li::before{content:"▸";position:absolute;left:0;top:0;color:var(--survey)}
+  .do li b{color:var(--ink)}
+  /* tool pills */
+  .tool{font-family:var(--mono);font-size:10px;letter-spacing:.02em;border-radius:99px;padding:1px 8px;border:1px solid;white-space:nowrap;position:relative;top:-1px}
+  .tool.cc{color:var(--survey);border-color:var(--survey);background:var(--survey-soft)}
+  .tool.cx{color:var(--marker);border-color:var(--marker);background:var(--bad-soft)}
+  .tool.any{color:var(--ink-faint);border-color:var(--ink-faint)}
+  #practice h3{font-family:var(--serif);font-size:20px;margin:34px 0 14px}
+
   /* quiz */
   .quiz-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
   .quiz-card .q-no{font-family:var(--mono);font-size:12px;color:var(--contour);letter-spacing:.1em}
@@ -187,11 +214,12 @@
   <div class="wrap">
     <p class="eyebrow">Critical Read · 批判性精读</p>
     <h1>Agentic 之道，<br>把每句主张放回一手来源</h1>
-    <p class="thesis">彭超《Agentic 之道》是一篇<strong>命名密集的观点文</strong>：主线「代码 → Context → Agent Plan → 商业大脑 → OPC」方向站得住，但概念多为<strong>重新命名而非新发现</strong>，且几乎<strong>不给实证</strong>。这一页做两件原文没做的事——把每个概念对回 Anthropic / Karpathy / Every / Sam Altman 的一手出处，并补上支持与质疑的两面证据。</p>
+    <p class="thesis">彭超《Agentic 之道》是一篇<strong>命名密集的观点文</strong>：主线「代码 → Context → Agent Plan → 商业大脑 → OPC」方向站得住，但概念多为<strong>重新命名而非新发现</strong>，且几乎<strong>不给实证</strong>。这一页做三件原文没做的事——把每个概念对回 Anthropic / Karpathy / Every / Sam Altman 的一手出处，给出在 Claude Code / Codex 上到底怎么做，并补上支持与质疑的两面证据。</p>
     <p class="credit">原文：<a href="https://mp.weixin.qq.com/s/btMZaBifixsnlogTDAZJhg">《Agentic 之道》· 公众号 ChaoGeek（彭超）</a>，2026-07-06，GTLC 杭州站演讲整理版。本页结论由多源检索交叉核实（Anthropic 官方博客、X 原帖、Every、HackerNews、METR、GitHub、企查查/天眼查、GTLC 官网），每条附一手链接。</p>
     <nav class="legend" aria-label="页面导航">
       <a href="#spine"><span class="dot"></span>主线全景</a>
       <a href="#prov"><span class="dot"></span>七概念·正本清源</a>
+      <a href="#practice"><span class="dot"></span>落地实战·GCC 怎么做</a>
       <a href="#duel"><span class="dot"></span>支持 vs 质疑</a>
       <a href="#evidence"><span class="dot"></span>原文缺的硬证据</a>
       <a href="#verify"><span class="dot"></span>会议与作者核实</a>
@@ -272,9 +300,99 @@
   </div>
 </section>
 
+<section id="practice">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§3</span><h2>落地实战：七概念 → Claude Code / Codex 怎么做</h2></div>
+    <p class="sec-lede">原文只说「要养 Context、要有 Plan」，没说在具体工具里到底敲什么。这一节把概念落到<b>命令、文件、flag</b>。一个巧合可当骨架：Codex 官方的四要素 prompt 模板 <code>Goal / Context / Constraints / Done-when</code>，几乎就是作者 GCC 的工程版——只多了一条「完成判据」。先把 GCC 三块逐一拆开。</p>
+
+    <article class="gcc" id="gcc-g">
+      <div class="gcc-head"><span class="gcc-letter">G</span><div><h4>Goal —— 先计划后写码，并给一个它自己能跑的完成判据</h4><p class="gcc-sub">把「目标清楚」变成两个动作：进 plan mode 出方案，给一个可自动验证的「done」。</p></div></div>
+      <ul class="do">
+        <li><span class="tool cc">Claude Code</span> <b>计划先行</b>：<code>Shift+Tab</code> 循环 <code>default → acceptEdits → plan</code>，或 <code>claude --permission-mode plan</code>，或单条前缀 <code>/plan</code>。官方工作流是四段 <b>Explore → Plan → Code → Commit</b>：先只读探查，再产出计划（<code>Ctrl+G</code> 可在编辑器里直接改计划），批准后才执行。</li>
+        <li><span class="tool any">判断</span> <b>什么时候跳过计划</b>：官方原则——「能一句话描述这个 diff，就别写 plan」。改 typo、加日志、重命名 → 直接做；方法不确定 / 跨多文件 / 不熟这段代码 → 先 plan。</li>
+        <li><span class="tool cc">Claude Code</span> <b>给可验证的「done」</b>：官方核心论断「Give Claude a check it can run」——把验收标准和用例直接写进 prompt（<code>write validateEmail; a@x.com→true, invalid→false; 实现后跑测试</code>），UI 改动让它<b>截图对比原图并列差异</b>。要它「亮证据」（测试输出／命令返回／截图），不接受「声称完成」。</li>
+        <li><span class="tool cx">Codex</span> <b>四要素 prompt</b>：Goal（做什么）／ Context（相关文件）／ Constraints（标准与边界）／ <b>Done-when</b>（如「测试通过、bug 不再复现」）。复杂任务先 <code>/plan</code>，接受前 <code>/review</code> 看 diff；按难度调 reasoning（<code>low/medium/high/xhigh</code>）。</li>
+        <li><span class="tool any">大特性</span> <b>让它反过来采访你</b>：先一问一答逼出规格再写码——「Interview me one question at a time … then write a complete spec to <code>SPEC.md</code>」，然后<b>开新会话</b>用干净上下文执行 spec。</li>
+      </ul>
+      <p class="gcc-src">来源：<a href="https://code.claude.com/docs/en/best-practices">Claude Code Best Practices</a> · <a href="https://developers.openai.com/codex/learn/best-practices">Codex Best Practices</a></p>
+    </article>
+
+    <article class="gcc" id="gcc-c1">
+      <div class="gcc-head"><span class="gcc-letter">C</span><div><h4>Context —— 把「懂你」写进文件，而不是每次重讲</h4><p class="gcc-sub">这就是原文「Context 才是资产」的落地：一个随项目沉淀的记忆文件 + 主动的上下文卫生。</p></div></div>
+      <ul class="do">
+        <li><span class="tool cc">Claude Code</span> <b><code>CLAUDE.md</code></b>：<code>/init</code> 生成初版。层级从宽到窄、窄者优先：用户级 <code>~/.claude/CLAUDE.md</code> → 项目级 <code>./CLAUDE.md</code>（提交 git 共享）→ 本地私有 <code>./CLAUDE.local.md</code>（gitignore）；<code>@path</code> 可导入其他文件。</li>
+        <li><span class="tool any">纪律</span> <b>放什么／不放什么</b>：放「agent 猜不到的构建/测试命令、与默认不同的代码风格、仓库约定、项目特有架构决策、环境坑」；不放「读代码就知道的、语言通用惯例、频繁变动的信息、『写干净代码』这种废话」。目标<b>每个文件 &lt; 200 行</b>——臃肿会让 agent 忽略真正重要的指令。逐行自问「删了它 agent 会不会犯错，不会就删」。</li>
+        <li><span class="tool cx">Codex</span> <b><code>AGENTS.md</code></b>（跨厂商开放标准，Codex／Cursor／Cline／Copilot 等 25+ 工具共读）：解析规则是「<b>离被改文件最近的那个胜出</b>」，分层合并 <code>~/.codex/AGENTS.md</code> → 仓库根 → 子目录。想同时喂 Claude Code 和 Codex，社区通行做法是把 <code>CLAUDE.md</code> 和 <code>AGENTS.md</code> 做成 symlink，一份内容两边生效。</li>
+        <li><span class="tool cc">Claude Code</span> <b>即时引用 & 沉淀</b>：<code>@文件</code> 让它先读再答；<code>/memory</code> 编辑记忆、auto memory 自动把纠正/偏好记进 <code>~/.claude/…/memory/</code>；只在相关时用的领域流程放 <b>Skills</b>（<code>.claude/skills/name/SKILL.md</code>），别塞进每次都加载的 CLAUDE.md；接外部系统用 <b>MCP</b>（<code>claude mcp add</code>），但官方说能用 CLI（<code>gh</code>／<code>aws</code>）就用 CLI，最省上下文。</li>
+        <li><span class="tool any">上下文卫生</span> <b>克制胜于堆量</b>：目标是「能达成结果的最小高信号 token 集」——窗口越长越出现 context rot（召回下降）。<code>/context</code> 看占用，不相关任务间 <code>/clear</code>，逼近上限用 <code>/compact 只保留 API 改动</code>。<b>同一问题纠正超过两次</b>，说明上下文已被失败方案污染——<code>/clear</code> 重开 + 写一条更好的 prompt，几乎总比在长会话里继续纠正强。</li>
+      </ul>
+      <p class="gcc-src">来源：<a href="https://code.claude.com/docs/en/memory">Claude Code Memory</a> · <a href="https://agents.md/">AGENTS.md</a> · <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic · Context Engineering</a> · <a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html">Breunig · How contexts fail</a></p>
+    </article>
+
+    <article class="gcc" id="gcc-c2">
+      <div class="gcc-head"><span class="gcc-letter">C</span><div><h4>Constraints —— 软约束写文件，硬约束写规则 / hook / sandbox</h4><p class="gcc-sub">关键认知：写进 CLAUDE.md 的边界是「建议」，模型可能违背；要「硬保证」得用权限规则、hook 或沙箱。</p></div></div>
+      <ul class="do">
+        <li><span class="tool cc">Claude Code</span> <b>权限模式</b>（<code>Shift+Tab</code> 切前三个）：<code>default</code>（只读免批、其余问）／ <code>acceptEdits</code>（工作区编辑免批）／ <code>plan</code>（纯只读）／ <code>dontAsk</code>（锁死，适合 CI）／ <code>bypassPermissions</code>（=<code>--dangerously-skip-permissions</code>，只在容器/VM 里用）。</li>
+        <li><span class="tool cc">Claude Code</span> <b>硬规则</b>：<code>settings.json</code> 的 <code>permissions</code> 三类——<code>allow</code> / <code>ask</code> / <code>deny</code>，语法按工具：<code>Bash(npm run test:*)</code>、<code>Edit(./src/**/*.ts)</code>、<code>Read(./.env)</code>。<b><code>deny</code> 在所有模式（含 bypass）都生效</b>，是最硬的边界。</li>
+        <li><span class="tool cc">Claude Code</span> <b>Hooks = 确定性护栏</b>（「必须每次发生、零例外」）：在 <code>.claude/settings.json</code> 配。<code>PreToolUse</code> 能<b>拦截</b>工具调用（退出码 2 反馈给 Claude），<code>Stop</code> 事件可强制「测试不过不许结束」。想「绝不改 migrations 目录」——写 deny 规则或 PreToolUse hook，别只写在 CLAUDE.md。</li>
+        <li><span class="tool cx">Codex</span> <b>两个正交维度</b>（旧的 suggest／auto-edit／full-auto 已废弃）：<code>approval_policy</code>（<code>untrusted</code> / <code>on-request</code> 默认 / <code>never</code>）× <code>sandbox_mode</code>（<code>read-only</code> / <code>workspace-write</code> 默认 / <code>danger-full-access</code>）。<b>安全默认 = workspace-write + on-request</b>：沙箱内自主、越界才问。</li>
+        <li><span class="tool cx">Codex</span> <b>联网默认关</b>：要放开得在 <code>[sandbox_workspace_write]</code> 设 <code>network_access=true</code>；CI／无人值守用 <code>codex exec</code> + <code>approval_policy="never"</code>，高危的 <code>danger-full-access</code> / <code>--yolo</code> 只进隔离环境。<code>~/.codex/config.toml</code> + profiles（<code>codex --profile strict</code>）管多套环境。</li>
+      </ul>
+      <p class="gcc-src">来源：<a href="https://code.claude.com/docs/en/permissions">Claude Code Permissions</a> · <a href="https://code.claude.com/docs/en/hooks">Hooks</a> · <a href="https://developers.openai.com/codex/concepts/sandboxing">Codex Sandboxing</a></p>
+    </article>
+
+    <h3>其余四概念，同样落到手上</h3>
+
+    <article class="pract">
+      <div class="pract-head"><span class="pract-tag">Vibe Coding 的解药</span><h4>怎么用 AI 快，又不在生产里翻车</h4></div>
+      <ul class="do">
+        <li><b>读 diff、别 Accept All</b>：Karpathy 本人对认真代码就逐行看 diff。长会话大 diff 用第 11 招（merge 前让它考你）收尾。</li>
+        <li><b>给能自跑的验证器</b>：测试 / build 退出码 / linter / 截图对比——有它循环自己闭合，没它「看起来做完」就是唯一信号，你被迫当人肉验证。</li>
+        <li><span class="tool cc">Claude Code</span> <b>对抗式复核</b>：收工前让一个全新上下文的子 agent 只看 diff + 验收标准复核（内置 <code>/code-review</code>）；但约束它只报「影响正确性」的 gap，否则会过度工程。</li>
+        <li><b>放手就上沙箱 + 停止条件</b>：要无人值守就在隔离环境跑（无网 Docker、只给测试凭证、设预算/最大迭代上限），而不是靠逐条点批准。</li>
+      </ul>
+      <p class="gcc-src">来源：<a href="https://code.claude.com/docs/en/best-practices">Claude Code Best Practices</a> · <a href="https://simonwillison.net/2025/Sep/30/designing-agentic-loops/">Willison · Designing agentic loops</a></p>
+    </article>
+
+    <article class="pract">
+      <div class="pract-head"><span class="pract-tag">Plan 五步闭环 / Compound Loop</span><h4>把「写回 Context 形成复利」变成固定动作</h4></div>
+      <ul class="do">
+        <li><b>完整闭环</b>（Every 版）：Brainstorm → Plan（研究后产出结构化计划存 <code>docs/plans/</code>）→ Work（隔离 worktree、每步跑测试）→ Simplify → Review（并行多个专职 agent）→ <b>Compound（写回）</b> → Repeat。</li>
+        <li><b>写回两个固定位置</b>：事实/偏好 → <code>CLAUDE.md</code> 加一条 note；可搜索的解法 → <code>docs/solutions/</code>（带 YAML frontmatter 按主题分类），未来会话自动检索到。</li>
+        <li><b>缺陷升级成系统防线</b>：一个 SQL 注入不只修当下——① 写进 CLAUDE.md 或 security skill；② 加一条 lint 规则；③ 更新 review agent 的 prompt 让它以后主动抓。金句「Every bug becomes a permanent lesson」。</li>
+        <li><span class="tool cc">Claude Code</span> <b>现成插件</b>：<code>/plugin marketplace add EveryInc/compound-engineering-plugin</code> 装上，用 <code>/ce-plan</code> <code>/ce-work</code> <code>/ce-code-review</code> <code>/ce-compound</code>，或 <code>/lfg</code> 一键串起全流程。</li>
+      </ul>
+      <p class="gcc-src">来源：<a href="https://every.to/guides/compound-engineering">Every · Compound Engineering</a> · <a href="https://github.com/EveryInc/compound-engineering-plugin">插件仓库</a></p>
+    </article>
+
+    <article class="pract">
+      <div class="pract-head"><span class="pract-tag">Clawmancer / 多 Agent</span><h4>orchestrator-worker 怎么用，以及何时别用</h4></div>
+      <ul class="do">
+        <li><span class="tool cc">Claude Code</span> <b>子 Agent</b>：自定义放 <code>.claude/agents/*.md</code>（name + description 决定何时委派）；内置 <code>Explore</code>／<code>Plan</code>；<code>@</code>-mention 指定、或整场会话 <code>claude --agent code-reviewer</code>。并行：「Research the auth, db, API modules <b>in parallel using separate subagents</b>」。</li>
+        <li><span class="tool any">何时用</span> <b>子 Agent = 上下文保护工具</b>：当一个支线会把大量搜索/日志灌进主对话、且你之后不再引用时用它（独立上下文、只回传摘要）。也可路由到更便宜模型（Haiku）控成本。</li>
+        <li><span class="tool any">何时别用</span> 官方明确：需要频繁来回、多阶段共享大量上下文、小定点改、或延迟敏感 → 用主对话。想复用流程但仍在主上下文 → 用 <b>Skills</b> 而非子 Agent。呼应 §5：Anthropic 说「单 Agent 覆盖 80%，别过度工程化」。</li>
+        <li><span class="tool cx">Codex</span> <code>[features].multi_agent</code> 默认开；云端可并行跑多任务（各自独立 sandbox + git 状态）；跨 agent 转交/护栏用 Agents SDK 的 <code>handoffs</code> / <code>guardrails</code>。</li>
+      </ul>
+      <p class="gcc-src">来源：<a href="https://code.claude.com/docs/en/sub-agents">Claude Code Subagents</a> · <a href="https://developers.openai.com/codex/cloud">Codex Cloud</a></p>
+    </article>
+
+    <article class="pract">
+      <div class="pract-head"><span class="pract-tag">商业大脑 & OPC</span><h4>把「经验变系统」和「一个人的执行半径」落到工具上</h4></div>
+      <ul class="do">
+        <li><b>商业大脑 = 记忆层 + 技能 + 品味编码</b>：团队流程沉淀成 Skills、个人品味（命名/错误处理/测试策略）抽进 CLAUDE.md 偏好区和 review agent，接内部系统用 MCP。原则「<b>Teach the system, don't do the work yourself</b>」——留 50% 时间改进系统（建 review agent、写模式文档）。</li>
+        <li><span class="tool any">OPC 的执行半径</span> 扩大靠编排而非苦干：超出单会话上下文用 <b>agent teams</b>（各 worker 独立上下文、共享任务、有 team lead）；批量改用非交互 fan-out <code>for f in $(cat files.txt); do claude -p "Migrate $f" --allowedTools "Edit,Bash(git commit *)"; done</code>（先在 2-3 个文件上试 prompt 再放量）。</li>
+        <li><span class="tool any">但别忘了边界</span> §4 的质疑对 OPC 依然成立：能编排的是「执行」，接不住的是销售、客户信任、法律与道德责任。工具放大的是有判断力的人，不是把苦干自动化。</li>
+      </ul>
+      <p class="gcc-src">来源：<a href="https://every.to/guides/compound-engineering">Every · Teach the system</a> · <a href="https://code.claude.com/docs/en/best-practices">Claude Code · Automate and scale</a></p>
+    </article>
+
+    <p class="keyline">一句话：作者说「养 Context、蒸馏知识、编排智能」——落到手上就是 <b>写好 CLAUDE.md/AGENTS.md（养）→ 把踩坑写回 docs/solutions 与 skill（蒸馏）→ 计划先行 + 子 Agent + hook 护栏（编排）</b>。概念是对的，缺的那层「怎么做」，在这一节。</p>
+  </div>
+</section>
+
 <section id="duel">
   <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§3</span><h2>支持 vs 质疑：原文只讲了一面</h2></div>
+    <div class="sec-head"><span class="sec-no">§4</span><h2>支持 vs 质疑：原文只讲了一面</h2></div>
     <p class="sec-lede">文章是乐观的推介。把每个大主张的正反两面并排，你才看得到完整判断的空间。左绿=支持，右红=质疑。</p>
 
     <p class="duel-topic">① Context engineering 是真趋势吗？</p>
@@ -306,7 +424,7 @@
 
 <section id="evidence">
   <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§4</span><h2>原文缺的硬证据，补在这里</h2></div>
+    <div class="sec-head"><span class="sec-no">§5</span><h2>原文缺的硬证据，补在这里</h2></div>
     <p class="sec-lede">全文没有一个数字或对照实验。以下四条是这轮检索里最硬的一手证据——正反都有，恰恰是「缺实证」印象的解药。</p>
     <ul class="ev">
       <li><b>唯一严谨的对照实验，结论是反的</b>METR 随机对照实验（<a href="https://arxiv.org/abs/2507.09089">arXiv 2507.09089</a>）：资深开发者事前预测 AI 提速 24%、事后自估提速 20%，客观测量却是<span class="num">慢了 19%</span>。整场 AI 编码讨论里唯一接近科学方法的数据，方向与炒作相反。</li>
@@ -320,7 +438,7 @@
 
 <section id="verify">
   <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§5</span><h2>会议与作者：核实一下再信</h2></div>
+    <div class="sec-head"><span class="sec-no">§6</span><h2>会议与作者：核实一下再信</h2></div>
     <p class="sec-lede">既然要把它当学习材料，来源可信度也顺手查了。结论：真实，但有一处时间瑕疵。</p>
     <div class="verify"><b>✓ 会议与嘉宾属实。</b> GTLC 是极客邦/InfoQ 旗下真实的技术领导者峰会。官方页面（<a href="https://gtlc.infoq.cn/2026/hangzhou">gtlc.infoq.cn/2026/hangzhou</a>）逐字核对：鲁肃（程立，蚂蚁/阿里前 CTO）、叶军（前阿里副总裁）、汪源（杭州久痕科技 CEO、前网易研究院院长）均在嘉宾名单。</div>
     <div class="verify warn"><b>时间对不上（小瑕疵）。</b> 杭州站官方日期是 <b>2026-06-27</b>（分站，非「总站」），2026 年至今没有 7 月场次。而文章 07-06 发、称「上周六」——实际已过去约 10 天。不影响实质，但「上周六」是不准确的。</div>
@@ -330,8 +448,8 @@
 
 <section id="quiz">
   <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§6</span><h2>自测：分得清「真概念」和「新名词」才算学会</h2></div>
-    <p class="sec-lede">8 道题，考的不是背诵原文，而是你能不能把主张对回一手来源、并守住批判视角。答错会告诉你回读哪一节。全对解锁一句话总结。</p>
+    <div class="sec-head"><span class="sec-no">§7</span><h2>自测：分得清「真概念」和「新名词」，也会动手</h2></div>
+    <p class="sec-lede">11 道题：既考你能不能把主张对回一手来源、守住批判视角，也考落地实战（GCC 怎么做、护栏怎么设）。答错会告诉你回读哪一节。全对解锁一句话总结。</p>
     <div id="quizRoot"></div>
     <div class="verdict" id="verdict"></div>
     <div class="score-rail"><span class="score-pill" id="scorePill">0 / 8 已作答</span></div>
@@ -343,6 +461,7 @@
     <p><a href="../">← 返回学习主页</a></p>
     <p>原文：《Agentic 之道》· 公众号 ChaoGeek（彭超），2026-07-06 · GTLC 杭州站演讲整理。</p>
     <p>一手来源：Anthropic Engineering（context engineering / building effective agents / multi-agent research）· Karpathy、Tobi Lütke（X）· Every（compound engineering）· Sam Altman（one-person company）· METR（arXiv 2507.09089）· HackerNews · GitHub · GTLC 官网。</p>
+    <p>实战来源：Claude Code 文档（code.claude.com/docs）· Codex 文档（developers.openai.com/codex）· AGENTS.md · EveryInc/compound-engineering-plugin · Simon Willison / Drew Breunig / Harper Reed / Addy Osmani。</p>
     <p>批判性精读与多源核实由 Claude Code 五路并行子 Agent 完成（一手溯源 / X / GitHub / HackerNews / 中文圈）。</p>
   </div>
 </footer>
@@ -376,7 +495,7 @@
 
     {q:'关于「多 Agent 编排」，Anthropic 官方《Building Effective Agents》的立场其实是？',
      opts:['能编排越多 Agent 越好','单 Agent 能覆盖约 80% 场景，能不上多 Agent 就别上，避免过度工程化','多 Agent 是唯一正确的生产架构','Agent 不如预定义 workflow'],
-     a:1,anchor:'#evidence',tech:'§4 硬证据',
+     a:1,anchor:'#evidence',tech:'§5 硬证据',
      ok:'对。这正是对文章「上来就编排 6 个 Agent」叙事的重要对冲——官方主张「少即是多」，多 Agent 虽在研究评测上高 90.2%，但 token 成本约是对话的 15×。',
      no:'Anthropic 官方主张「少即是多」：单 Agent 覆盖约 80% 场景，能不上多 Agent 就别上。多 Agent 更强（+90.2%）但也更贵（约 15× token），不是无脑越多越好。'},
 
@@ -388,13 +507,13 @@
 
     {q:'关于「AI 让开发者更快」，目前唯一接近严谨的对照实验（METR RCT）结论是？',
      opts:['客观提速约 24%，与开发者预期一致','客观提速约 20%','客观上反而慢了约 19%，尽管开发者自以为更快了','没有可测量的差异'],
-     a:2,anchor:'#evidence',tech:'§4 硬证据',
+     a:2,anchor:'#evidence',tech:'§5 硬证据',
      ok:'对。METR（arXiv 2507.09089）：开发者事前预测提速 24%、事后自估 20%，实测却慢了 19%。这是整场讨论里唯一接近科学方法的数据，且方向与炒作相反。',
      no:'METR 随机对照实验测出的是「慢了约 19%」——而且开发者主观以为自己快了 20%。主观体感与客观测量的背离，正是这条证据的价值。'},
 
     {q:'对「OPC / 一人独角兽」，最有分量的质疑是什么？',
      opts:['AI 还不够便宜','一个人打字太慢','十亿估值绕不开销售、信任与法律责任，而这些 AI 接不住','没有足够的多 Agent 框架可用'],
-     a:2,anchor:'#duel',tech:'§3 支持 vs 质疑',
+     a:2,anchor:'#duel',tech:'§4 支持 vs 质疑',
      ok:'对。核心质疑是「能委派权力，但没法把法律与道德责任委派给 AI」；十亿估值绕不开销售团队与客户信任。最火的 Medvi 案例还被拆穿是营销引流站，连 Altman 都改口说「10 人」。',
      no:'最硬的质疑不在算力或速度，而在「人要担的那部分」——销售、客户信任、法律/道德责任，AI 接不住。这也是 HN 拆一人独角兽叙事的主线。'},
 
@@ -406,9 +525,27 @@
 
     {q:'核实文章来源后，最准确的结论是？',
      opts:['会议和嘉宾都是虚构的','会议、嘉宾真实，但官方日期是 2026-06-27，与文章暗示的「上周六/7 月」对不上','作者彭超的实名和履历都已在工商记录核实','整篇文章不可信'],
-     a:1,anchor:'#verify',tech:'§5 核实',
+     a:1,anchor:'#verify',tech:'§6 核实',
      ok:'对。GTLC 杭州站与三位嘉宾经官网逐字核实属实（真实来源）；但官方日期是 06-27、非 7 月，「上周六」不准确。作者背后是真 AI 产品公司（OneOneTalk），但「彭超」实名在公开渠道查不到。',
-     no:'会议和嘉宾是真的（GTLC 官网可核对），瑕疵只在时间：官方是 2026-06-27，非文章暗示的 7 月。作者有真实产品背书，但「彭超」实名无法在工商/应用记录里确证。'}
+     no:'会议和嘉宾是真的（GTLC 官网可核对），瑕疵只在时间：官方是 2026-06-27，非文章暗示的 7 月。作者有真实产品背书，但「彭超」实名无法在工商/应用记录里确证。'},
+
+    {q:'（实战）在 Claude Code 里，要「硬保证」某个目录（如 migrations）绝不被修改，最可靠的做法是？',
+     opts:['在 CLAUDE.md 里写一句「never touch migrations/」','写一条 permissions 的 deny 规则，或一个 PreToolUse hook','切到 plan 模式看看','每次口头提醒它小心'],
+     a:1,anchor:'#gcc-c2',tech:'§3 Constraints',
+     ok:'对。CLAUDE.md 是上下文/建议，模型可能违背；deny 规则和 PreToolUse hook 是确定性护栏——「必须每次发生、零例外」，deny 连 bypass 模式都拦得住。',
+     no:'写进 CLAUDE.md 只是「建议」，模型可能违背。要「硬保证」得用 permissions 的 deny 规则或 PreToolUse hook（确定性护栏）——deny 在所有模式含 bypass 都生效。'},
+
+    {q:'（实战）Codex 的护栏是两个正交维度。官方推荐的「安全默认」是哪一组？',
+     opts:['full-auto + danger-full-access','approval_policy=on-request + sandbox_mode=workspace-write，且联网默认关','approval_policy=never + sandbox_mode=read-only','老的 suggest 模式'],
+     a:1,anchor:'#gcc-c2',tech:'§3 Constraints',
+     ok:'对。on-request + workspace-write = 沙箱内自主、越界（联网/出工作区）才问；联网默认关，需 network_access=true 才放开。suggest/auto-edit/full-auto 是已废弃的旧命名。',
+     no:'官方安全默认是 approval_policy=on-request + sandbox_mode=workspace-write（沙箱内自主、越界才问，联网默认关）。full-auto/suggest 是废弃旧词；never+read-only 是 CI 或纯只读的极端档。'},
+
+    {q:'（实战）作者说的「把结果写回 Context 形成复利」，落到 Claude Code 上最具体的做法是？',
+     opts:['每次都开新会话重头讲一遍','把踩坑/评审结论写回 CLAUDE.md 与 docs/solutions，并把缺陷升级成 lint 规则或 review agent','把所有历史对话都留在上下文里不清空','只依赖模型自己的记忆'],
+     a:1,anchor:'#practice',tech:'§3 Compound Loop',
+     ok:'对。这正是 Every 的 compound engineering：事实写回 CLAUDE.md、可搜索解法进 docs/solutions（带 frontmatter）、一个 bug 升级成 lint 规则 + review agent 的 prompt——「每个 bug 变成永久教训」。',
+     no:'复利不是靠模型记忆或堆历史上下文（那会 context rot）。做法是把踩坑/评审写回 CLAUDE.md 与 docs/solutions、把缺陷升级成 lint 规则或 review agent，让系统下次自动 catch。'}
   ];
   var root=document.getElementById('quizRoot'),pill=document.getElementById('scorePill'),verdict=document.getElementById('verdict');
   var answered=0,correct=0;
@@ -453,7 +590,8 @@
         '<p>一句话总结这篇文章：</p><ul>'+
         '<li><b>方向对</b>：Context 比 Prompt 重要、Plan 化、多 Agent 编排、复利式工程、一人公司趋势——都有一手来源支撑。</li>'+
         '<li><b>但缺实证</b>：GCC、商业大脑、五步命名、Clawmancer 是自造包装；原文没引任何数字（Anthropic 90.2%/15×、METR −19% 它都没提）。</li>'+
-        '<li><b>该怎么用</b>：拿它当「记忆抓手」可以，但真要落地，回到一手来源（Anthropic context engineering / building effective agents）和反面证据（METR、HN），自己称重。</li></ul>';
+        '<li><b>该怎么用</b>：拿它当「记忆抓手」可以，但真要落地，回到一手来源（Anthropic context engineering / building effective agents）和反面证据（METR、HN），自己称重。</li>'+
+        '<li><b>更要动手</b>：把 GCC 落成 plan mode + CLAUDE.md/AGENTS.md + deny 规则/hook，把复利落成写回 docs/solutions——概念记住不算数，敲进工作流才算（见 §3）。</li></ul>';
     }else{
       verdict.className='verdict show retry';
       verdict.innerHTML='<h3>Not yet — 还差 '+(QS.length-correct)+' 题</h3>'+
