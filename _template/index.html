@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="【一句话描述本页：主题 + 心智模型 + 模板 + 自测】">
+<title>【中文标题】 · 【English Name】</title>
+<script>/* 冻结层：首屏前应用已保存主题，避免闪烁 */
+try{var t=localStorage.getItem('zb-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  /* ============ 冻结层：token 全集，别删别改名（改动需回写 CONTENT-SPEC.md） ============ */
+  :root{
+    --paper:#F3F5F1; --paper-raised:#FBFCFA; --ink:#20302E; --ink-soft:#5A6B67;
+    --ink-faint:#8B9995; --line:#D8DED8; --contour:#B5A488; --survey:#28599C;
+    --survey-soft:#DCE6F4; --marker:#B4452B; --good:#3D7A4E; --good-soft:#DFEDE2;
+    --bad-soft:#F4E2DC; --mono-bg:#E9EEE9;
+    --shadow:0 1px 2px rgba(32,48,46,.06),0 6px 20px rgba(32,48,46,.07);
+    --serif:"Songti SC","Georgia","Times New Roman",serif;
+    --sans:"PingFang SC",-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    --mono:"SF Mono","Menlo","Consolas",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#151B1B; --paper-raised:#1D2525; --ink:#DCE3DF; --ink-soft:#96A5A0;
+      --ink-faint:#687571; --line:#2E3938; --contour:#6E6350; --survey:#7FA9E4;
+      --survey-soft:#22334C; --marker:#D97B62; --good:#7FB98E; --good-soft:#243B2B;
+      --bad-soft:#462921; --mono-bg:#111716;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#151B1B; --paper-raised:#1D2525; --ink:#DCE3DF; --ink-soft:#96A5A0;
+    --ink-faint:#687571; --line:#2E3938; --contour:#6E6350; --survey:#7FA9E4;
+    --survey-soft:#22334C; --marker:#D97B62; --good:#7FB98E; --good-soft:#243B2B;
+    --bad-soft:#462921; --mono-bg:#111716;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --paper:#F3F5F1; --paper-raised:#FBFCFA; --ink:#20302E; --ink-soft:#5A6B67;
+    --ink-faint:#8B9995; --line:#D8DED8; --contour:#B5A488; --survey:#28599C;
+    --survey-soft:#DCE6F4; --marker:#B4452B; --good:#3D7A4E; --good-soft:#DFEDE2;
+    --bad-soft:#F4E2DC; --mono-bg:#E9EEE9;
+    --shadow:0 1px 2px rgba(32,48,46,.06),0 6px 20px rgba(32,48,46,.07);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+  a{color:var(--survey)}
+
+  /* ---------- 冻结层：hero + 主题切换 ---------- */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding:72px 0 56px}
+  .hero svg.contours{position:absolute;inset:0;width:100%;height:100%;color:var(--contour);opacity:.28;pointer-events:none}
+  .hero .wrap{position:relative}
+  .theme-toggle{
+    position:absolute;top:16px;right:24px;z-index:2;font-family:var(--mono);font-size:12px;
+    border:1px solid var(--line);background:var(--paper-raised);color:var(--ink-soft);
+    border-radius:3px;padding:5px 11px;cursor:pointer;
+  }
+  .theme-toggle:hover{border-color:var(--survey);color:var(--survey)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--survey);margin:0 0 18px}
+  h1{font-family:var(--serif);font-size:clamp(34px,6vw,54px);line-height:1.2;margin:0 0 20px;text-wrap:balance;font-weight:700}
+  .thesis{max-width:38em;font-size:17.5px;color:var(--ink-soft);margin:0 0 8px}
+  .thesis strong{color:var(--ink)}
+  .credit{font-size:13.5px;color:var(--ink-faint);margin-top:20px}
+  .credit a{color:var(--ink-faint)}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .legend a{
+    font-family:var(--mono);font-size:12.5px;text-decoration:none;color:var(--ink-soft);
+    border:1px solid var(--line);background:var(--paper-raised);border-radius:3px;
+    padding:6px 12px;display:inline-flex;gap:8px;align-items:center;
+  }
+  .legend a:hover{border-color:var(--survey);color:var(--survey)}
+  .legend .dot{width:7px;height:7px;border-radius:50%;background:var(--survey)}
+
+  /* ---------- 冻结层：章节骨架 ---------- */
+  section{padding:60px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .sec-no{font-family:var(--mono);font-size:13px;color:var(--contour);letter-spacing:.1em}
+  h2{font-family:var(--serif);font-size:clamp(24px,3.6vw,32px);margin:0;text-wrap:balance}
+  .sec-lede{color:var(--ink-soft);max-width:42em;margin:10px 0 34px}
+  h3{font-family:var(--serif);font-size:20px;margin:36px 0 12px}
+
+  /* ---------- 冻结层：点选揭示范式（按钮组样式随主题自定，行为不变） ---------- */
+  .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:26px 0 6px}
+  @media(max-width:600px){.reveal-grid{grid-template-columns:1fr}}
+  .reveal{
+    text-align:left;font:inherit;color:inherit;cursor:pointer;
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:4px;
+    padding:18px 20px;transition:border-color .15s;
+  }
+  .reveal:hover,.reveal:focus-visible{border-color:var(--survey)}
+  .reveal[aria-pressed="true"]{border-color:var(--survey);box-shadow:inset 0 0 0 1px var(--survey)}
+  .reveal .r-tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;color:var(--survey);text-transform:uppercase}
+  .reveal h4{font-family:var(--serif);font-size:17.5px;margin:6px 0 4px}
+  .reveal p{margin:0;font-size:14px;color:var(--ink-soft);line-height:1.6}
+  .reveal-answer{
+    border-left:3px solid var(--survey);background:var(--survey-soft);
+    border-radius:0 4px 4px 0;padding:14px 18px;margin-top:14px;font-size:14.5px;min-height:52px;
+  }
+  .reveal-answer em{font-style:normal;color:var(--survey);font-weight:600}
+
+  /* ---------- 自由层（可选）：可复制模板区。不用就整块删掉 ---------- */
+  .promptbox{position:relative;margin:0 0 14px}
+  .promptbox pre{
+    margin:0;background:var(--mono-bg);border:1px solid var(--line);border-radius:4px;
+    padding:14px 16px;padding-right:88px;font-family:var(--mono);font-size:13px;line-height:1.6;
+    white-space:pre-wrap;overflow-x:auto;color:var(--ink);
+  }
+  .copy{
+    position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11.5px;
+    border:1px solid var(--line);background:var(--paper-raised);color:var(--ink-soft);
+    border-radius:3px;padding:4px 10px;cursor:pointer;
+  }
+  .copy:hover{border-color:var(--survey);color:var(--survey)}
+  .copy.done{border-color:var(--good);color:var(--good)}
+  .prompt-zh{font-size:13.5px;color:var(--ink-soft);margin:-6px 0 14px;padding:4px 0 4px 14px;border-left:2px solid var(--line);line-height:1.7}
+  .prompt-zh b{color:var(--ink-faint);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em}
+
+  /* ---------- 冻结层：来源书架 ---------- */
+  .shelf{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+  .shelf li{
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:4px;
+    padding:14px 18px;font-size:14.5px;color:var(--ink-soft);
+  }
+  .shelf b{color:var(--ink);font-family:var(--serif);font-size:15.5px;display:block;margin-bottom:2px}
+  .shelf .src{display:block;margin-top:6px;font-family:var(--mono);font-size:12.5px}
+  .shelf .date{color:var(--ink-faint);font-family:var(--mono);font-size:12px;margin-left:8px}
+
+  /* ---------- 冻结层：quiz（引擎行为别改） ---------- */
+  .quiz-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+  .quiz-card .q-no{font-family:var(--mono);font-size:12px;color:var(--contour);letter-spacing:.1em}
+  .quiz-card p.q{font-size:15.5px;margin:8px 0 14px;font-weight:600}
+  .opts{display:grid;gap:8px}
+  .opt{
+    text-align:left;font:inherit;font-size:14.5px;line-height:1.55;color:var(--ink);
+    background:transparent;border:1px solid var(--line);border-radius:4px;
+    padding:10px 14px;cursor:pointer;transition:border-color .12s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--survey)}
+  .opt:disabled{cursor:default;opacity:.92}
+  .opt.right{border-color:var(--good);background:var(--good-soft)}
+  .opt.wrong{border-color:var(--marker);background:var(--bad-soft)}
+  .fb{display:none;margin-top:12px;font-size:14px;border-radius:4px;padding:12px 15px;line-height:1.6}
+  .fb.show{display:block}
+  .fb.ok{background:var(--good-soft);border-left:3px solid var(--good)}
+  .fb.no{background:var(--bad-soft);border-left:3px solid var(--marker)}
+  .fb a{font-weight:600}
+  .verdict{display:none;border-radius:5px;padding:24px;margin-top:26px}
+  .verdict.show{display:block}
+  .verdict.pass{background:var(--good-soft);border:1px solid var(--good)}
+  .verdict.retry{background:var(--bad-soft);border:1px solid var(--marker)}
+  .verdict h3{margin:0 0 10px;font-family:var(--serif)}
+  .verdict ul{margin:8px 0 0;padding-left:20px;font-size:14.5px}
+  .verdict li{margin-bottom:5px}
+  .reset{
+    font:inherit;font-size:14px;margin-top:14px;cursor:pointer;
+    border:1px solid var(--line);background:var(--paper-raised);color:var(--ink);
+    border-radius:4px;padding:8px 18px;
+  }
+  .reset:hover{border-color:var(--survey);color:var(--survey)}
+  .score-rail{position:sticky;bottom:14px;display:flex;justify-content:center;pointer-events:none;margin-top:20px}
+  .score-pill{
+    pointer-events:auto;font-family:var(--mono);font-size:12.5px;
+    background:var(--ink);color:var(--paper);border-radius:99px;padding:7px 18px;box-shadow:var(--shadow);
+  }
+
+  footer{padding:44px 0 64px;color:var(--ink-faint);font-size:13.5px}
+  footer p{margin:4px 0}
+  footer a{color:var(--ink-faint)}
+</style>
+</head>
+<body>
+
+<!-- ============ 冻结层：hero 骨架。eyebrow 从受控词表选：Field Guide（默认）/ Field Manual / Critical Read ============ -->
+<header class="hero">
+  <svg class="contours" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1">
+    <ellipse cx="720" cy="90" rx="300" ry="130"/>
+    <ellipse cx="720" cy="90" rx="240" ry="100"/>
+    <ellipse cx="720" cy="90" rx="180" ry="72"/>
+    <ellipse cx="720" cy="90" rx="120" ry="46"/>
+    <ellipse cx="720" cy="90" rx="65" ry="24"/>
+    <ellipse cx="120" cy="360" rx="260" ry="110"/>
+    <ellipse cx="120" cy="360" rx="195" ry="80"/>
+    <ellipse cx="120" cy="360" rx="130" ry="52"/>
+    <ellipse cx="120" cy="360" rx="70" ry="27"/>
+  </svg>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换明暗主题">◐</button>
+  <div class="wrap">
+    <p class="eyebrow">Field Guide · 【中文副题】</p>
+    <h1>【主标题，可断行】</h1>
+    <p class="thesis">【论点段：这页解决什么问题，<strong>核心主张加粗</strong>。】</p>
+    <p class="credit">【整理自谁的什么资料，带一手链接与日期。】</p>
+    <nav class="legend" aria-label="页面导航">
+      <a href="#model"><span class="dot"></span>心智模型</a>
+      <a href="#body1"><span class="dot"></span>【正文章节】</a>
+      <a href="#shelf"><span class="dot"></span>来源书架</a>
+      <a href="#quiz"><span class="dot"></span><span id="quizNavLabel">自测</span></a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ 冻结层：§1 必须是心智模型 ============ -->
+<section id="model">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§1</span><h2>【心智模型标题】</h2></div>
+    <p class="sec-lede">【一段导语。下面的点选揭示是可选交互范式：button + aria-pressed，样式可随主题重造。】</p>
+    <div class="reveal-grid" role="group" aria-label="【组名】">
+      <button class="reveal" data-a="【点开后显示的答案，可用 <em>强调</em>。】" aria-pressed="false">
+        <span class="r-tag">Tag A</span>
+        <h4>【选项一】</h4>
+        <p>【一句说明。】</p>
+      </button>
+      <button class="reveal" data-a="【答案二。】" aria-pressed="false">
+        <span class="r-tag">Tag B</span>
+        <h4>【选项二】</h4>
+        <p>【一句说明。】</p>
+      </button>
+    </div>
+    <div class="reveal-answer" id="revealAnswer">☝ 点一个看解释。</div>
+  </div>
+</section>
+
+<!-- ============ 自由层：正文章节 §2…§N-2，组件形态随主题发明。 ============ -->
+<section id="body1">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§2</span><h2>【正文章节标题】</h2></div>
+    <p class="sec-lede">【导语。】</p>
+
+    <!-- 可选：可复制模板。外来英文 prompt 保留原文 + 中文大意；自产中文模板直接中文、删掉 prompt-zh 段。不用模板就删整块。 -->
+    <div class="promptbox"><pre>【English prompt verbatim, or 自产中文模板正文】</pre><button class="copy" type="button">复制</button></div>
+    <p class="prompt-zh"><b>中文大意</b><br>【英文 prompt 的中文大意；自产中文模板删掉本段。】</p>
+  </div>
+</section>
+
+<!-- ============ 冻结层：来源书架 = 倒数第二节。一手来源必须带日期。 ============ -->
+<section id="shelf">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§3</span><h2>来源书架：每份资料最值得记的一件事</h2></div>
+    <p class="sec-lede">不必都读。每条只记一件「这家独有」的事——想深入哪个再点进去。</p>
+    <ul class="shelf">
+      <li><b>【来源名】</b>【它独有的一件事。】<span class="src"><a href="https://example.com" rel="noopener">example.com/path</a><span class="date">2026-01-15</span></span></li>
+      <li><b>【来源名】</b>【它独有的一件事。】<span class="src"><a href="https://example.com" rel="noopener">example.com/path</a><span class="date">核对于 2026-07</span></span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 冻结层：quiz 永远是最后一节。题数只写在 JS 的 QS 数组里。 ============ -->
+<section id="quiz">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§4</span><h2>自测：通过才算学会</h2></div>
+    <p class="sec-lede">场景题，答错会告诉你去重读哪一节。全对才算通过。</p>
+    <div id="quizRoot"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="score-rail"><span class="score-pill" id="scorePill"></span></div>
+  </div>
+</section>
+
+<!-- ============ 冻结层：footer 首行返回主页（相对路径）。姊妹篇互链放这里（双向）。 ============ -->
+<footer>
+  <div class="wrap">
+    <p><a href="../">← 返回学习主页</a></p>
+    <p>【原文/一手来源一句话署名。】</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* ---------- 冻结层：手动主题切换（localStorage 键 zb-theme） ---------- */
+  var rootEl=document.documentElement,tt=document.getElementById('themeToggle');
+  function curTheme(){
+    var s=rootEl.getAttribute('data-theme');
+    if(s)return s;
+    return (window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  }
+  function paintToggle(){tt.textContent=curTheme()==='dark'?'☀ 亮色':'☾ 暗色'}
+  tt.addEventListener('click',function(){
+    var next=curTheme()==='dark'?'light':'dark';
+    rootEl.setAttribute('data-theme',next);
+    try{localStorage.setItem('zb-theme',next)}catch(e){}
+    paintToggle();
+  });
+  paintToggle();
+
+  /* ---------- 冻结层：点选揭示 ---------- */
+  var reveals=document.querySelectorAll('.reveal');
+  var rAns=document.getElementById('revealAnswer');
+  reveals.forEach(function(b){
+    b.addEventListener('click',function(){
+      reveals.forEach(function(o){o.setAttribute('aria-pressed','false')});
+      b.setAttribute('aria-pressed','true');
+      rAns.innerHTML=b.getAttribute('data-a');
+    });
+  });
+
+  /* ---------- 自由层（可选）：复制按钮。没有模板区可整段删。 ---------- */
+  document.querySelectorAll('.promptbox').forEach(function(box){
+    var btn=box.querySelector('.copy'),pre=box.querySelector('pre');
+    btn.addEventListener('click',function(){
+      var t=pre.textContent;
+      function done(){btn.textContent='已复制 ✓';btn.classList.add('done');
+        setTimeout(function(){btn.textContent='复制';btn.classList.remove('done')},1600);}
+      function fallback(){
+        var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);
+        ta.select();try{document.execCommand('copy');done()}catch(e){}
+        document.body.removeChild(ta);
+      }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(t).then(done,function(){fallback()});
+      }else{fallback()}
+    });
+  });
+
+  /* ---------- 冻结层：quiz 引擎。题目只改 QS 数组；行为（全对通过/错题锚点/重置）别改。 ---------- */
+  var QS=[
+    {q:'【场景题干？】',
+     opts:['【选项 A】','【选项 B（正确）】','【选项 C】','【选项 D】'],
+     a:1,anchor:'#model',tech:'§1 【小节名】',
+     ok:'对。【答对讲解。】',
+     no:'【答错讲解，说清为什么。】'},
+    {q:'【场景题干二？】',
+     opts:['【选项 A（正确）】','【选项 B】','【选项 C】','【选项 D】'],
+     a:0,anchor:'#body1',tech:'§2 【小节名】',
+     ok:'对。【答对讲解。】',
+     no:'【答错讲解。】'}
+  ];
+  var root=document.getElementById('quizRoot'),pill=document.getElementById('scorePill'),verdict=document.getElementById('verdict');
+  var navLabel=document.getElementById('quizNavLabel');
+  if(navLabel)navLabel.textContent='自测（'+QS.length+' 题）';
+  var answered=0,correct=0;
+  function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+  function build(){
+    answered=0;correct=0;root.innerHTML='';verdict.className='verdict';verdict.innerHTML='';
+    pill.textContent='0 / '+QS.length+' 已作答';
+    QS.forEach(function(item,qi){
+      var card=document.createElement('div');card.className='quiz-card';
+      var h='<span class="q-no">QUESTION '+String(qi+1).padStart(2,'0')+' · '+esc(item.tech)+'</span>'+
+            '<p class="q">'+esc(item.q)+'</p><div class="opts">';
+      item.opts.forEach(function(o,oi){
+        h+='<button class="opt" type="button" data-q="'+qi+'" data-o="'+oi+'">'+esc(o)+'</button>';
+      });
+      h+='</div><div class="fb"></div>';
+      card.innerHTML=h;root.appendChild(card);
+    });
+    root.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var qi=+btn.getAttribute('data-q'),oi=+btn.getAttribute('data-o');
+        var item=QS[qi],card=btn.closest('.quiz-card');
+        var opts=card.querySelectorAll('.opt'),fb=card.querySelector('.fb');
+        opts.forEach(function(o){o.disabled=true});
+        opts[item.a].classList.add('right');
+        answered++;
+        if(oi===item.a){
+          correct++;fb.className='fb show ok';
+          fb.innerHTML='✓ '+esc(item.ok);
+        }else{
+          btn.classList.add('wrong');fb.className='fb show no';
+          fb.innerHTML='✗ '+esc(item.no)+' <a href="'+item.anchor+'">重读 '+esc(item.tech)+' →</a>';
+        }
+        pill.textContent=correct+' 对 / '+answered+' 已答 / 共 '+QS.length+' 题';
+        if(answered===QS.length)finish();
+      });
+    });
+  }
+  function finish(){
+    if(correct===QS.length){
+      verdict.className='verdict show pass';
+      verdict.innerHTML='<h3>✓ Cleared — 你已经掌握这套方法</h3>'+
+        '<p>接下来把它变成肌肉记忆，落地清单：</p><ul>'+
+        '<li>【落地动作一】</li>'+
+        '<li>【落地动作二】</li></ul>';
+    }else{
+      verdict.className='verdict show retry';
+      verdict.innerHTML='<h3>Not yet — 还差 '+(QS.length-correct)+' 题</h3>'+
+        '<p>按上面错题里的链接回去重读对应小节，然后重考。不过关，不算学会。</p>'+
+        '<button class="reset" type="button" id="retryBtn">重置测验</button>';
+      var rb=document.getElementById('retryBtn');
+      if(rb)rb.addEventListener('click',function(){build();document.getElementById('quiz').scrollIntoView();});
+    }
+  }
+  build();
+})();
+</script>
+
+</body>
+</html>
