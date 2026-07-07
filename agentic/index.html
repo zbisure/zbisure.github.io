@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="《Agentic 之道》（彭超/ChaoGeek）的批判性精读：把每个概念对回一手出处（Anthropic、Karpathy、Every、Sam Altman），分清复述与自造，并用 METR、Anthropic 多 Agent 实测等硬证据做支持/质疑两面对冲。">
-<title>Agentic 之道 · 正本清源</title>
+<meta name="description" content="Agentic 开发作战手册：读完 Addy Osmani、superpowers、compound engineering、spec-kit/OpenSpec/BMAD、gstack 等 12 份一线实践后，逐点拍板出的一套可落地个人体系——5 条业内共识、5 个决策点、L0/L1/L2 两轴路由、可复制模板（CLAUDE.md/反借口表/踩坑 pattern/ADR）与 8 题自测。">
+<title>Agentic 开发作战手册</title>
 <style>
   :root{
     --paper:#F3F5F1; --paper-raised:#FBFCFA; --ink:#20302E; --ink-soft:#5A6B67;
@@ -76,8 +76,40 @@
   .sec-lede{color:var(--ink-soft);max-width:42em;margin:10px 0 34px}
   h3{font-family:var(--serif);font-size:20px;margin:36px 0 12px}
 
-  /* spine (主线) */
-  .spine{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:26px 0 6px}
+  /* consensus list */
+  .ev{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:12px}
+  .ev li{background:var(--paper-raised);border:1px solid var(--line);border-radius:4px;
+    padding:16px 18px 16px 58px;position:relative;font-size:14.5px;color:var(--ink-soft)}
+  .ev li::before{content:"▲";position:absolute;left:20px;top:16px;color:var(--contour);font-size:13px}
+  .ev b{color:var(--ink);display:block;font-size:15.5px;margin-bottom:3px;font-family:var(--serif)}
+  .ev .src{display:block;margin-top:6px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint)}
+
+  /* decision cards */
+  .gcc{background:var(--paper-raised);border:1px solid var(--line);border-left:3px solid var(--survey);border-radius:5px;box-shadow:var(--shadow);margin-bottom:18px;padding:20px 22px 16px}
+  .gcc-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:6px}
+  .gcc-letter{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--survey);line-height:1;flex:none;width:34px;text-align:center}
+  .gcc-head h4{font-family:var(--serif);font-size:18.5px;margin:0 0 3px;text-wrap:balance}
+  .gcc-sub{margin:0;font-size:13.5px;color:var(--ink-soft)}
+  .do{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:9px}
+  .do li{padding-left:18px;position:relative;font-size:14px;line-height:1.64;color:var(--ink-soft)}
+  .do li::before{content:"▸";position:absolute;left:0;top:0;color:var(--survey)}
+  .do li b{color:var(--ink)}
+  .verdict-strip{margin:14px 0 0;padding:12px 16px;border-left:3px solid var(--good);background:var(--good-soft);border-radius:0 4px 4px 0;font-size:14.5px}
+  .verdict-strip b{font-family:var(--serif)}
+  .caveat{margin:10px 0 0;padding:8px 14px;border-left:3px solid var(--contour);font-size:13.5px;color:var(--ink-soft);font-style:italic}
+  .gcc-src{margin:12px 0 0;padding-top:10px;border-top:1px dashed var(--line);font-size:12px;font-family:var(--mono);color:var(--ink-faint);line-height:1.9}
+  .gcc-src a{color:var(--ink-faint)}
+
+  /* tables */
+  .tbl-wrap{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14px;background:var(--paper-raised);min-width:560px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;line-height:1.55}
+  th{font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--ink-soft);text-transform:uppercase;background:var(--mono-bg)}
+  td b{color:var(--survey)}
+  .lv{font-family:var(--mono);font-weight:700;color:var(--survey);white-space:nowrap}
+
+  /* route triage interactive */
+  .spine{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:26px 0 6px}
   @media(max-width:640px){.spine{grid-template-columns:1fr 1fr}}
   .spine button{
     text-align:left;font:inherit;color:inherit;cursor:pointer;position:relative;
@@ -87,81 +119,26 @@
   .spine button:hover,.spine button:focus-visible{border-color:var(--survey)}
   .spine button[aria-pressed="true"]{border-color:var(--survey);box-shadow:inset 0 0 0 1px var(--survey)}
   .spine .s-no{font-family:var(--mono);font-size:11px;color:var(--contour)}
-  .spine .s-name{font-family:var(--serif);font-size:16px;display:block;margin-top:3px}
-  .spine .s-en{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);display:block;margin-top:2px}
+  .spine .s-name{font-size:14px;display:block;margin-top:3px;line-height:1.5}
   .spine-answer{border-left:3px solid var(--survey);background:var(--survey-soft);
     border-radius:0 4px 4px 0;padding:14px 18px;margin-top:16px;font-size:14.5px;min-height:52px}
   .spine-answer em{font-style:normal;color:var(--survey);font-weight:600}
 
-  /* provenance cards (正本清源) */
-  .prov{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;
-    box-shadow:var(--shadow);margin-bottom:16px;padding:18px 22px 16px}
-  .prov-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px;margin-bottom:10px}
-  .prov-head h4{font-family:var(--serif);font-size:19px;margin:0}
-  .vchip{font-size:11px;font-family:var(--mono);border-radius:99px;padding:2px 11px;letter-spacing:.04em;margin-left:auto;white-space:nowrap;border:1px solid}
-  .vchip.real{color:var(--good);border-color:var(--good);background:var(--good-soft)}
-  .vchip.mix{color:var(--survey);border-color:var(--survey);background:var(--survey-soft)}
-  .vchip.coined{color:var(--marker);border-color:var(--marker);background:var(--bad-soft)}
-  .prov p{margin:0 0 8px;font-size:14.5px}
-  .prov .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-faint);text-transform:uppercase;margin-right:6px}
-  .prov .prov-claim{color:var(--ink-soft)}
-  .prov .prov-src{color:var(--ink)}
-  .prov .prov-note{margin:0;padding:8px 0 0;border-top:1px dashed var(--line);color:var(--ink-soft);font-size:13.5px;font-style:italic}
-
-  /* balance (支持 vs 质疑) */
-  .duel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}
-  @media(max-width:640px){.duel{grid-template-columns:1fr}}
-  .duel .cell{border:1px solid var(--line);border-radius:4px;padding:14px 16px;background:var(--paper-raised);font-size:14px;line-height:1.6}
-  .duel .for{border-left:3px solid var(--good)}
-  .duel .against{border-left:3px solid var(--marker)}
-  .duel .cell b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
-  .duel .for b{color:var(--good)}
-  .duel .against b{color:var(--marker)}
-  .duel-topic{font-family:var(--serif);font-size:16.5px;margin:24px 0 0}
-
-  /* evidence anchors */
-  .ev{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:12px}
-  .ev li{background:var(--paper-raised);border:1px solid var(--line);border-radius:4px;
-    padding:16px 18px 16px 58px;position:relative;font-size:14.5px;color:var(--ink-soft)}
-  .ev li::before{content:"▲";position:absolute;left:20px;top:16px;color:var(--contour);font-size:13px}
-  .ev b{color:var(--ink);display:block;font-size:15.5px;margin-bottom:3px;font-family:var(--serif)}
-  .ev .num{color:var(--marker);font-weight:700;font-style:normal}
-  .ev a{font-family:var(--mono);font-size:12.5px}
-
-  /* verify block */
-  .verify{margin-top:6px;padding:16px 18px;border-left:3px solid var(--good);background:var(--good-soft);border-radius:0 4px 4px 0;font-size:14.5px}
-  .verify.warn{border-left-color:var(--contour);background:transparent;border:1px dashed var(--contour)}
-  .verify b{font-family:var(--serif)}
+  /* templates */
+  .tpl{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);margin:0 0 22px;overflow:hidden}
+  .tpl-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .tpl-head h4{font-family:var(--serif);font-size:16.5px;margin:0;flex:1}
+  .tpl-head .where{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+  .copy-btn{font:inherit;font-family:var(--mono);font-size:12px;cursor:pointer;color:var(--survey);
+    background:transparent;border:1px solid var(--survey);border-radius:3px;padding:4px 12px;white-space:nowrap}
+  .copy-btn:hover{background:var(--survey-soft)}
+  .tpl pre{margin:0;padding:16px 18px;overflow-x:auto;background:var(--mono-bg);
+    font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--ink)}
+  .tpl-note{padding:10px 16px;font-size:13px;color:var(--ink-soft);border-top:1px dashed var(--line)}
+  code{font-family:var(--mono);font-size:.85em;background:var(--mono-bg);border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--ink);word-break:break-word}
 
   .keyline{margin:24px 0 0;border-left:3px solid var(--contour);padding:8px 16px;
     font-size:15px;color:var(--ink-soft);font-style:italic}
-
-  /* inline code */
-  code{font-family:var(--mono);font-size:.85em;background:var(--mono-bg);border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--ink);word-break:break-word}
-  /* GCC big cards */
-  .gcc{background:var(--paper-raised);border:1px solid var(--line);border-left:3px solid var(--survey);border-radius:5px;box-shadow:var(--shadow);margin-bottom:16px;padding:20px 22px 16px}
-  .gcc-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:6px}
-  .gcc-letter{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--survey);line-height:1;flex:none;width:34px;text-align:center}
-  .gcc-head h4{font-family:var(--serif);font-size:18.5px;margin:0 0 3px;text-wrap:balance}
-  .gcc-sub{margin:0;font-size:13.5px;color:var(--ink-soft)}
-  .gcc-src,.pract .gcc-src{margin:12px 0 0;padding-top:10px;border-top:1px dashed var(--line);font-size:12px;font-family:var(--mono);color:var(--ink-faint);line-height:1.9}
-  .gcc-src a{color:var(--ink-faint)}
-  /* practice cards */
-  .pract{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);margin-bottom:16px;padding:18px 22px 16px}
-  .pract-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:2px}
-  .pract-head h4{font-family:var(--serif);font-size:18px;margin:0;text-wrap:balance}
-  .pract-tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--survey);text-transform:uppercase;width:100%}
-  /* do lists */
-  .do{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:9px}
-  .do li{padding-left:18px;position:relative;font-size:14px;line-height:1.64;color:var(--ink-soft)}
-  .do li::before{content:"▸";position:absolute;left:0;top:0;color:var(--survey)}
-  .do li b{color:var(--ink)}
-  /* tool pills */
-  .tool{font-family:var(--mono);font-size:10px;letter-spacing:.02em;border-radius:99px;padding:1px 8px;border:1px solid;white-space:nowrap;position:relative;top:-1px}
-  .tool.cc{color:var(--survey);border-color:var(--survey);background:var(--survey-soft)}
-  .tool.cx{color:var(--marker);border-color:var(--marker);background:var(--bad-soft)}
-  .tool.any{color:var(--ink-faint);border-color:var(--ink-faint)}
-  #practice h3{font-family:var(--serif);font-size:20px;margin:34px 0 14px}
 
   /* quiz */
   .quiz-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
@@ -212,244 +189,289 @@
     <ellipse cx="120" cy="360" rx="70" ry="27"/>
   </svg>
   <div class="wrap">
-    <p class="eyebrow">Critical Read · 批判性精读</p>
-    <h1>Agentic 之道，<br>把每句主张放回一手来源</h1>
-    <p class="thesis">彭超《Agentic 之道》是一篇<strong>命名密集的观点文</strong>：主线「代码 → Context → Agent Plan → 商业大脑 → OPC」方向站得住，但概念多为<strong>重新命名而非新发现</strong>，且几乎<strong>不给实证</strong>。这一页做三件原文没做的事——把每个概念对回 Anthropic / Karpathy / Every / Sam Altman 的一手出处，给出在 Claude Code / Codex 上到底怎么做，并补上支持与质疑的两面证据。</p>
-    <p class="credit">原文：<a href="https://mp.weixin.qq.com/s/btMZaBifixsnlogTDAZJhg">《Agentic 之道》· 公众号 ChaoGeek（彭超）</a>，2026-07-06，GTLC 杭州站演讲整理版。本页结论由多源检索交叉核实（Anthropic 官方博客、X 原帖、Every、HackerNews、METR、GitHub、企查查/天眼查、GTLC 官网），每条附一手链接。</p>
+    <p class="eyebrow">Field Manual · 作战手册</p>
+    <h1>Agentic 开发作战手册</h1>
+    <p class="thesis">这一页不是又一篇概念综述。它是把 <strong>12 份一线实践</strong>（Addy Osmani、obra/superpowers、Every compound engineering、spec-kit / OpenSpec / BMAD、gstack、everything-claude-code、oh-my-claudecode、planning-with-files、mattpocock/skills）读完之后，<strong>逐个决策点拍板</strong>出来的一套个人 agentic 开发体系——5 条没人跳过的业内共识、5 个必须自己选的决策、一张 L0/L1/L2 路由表、可直接复制的模板，和 8 题通关自测。所有选型都已在本机落地跑通，不是纸上方案。</p>
+    <p class="credit">定稿于 2026-07-07：4 路并行子 Agent 调研 → 头脑风暴逐点拍板 → 当天落地（skill 治理、CLAUDE.md 重写、记忆桥、SDD 接入）。方法本身就是这套体系的第一次实战。</p>
     <nav class="legend" aria-label="页面导航">
-      <a href="#spine"><span class="dot"></span>主线全景</a>
-      <a href="#prov"><span class="dot"></span>七概念·正本清源</a>
-      <a href="#practice"><span class="dot"></span>落地实战·GCC 怎么做</a>
-      <a href="#duel"><span class="dot"></span>支持 vs 质疑</a>
-      <a href="#evidence"><span class="dot"></span>原文缺的硬证据</a>
-      <a href="#verify"><span class="dot"></span>会议与作者核实</a>
+      <a href="#consensus"><span class="dot"></span>共识层</a>
+      <a href="#decisions"><span class="dot"></span>五个决策点</a>
+      <a href="#route"><span class="dot"></span>两轴路由</a>
+      <a href="#templates"><span class="dot"></span>模板库</a>
+      <a href="#shelf"><span class="dot"></span>来源书架</a>
       <a href="#quiz"><span class="dot"></span>自测（8 题）</a>
     </nav>
   </div>
 </header>
 
-<section id="spine">
+<section id="consensus">
   <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§1</span><h2>先看主线：一条五段式脊椎</h2></div>
-    <p class="sec-lede">全文围绕一条演进链展开。点每一段，看它到底在说什么——以及它是不是原文自己的说法。</p>
-    <div class="spine" role="group" aria-label="Agentic 主线五段">
-      <button aria-pressed="false" data-a="传统抓手。作者的起点承认：<em>代码只是最先被改变的地方</em>，不是终点。这一段无争议。"><span class="s-no">01</span><span class="s-name">代码</span><span class="s-en">Code</span></button>
-      <button aria-pressed="false" data-a="全文最扎实的一段。<em>「Prompt 不是资产，Context 才是资产」</em>直接对应业界的 context engineering 转向（Tobi Lütke → Karpathy → Anthropic）。判断成立，见 §2。"><span class="s-no">02</span><span class="s-name">Context</span><span class="s-en">上下文</span></button>
-      <button aria-pressed="false" data-a="把一次性任务变成可重复生产系统。五步闭环里只有 <em>Compound Loop</em> 有 Every 的出处，其余四个名字是作者自造；底层动作 = Anthropic 的 plan-act-reflect。见 §2。"><span class="s-no">03</span><span class="s-name">Agent Plan</span><span class="s-en">规划系统</span></button>
-      <button aria-pressed="false" data-a="把团队经验蒸馏成「可执行的经验」。<em>「商业大脑」是作者的隐喻</em>，非行业术语——好听，但没有对应的一手定义或方法。见 §2。"><span class="s-no">04</span><span class="s-name">商业大脑</span><span class="s-en">Business Brain</span></button>
-      <button aria-pressed="false" data-a="终点：<em>一个人拥有一家 AI 公司（OPC）</em>。内核 = Sam Altman 2024 的「一人十亿美元公司」预测，但这是全文争议最大、被 HN 拆得最狠的一段。见 §3。"><span class="s-no">05</span><span class="s-name">OPC</span><span class="s-en">一人公司</span></button>
-    </div>
-    <div class="spine-answer" id="spineAnswer">☝ 点一段主线，看它的实质与出处判定。</div>
-    <p class="keyline">一句话总览：底层判断都能对应到真实的一手来源，方向没错；但「自造命名的密度」远高于「一手实证的密度」——这正是它读起来「有道理却模糊」的原因。</p>
-  </div>
-</section>
-
-<section id="prov">
-  <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§2</span><h2>七个概念，各归其位</h2></div>
-    <p class="sec-lede">每张卡三行：<b>文章怎么说 → 一手出处是谁 → 判定</b>。绿标=复述已有行业概念，蓝标=改名/包装，红标=作者自造、无一手对应。</p>
-
-    <article class="prov">
-      <div class="prov-head"><h4>Context 才是资产</h4><span class="vchip real">复述·已有概念</span></div>
-      <p class="prov-claim"><span class="lbl">文章说</span>Prompt 是一次性对话；Context（你是谁、产品、用户、规则、禁区、品味）才随时间越攒越厚，是真正的资产。</p>
-      <p class="prov-src"><span class="lbl">一手出处</span>「context engineering」由 Shopify CEO Tobi Lütke 带火（<a href="https://x.com/tobi/status/1935533422589399127">X · 2025-06-19</a>），Karpathy 放大定义（<a href="https://x.com/karpathy/status/1937902205765607626">X · 2025-06-25</a>），Anthropic 官方定义为 prompt engineering 的「自然演进」（<a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">2025-09-29</a>）。</p>
-      <p class="prov-note">判断成立，是全文最扎实的一段；「资产」的对偶句是作者的修辞包装。注意：Anthropic 说的是「演进」不是「取代」。</p>
-    </article>
-
-    <article class="prov">
-      <div class="prov-head"><h4>Vibe Coding 让你快，不让你强</h4><span class="vchip real">复述·已有概念</span></div>
-      <p class="prov-claim"><span class="lbl">文章说</span>Vibe Coding 像许愿机：没记忆、没积累、不好管理，适合尝鲜不适合长期产品。</p>
-      <p class="prov-src"><span class="lbl">一手出处</span>Karpathy 造词原帖（<a href="https://x.com/karpathy/status/1886192184808149383">X · 2025-02-02</a>）本就把它限定为「throwaway weekend projects（一次性周末项目）」，核心是「不看 diff、全部接受」。</p>
-      <p class="prov-note">准确转述。造词者本人早已给它划了「不适合生产」的边界，作者的批评与原意一致。</p>
-    </article>
-
-    <article class="prov">
-      <div class="prov-head"><h4>GCC — Goal / Context / Constraints</h4><span class="vchip coined">作者自造·无一手出处</span></div>
-      <p class="prov-claim"><span class="lbl">文章说</span>Agent 要同时立住三件事：Goal（去哪）、Context（知道什么）、Constraints（不能乱来），翻车多半是三缺一。</p>
-      <p class="prov-src"><span class="lbl">一手出处</span>查无此三元组的行业出处。精神上与 context engineering、Anthropic 的 agent 设计原则相关，但「GCC」这个缩写是作者的原创归纳。</p>
-      <p class="prov-note">作为记忆抓手不错、也没错，但要当成「作者的框架」而非行业共识来引用。</p>
-    </article>
-
-    <article class="prov">
-      <div class="prov-head"><h4>Plan 五步闭环 + Compound Loop</h4><span class="vchip mix">半自造·一步有出处</span></div>
-      <p class="prov-claim"><span class="lbl">文章说</span>五步：Context Scout → Co-spark → Multi-lens Lock → Guarded Flow → Compound Loop（把结果/坑/模板写回 Context 形成复利）。</p>
-      <p class="prov-src"><span class="lbl">一手出处</span>只有第五步有出处：<b>compound engineering</b> 由 Every 的 Kieran Klaassen 提出（<a href="https://every.to/source-code/my-ai-had-already-fixed-the-code-before-i-saw-it">every.to · 2025-08-18</a>），原循环是 Plan→Work→Review→<b>Compound</b>→Repeat。前四个名字是作者对通用 agent 流程的重新命名。</p>
-      <p class="prov-note">「写回形成复利」是真 idea 且有出处（改名不改实质）；其余四步命名无外部来源。</p>
-    </article>
-
-    <article class="prov">
-      <div class="prov-head"><h4>Clawmancer（1 Lead + 6 Execute Agent）</h4><span class="vchip mix">品牌化·内核非原创</span></div>
-      <p class="prov-claim"><span class="lbl">文章说</span>作者的日常工作流：1 个 Lead 负责拆解编排 + 6 个 Execute Agent 负责执行复盘。</p>
-      <p class="prov-src"><span class="lbl">一手出处</span>架构本体 = Anthropic 官方的 <b>orchestrator-worker / lead+subagent</b> 模式（<a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective Agents · 2024-12-19</a>、<a href="https://www.anthropic.com/engineering/multi-agent-research-system">Multi-agent Research · 2025-06-13</a>）。GitHub 与全网搜索「Clawmancer」<b>0 结果</b>——非公开项目。</p>
-      <p class="prov-note">「Clawmancer」是作者的私有命名（Claw 影射 Claude）；「6 个」是个人配置不是行业定数。技术内核是标准多 Agent 拓扑。</p>
-    </article>
-
-    <article class="prov">
-      <div class="prov-head"><h4>商业大脑</h4><span class="vchip coined">作者隐喻·非行业概念</span></div>
-      <p class="prov-claim"><span class="lbl">文章说</span>不是知识库（存东西），而是把知识、流程、品味、约束交给 Agent 反复运行的动态执行系统；让团队最贵的认知「不随人走」。</p>
-      <p class="prov-src"><span class="lbl">一手出处</span>无对应行业术语。相关的真实工程是持久记忆层（Mem0、Letta/MemGPT、Graphiti、Cognee）+ harness 里的 <span style="font-family:var(--mono);font-size:12.5px">CLAUDE.md</span>/结果回写。</p>
-      <p class="prov-note">「商业大脑」是好用的隐喻，但它没有定义、没有方法、没有一手出处——是全文最「概念」的一处。</p>
-    </article>
-
-    <article class="prov">
-      <div class="prov-head"><h4>OPC — One Person Company / 一人公司</h4><span class="vchip mix">概念有源·缩写自造·争议大</span></div>
-      <p class="prov-claim"><span class="lbl">文章说</span>不是一个人辛苦干十个人的活，而是一个人拥有一家 AI 公司；人负责方向/判断/品味，Agent 团队负责执行。</p>
-      <p class="prov-src"><span class="lbl">一手出处</span>内核 = Sam Altman「一人十亿美元公司」预测（<a href="https://www.youtube.com/watch?v=Q5vsEUgxt3E">访谈 · 2024-02</a>，<a href="https://fortune.com/2024/02/04/sam-altman-one-person-unicorn-silicon-valley-founder-myth/">Fortune 报道</a>）+ Paul Jarvis《Company of One》(2019)。Altman 未用「OPC」缩写。</p>
-      <p class="prov-note">概念有源，但这是全文<b>争议最大</b>的一段——见 §3 的质疑与 §4 的反面证据。</p>
-    </article>
-  </div>
-</section>
-
-<section id="practice">
-  <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§3</span><h2>落地实战：七概念 → Claude Code / Codex 怎么做</h2></div>
-    <p class="sec-lede">原文只说「要养 Context、要有 Plan」，没说在具体工具里到底敲什么。这一节把概念落到<b>命令、文件、flag</b>。一个巧合可当骨架：Codex 官方的四要素 prompt 模板 <code>Goal / Context / Constraints / Done-when</code>，几乎就是作者 GCC 的工程版——只多了一条「完成判据」。先把 GCC 三块逐一拆开。</p>
-
-    <article class="gcc" id="gcc-g">
-      <div class="gcc-head"><span class="gcc-letter">G</span><div><h4>Goal —— 先计划后写码，并给一个它自己能跑的完成判据</h4><p class="gcc-sub">把「目标清楚」变成两个动作：进 plan mode 出方案，给一个可自动验证的「done」。</p></div></div>
-      <ul class="do">
-        <li><span class="tool cc">Claude Code</span> <b>计划先行</b>：<code>Shift+Tab</code> 循环 <code>default → acceptEdits → plan</code>，或 <code>claude --permission-mode plan</code>，或单条前缀 <code>/plan</code>。官方工作流是四段 <b>Explore → Plan → Code → Commit</b>：先只读探查，再产出计划（<code>Ctrl+G</code> 可在编辑器里直接改计划），批准后才执行。</li>
-        <li><span class="tool any">判断</span> <b>什么时候跳过计划</b>：官方原则——「能一句话描述这个 diff，就别写 plan」。改 typo、加日志、重命名 → 直接做；方法不确定 / 跨多文件 / 不熟这段代码 → 先 plan。</li>
-        <li><span class="tool cc">Claude Code</span> <b>给可验证的「done」</b>：官方核心论断「Give Claude a check it can run」——把验收标准和用例直接写进 prompt（<code>write validateEmail; a@x.com→true, invalid→false; 实现后跑测试</code>），UI 改动让它<b>截图对比原图并列差异</b>。要它「亮证据」（测试输出／命令返回／截图），不接受「声称完成」。</li>
-        <li><span class="tool cx">Codex</span> <b>四要素 prompt</b>：Goal（做什么）／ Context（相关文件）／ Constraints（标准与边界）／ <b>Done-when</b>（如「测试通过、bug 不再复现」）。复杂任务先 <code>/plan</code>，接受前 <code>/review</code> 看 diff；按难度调 reasoning（<code>low/medium/high/xhigh</code>）。</li>
-        <li><span class="tool any">大特性</span> <b>让它反过来采访你</b>：先一问一答逼出规格再写码——「Interview me one question at a time … then write a complete spec to <code>SPEC.md</code>」，然后<b>开新会话</b>用干净上下文执行 spec。</li>
-      </ul>
-      <p class="gcc-src">来源：<a href="https://code.claude.com/docs/en/best-practices">Claude Code Best Practices</a> · <a href="https://developers.openai.com/codex/learn/best-practices">Codex Best Practices</a></p>
-    </article>
-
-    <article class="gcc" id="gcc-c1">
-      <div class="gcc-head"><span class="gcc-letter">C</span><div><h4>Context —— 把「懂你」写进文件，而不是每次重讲</h4><p class="gcc-sub">这就是原文「Context 才是资产」的落地：一个随项目沉淀的记忆文件 + 主动的上下文卫生。</p></div></div>
-      <ul class="do">
-        <li><span class="tool cc">Claude Code</span> <b><code>CLAUDE.md</code></b>：<code>/init</code> 生成初版。层级从宽到窄、窄者优先：用户级 <code>~/.claude/CLAUDE.md</code> → 项目级 <code>./CLAUDE.md</code>（提交 git 共享）→ 本地私有 <code>./CLAUDE.local.md</code>（gitignore）；<code>@path</code> 可导入其他文件。</li>
-        <li><span class="tool any">纪律</span> <b>放什么／不放什么</b>：放「agent 猜不到的构建/测试命令、与默认不同的代码风格、仓库约定、项目特有架构决策、环境坑」；不放「读代码就知道的、语言通用惯例、频繁变动的信息、『写干净代码』这种废话」。目标<b>每个文件 &lt; 200 行</b>——臃肿会让 agent 忽略真正重要的指令。逐行自问「删了它 agent 会不会犯错，不会就删」。</li>
-        <li><span class="tool cx">Codex</span> <b><code>AGENTS.md</code></b>（跨厂商开放标准，Codex／Cursor／Cline／Copilot 等 25+ 工具共读）：解析规则是「<b>离被改文件最近的那个胜出</b>」，分层合并 <code>~/.codex/AGENTS.md</code> → 仓库根 → 子目录。想同时喂 Claude Code 和 Codex，社区通行做法是把 <code>CLAUDE.md</code> 和 <code>AGENTS.md</code> 做成 symlink，一份内容两边生效。</li>
-        <li><span class="tool cc">Claude Code</span> <b>即时引用 & 沉淀</b>：<code>@文件</code> 让它先读再答；<code>/memory</code> 编辑记忆、auto memory 自动把纠正/偏好记进 <code>~/.claude/…/memory/</code>；只在相关时用的领域流程放 <b>Skills</b>（<code>.claude/skills/name/SKILL.md</code>），别塞进每次都加载的 CLAUDE.md；接外部系统用 <b>MCP</b>（<code>claude mcp add</code>），但官方说能用 CLI（<code>gh</code>／<code>aws</code>）就用 CLI，最省上下文。</li>
-        <li><span class="tool any">上下文卫生</span> <b>克制胜于堆量</b>：目标是「能达成结果的最小高信号 token 集」——窗口越长越出现 context rot（召回下降）。<code>/context</code> 看占用，不相关任务间 <code>/clear</code>，逼近上限用 <code>/compact 只保留 API 改动</code>。<b>同一问题纠正超过两次</b>，说明上下文已被失败方案污染——<code>/clear</code> 重开 + 写一条更好的 prompt，几乎总比在长会话里继续纠正强。</li>
-      </ul>
-      <p class="gcc-src">来源：<a href="https://code.claude.com/docs/en/memory">Claude Code Memory</a> · <a href="https://agents.md/">AGENTS.md</a> · <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic · Context Engineering</a> · <a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html">Breunig · How contexts fail</a></p>
-    </article>
-
-    <article class="gcc" id="gcc-c2">
-      <div class="gcc-head"><span class="gcc-letter">C</span><div><h4>Constraints —— 软约束写文件，硬约束写规则 / hook / sandbox</h4><p class="gcc-sub">关键认知：写进 CLAUDE.md 的边界是「建议」，模型可能违背；要「硬保证」得用权限规则、hook 或沙箱。</p></div></div>
-      <ul class="do">
-        <li><span class="tool cc">Claude Code</span> <b>权限模式</b>（<code>Shift+Tab</code> 切前三个）：<code>default</code>（只读免批、其余问）／ <code>acceptEdits</code>（工作区编辑免批）／ <code>plan</code>（纯只读）／ <code>dontAsk</code>（锁死，适合 CI）／ <code>bypassPermissions</code>（=<code>--dangerously-skip-permissions</code>，只在容器/VM 里用）。</li>
-        <li><span class="tool cc">Claude Code</span> <b>硬规则</b>：<code>settings.json</code> 的 <code>permissions</code> 三类——<code>allow</code> / <code>ask</code> / <code>deny</code>，语法按工具：<code>Bash(npm run test:*)</code>、<code>Edit(./src/**/*.ts)</code>、<code>Read(./.env)</code>。<b><code>deny</code> 在所有模式（含 bypass）都生效</b>，是最硬的边界。</li>
-        <li><span class="tool cc">Claude Code</span> <b>Hooks = 确定性护栏</b>（「必须每次发生、零例外」）：在 <code>.claude/settings.json</code> 配。<code>PreToolUse</code> 能<b>拦截</b>工具调用（退出码 2 反馈给 Claude），<code>Stop</code> 事件可强制「测试不过不许结束」。想「绝不改 migrations 目录」——写 deny 规则或 PreToolUse hook，别只写在 CLAUDE.md。</li>
-        <li><span class="tool cx">Codex</span> <b>两个正交维度</b>（旧的 suggest／auto-edit／full-auto 已废弃）：<code>approval_policy</code>（<code>untrusted</code> / <code>on-request</code> 默认 / <code>never</code>）× <code>sandbox_mode</code>（<code>read-only</code> / <code>workspace-write</code> 默认 / <code>danger-full-access</code>）。<b>安全默认 = workspace-write + on-request</b>：沙箱内自主、越界才问。</li>
-        <li><span class="tool cx">Codex</span> <b>联网默认关</b>：要放开得在 <code>[sandbox_workspace_write]</code> 设 <code>network_access=true</code>；CI／无人值守用 <code>codex exec</code> + <code>approval_policy="never"</code>，高危的 <code>danger-full-access</code> / <code>--yolo</code> 只进隔离环境。<code>~/.codex/config.toml</code> + profiles（<code>codex --profile strict</code>）管多套环境。</li>
-      </ul>
-      <p class="gcc-src">来源：<a href="https://code.claude.com/docs/en/permissions">Claude Code Permissions</a> · <a href="https://code.claude.com/docs/en/hooks">Hooks</a> · <a href="https://developers.openai.com/codex/concepts/sandboxing">Codex Sandboxing</a></p>
-    </article>
-
-    <h3>其余四概念，同样落到手上</h3>
-
-    <article class="pract">
-      <div class="pract-head"><span class="pract-tag">Vibe Coding 的解药</span><h4>怎么用 AI 快，又不在生产里翻车</h4></div>
-      <ul class="do">
-        <li><b>读 diff、别 Accept All</b>：Karpathy 本人对认真代码就逐行看 diff。长会话大 diff 用第 11 招（merge 前让它考你）收尾。</li>
-        <li><b>给能自跑的验证器</b>：测试 / build 退出码 / linter / 截图对比——有它循环自己闭合，没它「看起来做完」就是唯一信号，你被迫当人肉验证。</li>
-        <li><span class="tool cc">Claude Code</span> <b>对抗式复核</b>：收工前让一个全新上下文的子 agent 只看 diff + 验收标准复核（内置 <code>/code-review</code>）；但约束它只报「影响正确性」的 gap，否则会过度工程。</li>
-        <li><b>放手就上沙箱 + 停止条件</b>：要无人值守就在隔离环境跑（无网 Docker、只给测试凭证、设预算/最大迭代上限），而不是靠逐条点批准。</li>
-      </ul>
-      <p class="gcc-src">来源：<a href="https://code.claude.com/docs/en/best-practices">Claude Code Best Practices</a> · <a href="https://simonwillison.net/2025/Sep/30/designing-agentic-loops/">Willison · Designing agentic loops</a></p>
-    </article>
-
-    <article class="pract">
-      <div class="pract-head"><span class="pract-tag">Plan 五步闭环 / Compound Loop</span><h4>把「写回 Context 形成复利」变成固定动作</h4></div>
-      <ul class="do">
-        <li><b>完整闭环</b>（Every 版）：Brainstorm → Plan（研究后产出结构化计划存 <code>docs/plans/</code>）→ Work（隔离 worktree、每步跑测试）→ Simplify → Review（并行多个专职 agent）→ <b>Compound（写回）</b> → Repeat。</li>
-        <li><b>写回两个固定位置</b>：事实/偏好 → <code>CLAUDE.md</code> 加一条 note；可搜索的解法 → <code>docs/solutions/</code>（带 YAML frontmatter 按主题分类），未来会话自动检索到。</li>
-        <li><b>缺陷升级成系统防线</b>：一个 SQL 注入不只修当下——① 写进 CLAUDE.md 或 security skill；② 加一条 lint 规则；③ 更新 review agent 的 prompt 让它以后主动抓。金句「Every bug becomes a permanent lesson」。</li>
-        <li><span class="tool cc">Claude Code</span> <b>现成插件</b>：<code>/plugin marketplace add EveryInc/compound-engineering-plugin</code> 装上，用 <code>/ce-plan</code> <code>/ce-work</code> <code>/ce-code-review</code> <code>/ce-compound</code>，或 <code>/lfg</code> 一键串起全流程。</li>
-      </ul>
-      <p class="gcc-src">来源：<a href="https://every.to/guides/compound-engineering">Every · Compound Engineering</a> · <a href="https://github.com/EveryInc/compound-engineering-plugin">插件仓库</a></p>
-    </article>
-
-    <article class="pract">
-      <div class="pract-head"><span class="pract-tag">Clawmancer / 多 Agent</span><h4>orchestrator-worker 怎么用，以及何时别用</h4></div>
-      <ul class="do">
-        <li><span class="tool cc">Claude Code</span> <b>子 Agent</b>：自定义放 <code>.claude/agents/*.md</code>（name + description 决定何时委派）；内置 <code>Explore</code>／<code>Plan</code>；<code>@</code>-mention 指定、或整场会话 <code>claude --agent code-reviewer</code>。并行：「Research the auth, db, API modules <b>in parallel using separate subagents</b>」。</li>
-        <li><span class="tool any">何时用</span> <b>子 Agent = 上下文保护工具</b>：当一个支线会把大量搜索/日志灌进主对话、且你之后不再引用时用它（独立上下文、只回传摘要）。也可路由到更便宜模型（Haiku）控成本。</li>
-        <li><span class="tool any">何时别用</span> 官方明确：需要频繁来回、多阶段共享大量上下文、小定点改、或延迟敏感 → 用主对话。想复用流程但仍在主上下文 → 用 <b>Skills</b> 而非子 Agent。呼应 §5：Anthropic 说「单 Agent 覆盖 80%，别过度工程化」。</li>
-        <li><span class="tool cx">Codex</span> <code>[features].multi_agent</code> 默认开；云端可并行跑多任务（各自独立 sandbox + git 状态）；跨 agent 转交/护栏用 Agents SDK 的 <code>handoffs</code> / <code>guardrails</code>。</li>
-      </ul>
-      <p class="gcc-src">来源：<a href="https://code.claude.com/docs/en/sub-agents">Claude Code Subagents</a> · <a href="https://developers.openai.com/codex/cloud">Codex Cloud</a></p>
-    </article>
-
-    <article class="pract">
-      <div class="pract-head"><span class="pract-tag">商业大脑 & OPC</span><h4>把「经验变系统」和「一个人的执行半径」落到工具上</h4></div>
-      <ul class="do">
-        <li><b>商业大脑 = 记忆层 + 技能 + 品味编码</b>：团队流程沉淀成 Skills、个人品味（命名/错误处理/测试策略）抽进 CLAUDE.md 偏好区和 review agent，接内部系统用 MCP。原则「<b>Teach the system, don't do the work yourself</b>」——留 50% 时间改进系统（建 review agent、写模式文档）。</li>
-        <li><span class="tool any">OPC 的执行半径</span> 扩大靠编排而非苦干：超出单会话上下文用 <b>agent teams</b>（各 worker 独立上下文、共享任务、有 team lead）；批量改用非交互 fan-out <code>for f in $(cat files.txt); do claude -p "Migrate $f" --allowedTools "Edit,Bash(git commit *)"; done</code>（先在 2-3 个文件上试 prompt 再放量）。</li>
-        <li><span class="tool any">但别忘了边界</span> §4 的质疑对 OPC 依然成立：能编排的是「执行」，接不住的是销售、客户信任、法律与道德责任。工具放大的是有判断力的人，不是把苦干自动化。</li>
-      </ul>
-      <p class="gcc-src">来源：<a href="https://every.to/guides/compound-engineering">Every · Teach the system</a> · <a href="https://code.claude.com/docs/en/best-practices">Claude Code · Automate and scale</a></p>
-    </article>
-
-    <p class="keyline">一句话：作者说「养 Context、蒸馏知识、编排智能」——落到手上就是 <b>写好 CLAUDE.md/AGENTS.md（养）→ 把踩坑写回 docs/solutions 与 skill（蒸馏）→ 计划先行 + 子 Agent + hook 护栏（编排）</b>。概念是对的，缺的那层「怎么做」，在这一节。</p>
-  </div>
-</section>
-
-<section id="duel">
-  <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§4</span><h2>支持 vs 质疑：原文只讲了一面</h2></div>
-    <p class="sec-lede">文章是乐观的推介。把每个大主张的正反两面并排，你才看得到完整判断的空间。左绿=支持，右红=质疑。</p>
-
-    <p class="duel-topic">① Context engineering 是真趋势吗？</p>
-    <div class="duel">
-      <div class="cell for"><b>支持</b>Karpathy、DAIR.AI、Weaviate 等高信号账号一致认为是超越 prompt 的工程学科；Anthropic 出了官方定义与指南。</div>
-      <div class="cell against"><b>质疑</b>HN 最高赞（<a href="https://news.ycombinator.com/item?id=44427757">915 pts</a>）指为「失败的 prompt engineering 换名圈 VC 钱」；连倡导者 Simon Willison 都自认是 rebrand。</div>
-    </div>
-
-    <p class="duel-topic">② 多 Agent 编排（1 Lead + 6 Execute）值得追吗？</p>
-    <div class="duel">
-      <div class="cell for"><b>支持</b>Anthropic 实测：多 Agent（Opus 4 lead + Sonnet 4 子 Agent）在内部研究评测上比单 Agent <b>高 90.2%</b>。</div>
-      <div class="cell against"><b>质疑</b>同一篇 Anthropic 官方却说「<b>单 Agent 覆盖 80% 场景，别过度工程化</b>」；一线整理称 AutoGen/CrewAI「demo 好看、生产易崩，资深工程师已弃用」。</div>
-    </div>
-
-    <p class="duel-topic">③ Vibe Coding / Agentic Coding 能上生产吗？</p>
-    <div class="duel">
-      <div class="cell for"><b>支持</b>有人反对「vibe coding」这个贬义框架：认真用 Claude Code 建生产应用是可行的，「别再叫它 vibe coding，它就是 coding」。</div>
-      <div class="cell against"><b>质疑</b>金句「以 10 倍速度制造 10 倍技术债」；撞墙点在鉴权/安全/支付/并发；生成代码把 bug 伪装起来、审查常比手写更贵。</div>
-    </div>
-
-    <p class="duel-topic">④ OPC / 一人独角兽 是现实还是炒作？</p>
-    <div class="duel">
-      <div class="cell for"><b>支持</b>工具/基建在快速成熟（Cofounder、多 Agent 编排产品）；Dario Amodei 称第一家单人十亿公司「2026，置信 70–80%」。</div>
-      <div class="cell against"><b>质疑</b>十亿估值绕不开销售/信任/<b>法律责任</b>（AI 接不住）；最火的 Medvi 案例被拆是「减肥药引流站」；连 Altman 后来都改口说「<b>10 人</b>十亿公司」。</div>
-    </div>
-    <p class="keyline">规律：作者站在「工具在变强」的一面，而质疑几乎都站在「人要担的那部分（销售、信任、责任、维护）AI 接不住」的一面。两面都对，差别在你把赌注押在哪。</p>
-  </div>
-</section>
-
-<section id="evidence">
-  <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§5</span><h2>原文缺的硬证据，补在这里</h2></div>
-    <p class="sec-lede">全文没有一个数字或对照实验。以下四条是这轮检索里最硬的一手证据——正反都有，恰恰是「缺实证」印象的解药。</p>
+    <div class="sec-head"><span class="sec-no">§1</span><h2>共识层：没人跳过的五件事</h2></div>
+    <p class="sec-lede">12 份资料立场各异、重量级悬殊，但这五件事所有人都在做——分歧只在「做多重」，没人跳过。这一层不需要选型，直接采纳。</p>
     <ul class="ev">
-      <li><b>唯一严谨的对照实验，结论是反的</b>METR 随机对照实验（<a href="https://arxiv.org/abs/2507.09089">arXiv 2507.09089</a>）：资深开发者事前预测 AI 提速 24%、事后自估提速 20%，客观测量却是<span class="num">慢了 19%</span>。整场 AI 编码讨论里唯一接近科学方法的数据，方向与炒作相反。</li>
-      <li><b>多 Agent 确实更强，但也确实更贵</b>Anthropic <a href="https://www.anthropic.com/engineering/multi-agent-research-system">多 Agent 研究系统</a>：比单 Agent 高 <span class="num">90.2%</span>，但代价是 token 消耗约为普通对话的 <span class="num">15×</span>（单 Agent 约 4×）。「1 Lead + 6 Execute」不是免费的强。</li>
-      <li><b>官方自己主张「少即是多」</b>Anthropic《<a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective Agents</a>》：能用单 Agent 别上多 Agent，能用 workflow（预定义代码路径）别上 agent。与「上来就编排 6 个 Agent」的叙事相反。</li>
-      <li><b>概念在开源生态里都有真实落地</b>编排（LangGraph ~3.7w、CrewAI ~5.5w、AutoGen ~6w、OpenAI Agents SDK ~2.8w）、记忆（Mem0 ~6w、Letta ~2.4w）、harness（Claude Code ~13.7w、Cline 的 Plan/Act ~6.4w、Aider ~4.7w）。方向是真的，只是都不是新概念。</li>
+      <li><b>1 · 写代码之前，先有一份被人批准的书面 spec / plan</b>
+        Addy 管它叫「15 分钟 waterfall」，superpowers 用 HARD-GATE 强制（设计未批准前禁止写任何代码），三大 SDD 框架的存在理由就是它。计划要拆成 2–5 分钟粒度的小步，每步做完 commit——commit 是游戏存档点，让你敢做大胆重构。
+        <span class="src">Addy Osmani · superpowers · spec-kit / OpenSpec / BMAD</span></li>
+      <li><b>2 · 重要状态外置到磁盘文件，不信任上下文</b>
+        「Context Window = RAM（易失、有限），Filesystem = Disk（持久、无限）」。plan、调研发现、失败尝试都要落盘：长任务 50+ 次工具调用后必然 context rot，写在磁盘上的目标才能跨会话存活。todo 清单只记「做没做」，文件还记「发现了什么、错在哪」。
+        <span class="src">planning-with-files · OpenSpec（living spec）· gstack（gbrain）</span></li>
+      <li><b>3 · 纪律要写成硬规则，还要预埋「反借口表」</b>
+        LLM 一定会自我合理化跳步（「先跳过测试回头补」）。所以纪律不能靠嘱咐，要写成不可协商的 Iron Law（没有失败测试不写产品代码、没查根因不修、没跑验证不说完成），并预写 agent 的偷懒话术 + 反驳。
+        <span class="src">superpowers（Iron Law）· addyosmani/agent-skills（Rationalizations 表）</span></li>
+      <li><b>4 · 用 fresh context 干活</b>
+        每个 feature 开新会话；执行计划的 subagent 零继承上下文，由协调者精确构造输入；只在逻辑断点 compact；每个任务喂的上下文控制在小范围。跨阶段的接力棒是<b>产出文件</b>，不是聊天记录。
+        <span class="src">superpowers（subagent-driven）· everything-claude-code · Addy Osmani</span></li>
+      <li><b>5 · 做完必须闭环沉淀</b>
+        Compound engineering 的核心命题：「每一个工程工作单元，都应该让后续单元更容易——而不是更难」。踩坑写成可检索的 pattern 文档，plan / review 时派 agent 先查一遍，命中标注 Known Pattern。系统才会越用越聪明，而不是每次从零。
+        <span class="src">EveryInc/compound-engineering · gstack（/learn）· mattpocock（grill-with-docs 顺手写 ADR）</span></li>
     </ul>
-    <p class="keyline">把这四条放回原文，「Agentic 之道」的判断依然站得住——但你会同时知道它的代价、边界和反例，而不只是它的好处。</p>
+    <p class="keyline">共识层是地基。下面五个决策点，才是你必须结合自己处境拍板的部分——每张卡给出业界谱系、我的选择和为什么，你的答案可以不同，但不能不答。</p>
   </div>
 </section>
 
-<section id="verify">
+<section id="decisions">
   <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§6</span><h2>会议与作者：核实一下再信</h2></div>
-    <p class="sec-lede">既然要把它当学习材料，来源可信度也顺手查了。结论：真实，但有一处时间瑕疵。</p>
-    <div class="verify"><b>✓ 会议与嘉宾属实。</b> GTLC 是极客邦/InfoQ 旗下真实的技术领导者峰会。官方页面（<a href="https://gtlc.infoq.cn/2026/hangzhou">gtlc.infoq.cn/2026/hangzhou</a>）逐字核对：鲁肃（程立，蚂蚁/阿里前 CTO）、叶军（前阿里副总裁）、汪源（杭州久痕科技 CEO、前网易研究院院长）均在嘉宾名单。</div>
-    <div class="verify warn"><b>时间对不上（小瑕疵）。</b> 杭州站官方日期是 <b>2026-06-27</b>（分站，非「总站」），2026 年至今没有 7 月场次。而文章 07-06 发、称「上周六」——实际已过去约 10 天。不影响实质，但「上周六」是不准确的。</div>
-    <div class="verify"><b>作者可信度：有真实产品背书。</b> 公众号 ChaoGeek 背后主体为深圳拾音教育咨询有限公司，产品是 AI 英语口语陪练 app <b>OneOneTalk / 11Talk</b>（小米商店 + 隐私政策页核实）。不过所有公开工商/应用记录里查不到「彭超」实名——应是运营者的专业身份/笔名。<span style="color:var(--ink-faint)">（作者身份核实证据强度：中；他是真做 AI 产品的人，非纯内容营销号，但实名无法在公开渠道确证。）</span></div>
+    <div class="sec-head"><span class="sec-no">§2</span><h2>五个决策点：谱系、选择与理由</h2></div>
+    <p class="sec-lede">读资料的正确姿势不是「都学」，而是把它们放到同一个决策点下对比，然后选一个能落地的。以下是我的五次拍板。</p>
+
+    <article class="gcc" id="d-a">
+      <div class="gcc-head"><span class="gcc-letter">A</span>
+        <div><h4>狭义 Context：CLAUDE.md 怎么写、怎么分层</h4>
+        <p class="gcc-sub">每个 session 都要付的固定成本，写错方向就是持续漏 token。</p></div>
+      </div>
+      <ul class="do">
+        <li><b>极简五要素派</b>（Addy context-engineering）：只写技术栈、常用命令、约定、边界、一个「好范例」文件——范例比十条规则管用。缺点：纪律没地方放。</li>
+        <li><b>全家桶派</b>（everything-claude-code）：34 条 rules 分层 + 20 个 hooks + 完整模板。覆盖全面，但大量 rules 是模型本来就会的通用建议，纯吃上下文——ECC 自己都警告别全量堆叠。</li>
+        <li><b>三层各司其职</b>：全局层薄（个人硬纪律 + 反借口表 + 路由判据）；项目层五要素 + 指针；<b>流程给 skills，确定性给 hooks</b>，CLAUDE.md 不承担流程。</li>
+      </ul>
+      <p class="verdict-strip"><b>我的选择：三层各司其职。</b>判据一句话：<b>每一行都要过「删掉这行，agent 会做错什么？」测试</b>——答不上来就删。实现细节会过时（用文件引用代替）、通用建议模型已会（删）、流程步骤该做成 skill（挪走）。</p>
+      <p class="gcc-src">谱系：addyosmani/agent-skills（context-engineering）· affaan-m/everything-claude-code · 模板见 <a href="#templates">§4</a></p>
+    </article>
+
+    <article class="gcc" id="d-b">
+      <div class="gcc-head"><span class="gcc-letter">B</span>
+        <div><h4>广义 Context：知识大脑放在哪</h4>
+        <p class="gcc-sub">踩坑教训、架构决策、项目档案——放 repo 里还是笔记库里？</p></div>
+      </div>
+      <ul class="do">
+        <li><b>先立判断标准：按「消费者是谁」分家。</b>agent 消费的知识必须放在 agent 默认可达的地方；「靠约定才够得着的记忆」在实践中一定会被遗忘。</li>
+        <li><b>repo 内沉淀</b>（compound 派）：<code>docs/solutions/</code> + <code>docs/adr/</code>，与代码同版本、可 grep、换机器不断链。缺点：跨项目知识各自为政。</li>
+        <li><b>笔记库唯一大脑</b>（Obsidian 等）：人看东西只有一个地方，跨项目档案统一。缺点：agent 默认读不到，桥必须自己修。</li>
+        <li><b>双层</b>：agent 的记忆在 repo，人的大脑在笔记库，中间定「升舱」规则。</li>
+      </ul>
+      <p class="verdict-strip"><b>我的选择：笔记库唯一大脑（Obsidian），把桥修成一等公民基础设施。</b>三条协议：① 每个 repo 的 CLAUDE.md 显式指向笔记库里的项目文件夹；② 开工读项目 index、收工写回（进度、决策 ADR、踩坑 pattern）；③ plan / review / debug 开工先检索 Learnings，命中标 Known Pattern。代价是 repo 可移植性（云端 agent、协作者读不到）——单机工作流可接受。</p>
+      <p class="caveat">诚实的变体提示：如果你多机工作或有协作者，双层更稳——agent 记忆走 repo，笔记库只留人读的档案。</p>
+      <p class="gcc-src">谱系：EveryInc/compound-engineering（docs/solutions）· gstack（gbrain）· planning-with-files</p>
+    </article>
+
+    <article class="gcc" id="d-c">
+      <div class="gcc-head"><span class="gcc-letter">C</span>
+        <div><h4>流程：SDD 框架怎么选、怎么分级</h4>
+        <p class="gcc-sub">spec-kit、OpenSpec、BMAD、superpowers……装哪个？答案是别把这当单选题。</p></div>
+      </div>
+      <ul class="do">
+        <li><b>spec-kit</b>（GitHub 官方）：constitution + 七步阶段门（specify→plan→tasks→implement），中量级，适合绿地大 feature；小改动仪式感过剩。</li>
+        <li><b>OpenSpec</b>：最轻（proposal→apply→archive），<b>唯一有 living spec 机制</b>——archive 时把变更增量回写 source of truth，专为存量项目设计。</li>
+        <li><b>BMAD</b>：模拟整个敏捷团队（PM/Architect/Dev/QA 十余角色）。对 solo 开发者，多数场景 overkill——只值得借它的 architecture 单品。</li>
+        <li><b>superpowers</b>：不是 spec 格式而是硬门全链——brainstorm→写计划→subagent 逐任务执行→review→验证，纪律最强。</li>
+      </ul>
+      <p class="verdict-strip"><b>我的选择：不选框架，选路由。</b>SDD 的失败模式不是「框架选错」而是「一刀切」：小改动过重仪式导致弃用，大改动裸奔导致返工。按改动大小分级——L0 直接干、L1 走 OpenSpec 提案流、L2 走 superpowers 全链（见 <a href="#route">§3 路由表</a>）。公认教训：<b>spec 的价值 = agent 真的会读 × 跨会话存活 × 随代码演进</b>，写完即弃的 spec 是纯开销。</p>
+      <p class="gcc-src">谱系：github/spec-kit · Fission-AI/OpenSpec · bmad-code-org/BMAD-METHOD · obra/superpowers</p>
+    </article>
+
+    <article class="gcc" id="d-d">
+      <div class="gcc-head"><span class="gcc-letter">D</span>
+        <div><h4>技能：skill 装了一堆，怎么治理</h4>
+        <p class="gcc-sub">合集仓库随手一装就是 100+ 个 skill——这本身就在吃你的上下文，还让 agent 同时听几套指挥。</p></div>
+      </div>
+      <ul class="do">
+        <li><b>治理的钥匙是一个区分：流程型互斥，工具型可叠加。</b>流程型 skill（brainstorm、plan、review）定义「按什么步骤走」，同时激活两个 = 让 agent 听两套互相矛盾的流程；工具型（浏览器、笔记库 CLI、图表）只提供能力，叠加无害。</li>
+        <li><b>一阶段一主将</b>：把开发生命周期切成阶段（构思/规格/架构/计划/开发/评审/QA/发布/排障），每阶段只激活一个流程主将 + 若干工具型。同类非主将不删源、只不激活——想换随时换。</li>
+        <li><b>单一供应链</b>：所有 skill 从一个管理面进出（git 上游源 + 本地自写目录），插件层只留工具型/平台型。我落地时在四个角落挖出了四层混居的 skill，收编成单链后：68 项全部受管、零散件。</li>
+        <li><b>自己只写「胶水」</b>：流程上游已经卷得很成熟，值得自写的是接你自己基础设施的胶水（比如把 learnings 沉淀改道到自己的笔记库）。</li>
+      </ul>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>阶段</th><th>主将（我的选型）</th><th>为什么</th></tr></thead>
+        <tbody>
+          <tr><td>构思</td><td>interview-me（Addy）</td><td>一次一问磨意图，比发散 brainstorm 适合 solo</td></tr>
+          <tr><td>规格</td><td>openspec-proposal / gstack-spec</td><td>L1 提案流 / L2 绿地五阶段</td></tr>
+          <tr><td>架构</td><td>bmad-architecture</td><td>BMAD 唯一保留单品</td></tr>
+          <tr><td>计划</td><td>superpowers writing-plans</td><td>产出能直接喂 subagent 的细粒度计划</td></tr>
+          <tr><td>开发</td><td>superpowers executing-plans + TDD</td><td>Iron Law 纪律最硬</td></tr>
+          <tr><td>评审</td><td>gstack-review + Codex 第二意见</td><td>双模型独立复审</td></tr>
+          <tr><td>QA</td><td>gstack-qa</td><td>真浏览器闭环找 bug</td></tr>
+          <tr><td>发布</td><td>gstack-ship</td><td>测试→diff→版本→changelog→PR 全流水线</td></tr>
+          <tr><td>排障</td><td>superpowers systematic-debugging</td><td>没查到根因不许动代码</td></tr>
+        </tbody>
+      </table></div>
+      <p class="gcc-src">谱系：garrytan/gstack · obra/superpowers · Yeachan-Heo/oh-my-claudecode（模式分档思路）</p>
+    </article>
+
+    <article class="gcc" id="d-e">
+      <div class="gcc-head"><span class="gcc-letter">E</span>
+        <div><h4>纪律：验证与编排开多大档</h4>
+        <p class="gcc-sub">全档 TDD 太磨，全靠自觉必翻车——档位要跟着改动大小走。</p></div>
+      </div>
+      <ul class="do">
+        <li><b>L0</b>：只强制 verification-before-completion——跑起来、看到证据、才算完成。「应该能工作」不是证据。</li>
+        <li><b>L1</b>：TDD（改行为必须测试先行，红→绿→重构）+ 单模型 review。</li>
+        <li><b>L2</b>：TDD + 双模型 review（一个写、另一个独立复审——卡住时换模型也是 Addy 的「model musical chairs」）+ 真浏览器 QA。</li>
+        <li><b>worktree 隔离</b>：开发/QA/排障强制独立 worktree，评审只读——agent 实验不弄脏主工作区。</li>
+      </ul>
+      <p class="verdict-strip"><b>唯一全级别不可豁免的是 verify。</b>它是调研里公认「成本最低、防『假完成』收益最大」的一条：没跑验证命令、没看到输出，就不许说「完成」。</p>
+      <p class="gcc-src">谱系：superpowers（verification-before-completion / Iron Law）· Addy Osmani（Never commit code you can't explain）</p>
+    </article>
+  </div>
+</section>
+
+<section id="route">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§3</span><h2>两轴路由：什么改动走什么流程</h2></div>
+    <p class="sec-lede">横轴是生命周期阶段（每阶段一个干净工作台），纵轴是改动大小（决定走哪几个阶段）。三级还对应三种「你出现的程度」——高效指挥 agent 的具体形态，就是把注意力只花在杠杆最高的决策点上。</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>级别</th><th>判据</th><th>走哪些阶段</th><th>验证档位</th><th>你出现的程度</th></tr></thead>
+      <tbody>
+        <tr><td class="lv">L0 小改</td><td>&lt;30 分钟，影响面一目了然</td><td>直接干</td><td>verify：跑起来见证据</td><td>只看结果</td></tr>
+        <tr><td class="lv">L1 中改</td><td>≤半天，改行为，存量演进</td><td>spec（提案）→ 批准 → dev → review</td><td>TDD + 单模型 review</td><td>批 proposal</td></tr>
+        <tr><td class="lv">L2 大活</td><td>多天，新子系统 / 新项目</td><td>构思 → spec → 架构 → 计划 → dev → review → QA → 发布</td><td>TDD + 双模型 review + 浏览器 QA</td><td>全程参与设计</td></tr>
+        <tr><td class="lv">debug</td><td>bug / 故障（横切，不分级）</td><td>先根因，后动手，补回归测试</td><td>根因证据 + 回归测试</td><td>看根因报告</td></tr>
+      </tbody>
+    </table></div>
+    <p>把判据写进全局 CLAUDE.md，让 agent <b>开工先自报「这是 L 几」</b>，拿不准就问。跨阶段衔接用文件接力：每阶段收尾把产出落盘，下一阶段开新会话读文件——接力棒是结论文件，不是聊天记录（fresh context，共识 #4）。</p>
+
+    <h3>练手：这个改动是 L 几？</h3>
+    <div class="spine" id="triage">
+      <button type="button" aria-pressed="false" data-a="<em>L0。</em>影响面一目了然、几分钟搞定——直接改，但 verify 不减：刷新页面亲眼看到新文案才算完。"><span class="s-no">场景 1</span><span class="s-name">改按钮文案，顺手修个 typo</span></button>
+      <button type="button" aria-pressed="false" data-a="<em>L1。</em>改行为、约半天、存量演进——典型提案流：先出 proposal（改什么、验收标准），你批准后再动代码，测试先行，完成后归档回写 spec。"><span class="s-no">场景 2</span><span class="s-name">给存量项目加「导出 CSV」（约半天）</span></button>
+      <button type="button" aria-pressed="false" data-a="<em>L2。</em>多天新子系统——全链：先质询磨清意图，spec、架构、计划逐个过你的批准，然后 subagent 分步执行，双模型 review + 浏览器 QA 收尾。"><span class="s-no">场景 3</span><span class="s-name">新做一个数据看板子系统</span></button>
+      <button type="button" aria-pressed="false" data-a="<em>debug，横切不分级。</em>Iron Law：没定位根因不许改代码。先复现、缩小范围、拿到根因证据，修完必须补回归测试。"><span class="s-no">场景 4</span><span class="s-name">生产接口突然超时，要排查</span></button>
+      <button type="button" aria-pressed="false" data-a="<em>不是 L0——至少 L1。</em>L0 的判据不是「改动行数少」，是「影响面一目了然」。说不清影响面的一行配置，恰恰是最危险的改动：先花十分钟写清楚它影响什么，再动手。"><span class="s-no">场景 5</span><span class="s-name">改一行配置，但说不清影响面</span></button>
+      <button type="button" aria-pressed="false" data-a="<em>L1。</em>虽然行为不变，但 2 小时超过 L0 的时间判据，且重构最需要测试网兜底——先确认测试覆盖（没有就先补），再动手，每小步 commit 存档。"><span class="s-no">场景 6</span><span class="s-name">重构模块内部实现（行为不变，约 2 小时）</span></button>
+    </div>
+    <div class="spine-answer" id="triageAnswer">☝ 点一个场景，看它该走哪条路由、为什么。</div>
+  </div>
+</section>
+
+<section id="templates">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§4</span><h2>模板库：拿去就能用</h2></div>
+    <p class="sec-lede">四份模板都是我实际在用的版本做了通用化（把本机路径换成占位符）。复制后按「删掉这行 agent 会做错什么」的标准裁剪成你自己的。</p>
+
+    <div class="tpl">
+      <div class="tpl-head"><h4>T1 · 全局 CLAUDE.md（路由 + 硬纪律 + 反借口表 + 记忆协议）</h4><span class="where">~/.claude/CLAUDE.md</span><button class="copy-btn" type="button" data-copy="t1">复制</button></div>
+      <pre id="t1"># 全局约定
+
+## 开工路由：先自报改动等级
+- **L0 小改**（&lt;30 分钟、影响面一目了然）：直接做，验证门槛不减。
+- **L1 中改**（≤半天、改行为、存量演进）：先出变更提案，批准后实现，完成后归档回写 spec。
+- **L2 大活**（多天、新子系统/新项目）：走全链 brainstorm → spec → architecture
+  → plan → 分步实现 → review → qa → ship。
+- 修 bug 走 debug 流程（先根因后动手），不参与分级。
+开工时先说「这是 L 几」，拿不准就问。
+
+## 硬纪律（不可协商）
+1. 没跑验证不许说「完成」——必须给出运行命令与输出证据。
+2. L1/L2 改行为必须测试先行（红 → 绿 → 重构）。
+3. 修 bug 先定位根因，未定位不许改代码。
+4. L1/L2 未经批准的 spec/plan 不写产品代码。
+5. 不确定就问，不许编造 API 或事实。
+
+## 反借口表（出现这些念头 = 停下）
+| 借口 | 反驳 |
+|---|---|
+| 「先跳过测试，回头补」 | 回头不存在。现在写。 |
+| 「改动太小不用验证」 | 小改动引发的事故最多。跑一遍。 |
+| 「应该能工作 / 看起来对」 | 「应该」不是证据。要输出。 |
+| 「直接修快一点」 | 不查根因的修复会回来第二次。 |
+| 「这个不用写进 spec」 | 没写下来的东西不存在。 |
+
+## 记忆协议
+- 项目档案在 &lt;你的笔记库&gt;/&lt;项目&gt;/：开工先读 index，收工把进度/决策/踩坑写回。
+- plan / review / debug 开工先查该项目的 Learnings 与 ADR，
+  命中要在产出里标 Known Pattern 并遵循；修完非平凡 bug 主动提议沉淀。
+
+## 本机
+- （把你机器上的环境陷阱写在这里，例：node 要用绝对路径 ~/.nvm/.../bin/node）</pre>
+      <div class="tpl-note">全局层只写「稳定、且 agent 猜不到」的东西。语言偏好、模型选择这类配置项放 settings，不占 CLAUDE.md。</div>
+    </div>
+
+    <div class="tpl">
+      <div class="tpl-head"><h4>T2 · 项目 CLAUDE.md（五要素 + 指针）</h4><span class="where">&lt;repo&gt;/CLAUDE.md</span><button class="copy-btn" type="button" data-copy="t2">复制</button></div>
+      <pre id="t2"># &lt;项目名&gt;（项目约定）
+
+## 项目是什么
+一句话：做什么、给谁用。线上地址 / 部署方式。
+
+## 技术栈与关键命令
+- 栈：&lt;语言 / 框架 / 数据库&gt;
+- 构建：`&lt;命令&gt;` · 测试：`&lt;命令&gt;` · 本地起服务：`&lt;命令&gt;`
+- 部署：&lt;怎么发布，push 即上线还是要跑脚本&gt;
+
+## 约定
+- 目录结构要点、命名规则、代码风格里「模型猜不到」的部分。
+
+## 边界（不许碰）
+- &lt;目录/文件&gt;：为什么不许动（需要硬保证就再加 permissions deny 或 hook）。
+
+## 范例
+- 新增 &lt;页面/模块/接口&gt; 照 `&lt;某个真实文件路径&gt;` 写——范例比十条规则管用。
+
+## 指针（引用，不内联）
+- 进度与决策档案：&lt;笔记库项目文件夹路径&gt;（开工先读 index）
+- 深入文档：`docs/&lt;...&gt;`</pre>
+      <div class="tpl-note">五要素出自 Addy 的 context-engineering：stack / commands / conventions / boundaries / <b>一个好范例</b>。实现细节永远用文件引用，不复制进来。</div>
+    </div>
+
+    <div class="tpl">
+      <div class="tpl-head"><h4>T3 · 踩坑 pattern（Learning）模板</h4><span class="where">&lt;笔记库&gt;/&lt;项目&gt;/Learnings/YYYY-MM-DD-主题.md</span><button class="copy-btn" type="button" data-copy="t3">复制</button></div>
+      <pre id="t3"># &lt;一句话说清坑&gt;
+
+- **症状**：报什么错 / 什么行为
+- **根因**：真正原因（不是表象）
+- **解法**：怎么修的，贴关键命令或代码点（file:line）
+- **防复发**：下次怎么提前发现 / 避免（检查命令、写进哪个配置、加了什么测试）
+- **适用边界**：什么情况下这条不适用</pre>
+      <div class="tpl-note">≤15 行，写给两周后的自己 30 秒能用上。判断要不要记的标准不是坑的大小，是<b>会不会再犯</b>。</div>
+    </div>
+
+    <div class="tpl">
+      <div class="tpl-head"><h4>T4 · 架构决策记录（ADR）模板</h4><span class="where">&lt;笔记库&gt;/&lt;项目&gt;/ADRs/YYYY-MM-DD-决策名.md</span><button class="copy-btn" type="button" data-copy="t4">复制</button></div>
+      <pre id="t4"># &lt;决策名&gt;    （status: proposed | accepted | superseded）
+
+- **背景**：什么问题逼出这个决策
+- **选项**：候选方案 + 一句话权衡
+- **决定**：选了什么
+- **后果**：接受了什么代价；什么信号出现时该重审</pre>
+      <div class="tpl-note">被推翻的旧 ADR 改 superseded 并链到新档，不删除——决策历史本身就是 context。质询（grill）收敛时顺手写 ADR，让「问清楚」这个动作直接变成沉淀。</div>
+    </div>
+  </div>
+</section>
+
+<section id="shelf">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§5</span><h2>来源书架：每份资料最值得抄的一件事</h2></div>
+    <p class="sec-lede">不必都读。每条只记一件「这家独有、别家没有」的事——想深入哪个再点进去。</p>
+    <ul class="ev">
+      <li><b>Addy Osmani《My AI Coding Workflow》</b>spec → plan → 分步执行 + 每步 commit 当存档点；卡住就换模型（model musical chairs）；铁律「Never commit code you can't explain」。<span class="src"><a href="https://addyosmani.com/blog/ai-coding-workflow/" rel="noopener">addyosmani.com/blog/ai-coding-workflow</a></span></li>
+      <li><b>addyosmani/agent-skills</b>Rationalizations 反借口表（预写 agent 偷懒话术 + 反驳）；context-engineering 的 CLAUDE.md 五要素；24 个 skill 按 SDLC 七阶段编排。<span class="src"><a href="https://github.com/addyosmani/agent-skills" rel="noopener">github.com/addyosmani/agent-skills</a></span></li>
+      <li><b>mattpocock/skills</b>grilling 质询术：一次只问一个问题、只问决策不问事实（事实自己查）、每问附上自己的推荐答案；grill-with-docs 把质询结论直接写成术语表和 ADR。<span class="src"><a href="https://github.com/mattpocock/skills" rel="noopener">github.com/mattpocock/skills</a></span></li>
+      <li><b>obra/superpowers</b>HARD-GATE（设计未批准禁止写码）与三条 Iron Law；计划拆成 2–5 分钟小步后，每任务派零上下文的 fresh subagent 执行 + reviewer 复查。<span class="src"><a href="https://github.com/obra/superpowers" rel="noopener">github.com/obra/superpowers</a></span></li>
+      <li><b>EveryInc/compound-engineering</b>「每次工程工作让下一次更容易」；踩坑写进 docs/solutions，plan / review 时必派 agent 检索，命中标 Known Pattern——review 反哺下一次 plan。<span class="src"><a href="https://github.com/EveryInc/compound-engineering-plugin" rel="noopener">github.com/EveryInc/compound-engineering-plugin</a></span></li>
+      <li><b>github/spec-kit</b>constitution（项目宪法）先行 + specify/plan/tasks 阶段门；spec 管 what/why、plan 管 how 的严格分离。<span class="src"><a href="https://github.com/github/spec-kit" rel="noopener">github.com/github/spec-kit</a></span></li>
+      <li><b>Fission-AI/OpenSpec</b>三家里唯一的 living spec：变更以 proposal 增量提出，archive 时回写 source of truth——spec 跟着代码活，而不是写完即弃。<span class="src"><a href="https://github.com/Fission-AI/OpenSpec" rel="noopener">github.com/Fission-AI/OpenSpec</a></span></li>
+      <li><b>bmad-code-org/BMAD-METHOD</b>把「规划阶段值得多个角色视角」讲透（Analyst→PM→Architect→按 story 开发）；同时也是「solo 别上全家桶」的最好反面教材。<span class="src"><a href="https://github.com/bmad-code-org/BMAD-METHOD" rel="noopener">github.com/bmad-code-org/BMAD-METHOD</a></span></li>
+      <li><b>planning-with-files</b>「Context = RAM，Filesystem = Disk」；task_plan / findings / progress 三文件做外部工作记忆；2-Action Rule（每两次浏览动作就落盘一次发现）；错误必须记录、查过才能重试。<span class="src"><a href="https://github.com/OthmanAdi/planning-with-files" rel="noopener">github.com/OthmanAdi/planning-with-files</a></span></li>
+      <li><b>affaan-m/everything-claude-code</b>CLAUDE.md「写什么/不写什么」清单；rules 按语言分层按需装；hooks 管确定性（拦破坏命令、查 secrets、会话结束提取学习）。<span class="src"><a href="https://github.com/affaan-m/everything-claude-code" rel="noopener">github.com/affaan-m/everything-claude-code</a></span></li>
+      <li><b>Yeachan-Heo/oh-my-claudecode</b>编排模式按场景分档的思路：正规特性走流水线、自治任务放单 agent、「verify-fix 循环到真做完」、批量爆发才开最大并行。<span class="src"><a href="https://github.com/Yeachan-Heo/oh-my-claudecode" rel="noopener">github.com/Yeachan-Heo/oh-my-claudecode</a></span></li>
+      <li><b>garrytan/gstack</b>全流程 skill 流水线（think→plan 四视角评审→build→review→QA 真浏览器→ship→retro），每步产出喂下一步；learnings 持久层 + 自动写回 CLAUDE.md 的检索指引。<span class="src"><a href="https://github.com/garrytan/gstack" rel="noopener">github.com/garrytan/gstack</a></span></li>
+    </ul>
   </div>
 </section>
 
 <section id="quiz">
   <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§7</span><h2>自测：分得清「真概念」和「新名词」，也会动手</h2></div>
-    <p class="sec-lede">11 道题：既考你能不能把主张对回一手来源、守住批判视角，也考落地实战（GCC 怎么做、护栏怎么设）。答错会告诉你回读哪一节。全对解锁一句话总结。</p>
+    <div class="sec-head"><span class="sec-no">§6</span><h2>自测：会路由、会治理，才算学会</h2></div>
+    <p class="sec-lede">8 题全对才算通关。错了会给出该重读的小节。</p>
     <div id="quizRoot"></div>
     <div class="verdict" id="verdict"></div>
     <div class="score-rail"><span class="score-pill" id="scorePill">0 / 8 已作答</span></div>
@@ -459,18 +481,16 @@
 <footer>
   <div class="wrap">
     <p><a href="../">← 返回学习主页</a></p>
-    <p>原文：《Agentic 之道》· 公众号 ChaoGeek（彭超），2026-07-06 · GTLC 杭州站演讲整理。</p>
-    <p>一手来源：Anthropic Engineering（context engineering / building effective agents / multi-agent research）· Karpathy、Tobi Lütke（X）· Every（compound engineering）· Sam Altman（one-person company）· METR（arXiv 2507.09089）· HackerNews · GitHub · GTLC 官网。</p>
-    <p>实战来源：Claude Code 文档（code.claude.com/docs）· Codex 文档（developers.openai.com/codex）· AGENTS.md · EveryInc/compound-engineering-plugin · Simon Willison / Drew Breunig / Harper Reed / Addy Osmani。</p>
-    <p>批判性精读与多源核实由 Claude Code 五路并行子 Agent 完成（一手溯源 / X / GitHub / HackerNews / 中文圈）。</p>
+    <p>本页方法：4 路并行子 Agent 调研 12 份资料 → 头脑风暴逐决策拍板 → 当天在本机落地跑通（skill 四层归一、CLAUDE.md 重写、记忆桥、OpenSpec 接入）→ 回写成这份手册。</p>
+    <p>一线来源：Addy Osmani · addyosmani/agent-skills · mattpocock/skills · obra/superpowers · EveryInc/compound-engineering · github/spec-kit · Fission-AI/OpenSpec · BMAD-METHOD · planning-with-files · everything-claude-code · oh-my-claudecode · garrytan/gstack。</p>
   </div>
 </footer>
 
 <script>
 (function(){
-  // spine
-  var sp=document.querySelectorAll('.spine button');
-  var sa=document.getElementById('spineAnswer');
+  // triage interactive
+  var sp=document.querySelectorAll('#triage button');
+  var sa=document.getElementById('triageAnswer');
   sp.forEach(function(b){
     b.addEventListener('click',function(){
       sp.forEach(function(o){o.setAttribute('aria-pressed','false')});
@@ -479,73 +499,73 @@
     });
   });
 
+  // copy buttons
+  document.querySelectorAll('.copy-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var pre=document.getElementById(btn.getAttribute('data-copy'));
+      if(!pre)return;
+      var done=function(){btn.textContent='已复制 ✓';setTimeout(function(){btn.textContent='复制'},1600)};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(pre.textContent).then(done,function(){fallback()});
+      }else{fallback()}
+      function fallback(){
+        var r=document.createRange();r.selectNodeContents(pre);
+        var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);
+        try{document.execCommand('copy');done()}catch(e){}
+        sel.removeAllRanges();
+      }
+    });
+  });
+
   // quiz
   var QS=[
-    {q:'文章的核心口号「Prompt 不是资产，Context 才是资产」，最准确对应哪个已有行业概念？',
-     opts:['提示词工程（prompt engineering）的升级技巧','上下文工程（context engineering），由 Tobi Lütke / Karpathy 带火、Anthropic 定义','RAG 检索增强生成','作者原创、没有对应的行业概念'],
-     a:1,anchor:'#prov',tech:'§2 Context',
-     ok:'对。这是全文最扎实的一段，直接对应 context engineering 转向。注意 Anthropic 的定性是 prompt engineering 的「自然演进」而非取代。',
-     no:'它对应的是 context engineering（Tobi Lütke 2025-06 带火、Anthropic 2025-09 定义），不是 prompt 技巧、也不是 RAG，更不是无出处的原创。'},
+    {q:'给一个存量项目加「导出 CSV」功能，估计半天。按两轴路由，正确的走法是？',
+     opts:['L0：直接写，写完跑一下就行','L1：先出变更提案（改什么、验收标准），人批准后测试先行地实现，完成后归档回写 spec','L2：先开一轮 brainstorm，再写架构文档','先写代码，之后有空再补 spec'],
+     a:1,anchor:'#route',tech:'§3 路由',
+     ok:'对。≤半天、改行为、存量演进——典型 L1。你只在「批 proposal」这一个点出现，剩下交给流程。',
+     no:'半天、改行为、存量演进是 L1 的标准画像：proposal → 批准 → 测试先行实现 → review → 归档回写。L0 只留给「影响面一目了然」的小改，「回头补 spec」违反共识 #1。'},
 
-    {q:'作者的工作流「Clawmancer（1 Lead + 6 Execute Agent）」，在工程上其实是什么？',
-     opts:['一个可在 GitHub 找到的开源多 Agent 框架','Anthropic 早已描述的 orchestrator-worker / lead+subagent 标准拓扑','作者原创、业界没有类似结构的编排方式','LangGraph 的官方推荐配置'],
-     a:1,anchor:'#prov',tech:'§2 Clawmancer',
-     ok:'对。技术内核就是 Anthropic《Building Effective Agents》和多 Agent 研究里的 orchestrator-worker 模式。「Clawmancer」是作者的私有命名，GitHub 搜索 0 结果；「6 个」是个人配置不是行业定数。',
-     no:'搜「Clawmancer」全网 0 结果——它不是开源框架。其内核是 Anthropic 早已描述的 orchestrator-worker（lead + 并行 subagent）标准模式，作者做的是品牌化命名。'},
+    {q:'你装了两个合集，现在 brainstorm 类 skill 同时激活了 4 个。真正的问题是什么？',
+     opts:['没问题，多多益善','占了一点磁盘空间','流程型 skill 互斥：agent 同时听几套互相矛盾的流程指令，等于没有流程；工具型才可以叠加','skill 名字可能重复'],
+     a:2,anchor:'#d-d',tech:'§2-D 技能治理',
+     ok:'对。这就是「一阶段一主将」的理由：每阶段只留一个流程主将，其余不删源、只不激活。工具型（浏览器、图表、笔记库 CLI）不抢指挥权，可以叠加。',
+     no:'关键区分是流程型 vs 工具型：流程型定义「按什么步骤走」，同时激活多个 = agent 听几套矛盾指挥；工具型只提供能力可叠加。治理动作：每阶段一个主将，其余降为不激活。'},
 
-    {q:'关于「多 Agent 编排」，Anthropic 官方《Building Effective Agents》的立场其实是？',
-     opts:['能编排越多 Agent 越好','单 Agent 能覆盖约 80% 场景，能不上多 Agent 就别上，避免过度工程化','多 Agent 是唯一正确的生产架构','Agent 不如预定义 workflow'],
-     a:1,anchor:'#evidence',tech:'§5 硬证据',
-     ok:'对。这正是对文章「上来就编排 6 个 Agent」叙事的重要对冲——官方主张「少即是多」，多 Agent 虽在研究评测上高 90.2%，但 token 成本约是对话的 15×。',
-     no:'Anthropic 官方主张「少即是多」：单 Agent 覆盖约 80% 场景，能不上多 Agent 就别上。多 Agent 更强（+90.2%）但也更贵（约 15× token），不是无脑越多越好。'},
+    {q:'审查你的 CLAUDE.md 时，哪一行最应该被删掉？',
+     opts:['「测试命令：npm test -- --coverage」','「新增页面照 unknowns/index.html 的结构写」','「写代码要注意可读性和可维护性」','「migrations/ 目录只读，改表结构走新迁移文件」'],
+     a:2,anchor:'#d-a',tech:'§2-A CLAUDE.md',
+     ok:'对。「注意可读性」是模型本来就会的通用建议——删掉它 agent 不会做错任何事，留着纯吃上下文。其余三条都过得了「删掉会做错什么」测试：命令、范例、边界。',
+     no:'判据是「删掉这行，agent 会做错什么？」。命令、范例文件、边界禁区都答得上来；「注意可读性和可维护性」答不上来——模型不需要被提醒这个，这行是纯开销。'},
 
-    {q:'Vibe Coding 的造词者 Karpathy，最初把它限定用于什么场景？',
-     opts:['企业生产系统','一次性的周末抛弃型项目','团队协作的长期产品','安全关键型代码'],
-     a:1,anchor:'#prov',tech:'§2 Vibe Coding',
-     ok:'对。Karpathy 原帖（2025-02）就说「not too bad for throwaway weekend projects」，核心是「不看 diff、全部接受」。作者「不适合长期产品」的批评与原意一致。',
-     no:'Karpathy 造词原帖明确限定为「throwaway weekend projects（一次性周末项目）」，并说自己认真写代码时会逐行看 diff。它天生不是为生产设计的。'},
+    {q:'L2 大活从 spec 阶段进入 dev 阶段，两个会话之间正确的衔接方式是？',
+     opts:['把上一个会话的聊天记录全部粘贴到新会话','用文件接力：spec 阶段收尾把结论落盘，dev 阶段开 fresh 会话读文件，接力棒是产出文件不是对话','一直用同一个会话聊到底，中间绝不能断','让模型凭记忆回忆上一阶段讨论了什么'],
+     a:1,anchor:'#route',tech:'§3 文件接力',
+     ok:'对。下一阶段需要的是上一阶段的「结论」而不是「过程」。长对话必然 context rot，粘贴全文和单会话到底都在喂噪音；凭记忆则违反「状态外置」共识。',
+     no:'正解是文件接力（共识 #2 + #4）：状态外置到磁盘、fresh context 干活。粘贴聊天记录和单会话到底都会 context rot；「凭记忆」正是要被消灭的那种不可靠。'},
 
-    {q:'关于「AI 让开发者更快」，目前唯一接近严谨的对照实验（METR RCT）结论是？',
-     opts:['客观提速约 24%，与开发者预期一致','客观提速约 20%','客观上反而慢了约 19%，尽管开发者自以为更快了','没有可测量的差异'],
-     a:2,anchor:'#evidence',tech:'§5 硬证据',
-     ok:'对。METR（arXiv 2507.09089）：开发者事前预测提速 24%、事后自估 20%，实测却慢了 19%。这是整场讨论里唯一接近科学方法的数据，且方向与炒作相反。',
-     no:'METR 随机对照实验测出的是「慢了约 19%」——而且开发者主观以为自己快了 20%。主观体感与客观测量的背离，正是这条证据的价值。'},
+    {q:'为什么要在 CLAUDE.md / skill 里预埋「反借口表」（借口 + 反驳）？',
+     opts:['为了显得文档更完整','因为 LLM 一定会自我合理化跳步（「先跳过测试回头补」），纪律必须连同它的破解话术一起预写成硬规则','因为用户经常找借口','只是 Addy 的个人风格，可有可无'],
+     a:1,anchor:'#consensus',tech:'§1 共识 #3',
+     ok:'对。这是共识层第 3 条：superpowers 用 Iron Law、Addy 用 Rationalizations 表，解决的是同一个问题——agent 会在执行中途生成一个听起来合理的理由绕过纪律，预写反驳才拦得住。',
+     no:'反借口表针对的是 LLM 的固有行为：执行中途自我合理化跳步。「回头补测试」这类话术一定会出现，所以要预写「回头不存在，现在写」这样的反驳。这不是风格，是护栏。'},
 
-    {q:'对「OPC / 一人独角兽」，最有分量的质疑是什么？',
-     opts:['AI 还不够便宜','一个人打字太慢','十亿估值绕不开销售、信任与法律责任，而这些 AI 接不住','没有足够的多 Agent 框架可用'],
-     a:2,anchor:'#duel',tech:'§4 支持 vs 质疑',
-     ok:'对。核心质疑是「能委派权力，但没法把法律与道德责任委派给 AI」；十亿估值绕不开销售团队与客户信任。最火的 Medvi 案例还被拆穿是营销引流站，连 Altman 都改口说「10 人」。',
-     no:'最硬的质疑不在算力或速度，而在「人要担的那部分」——销售、客户信任、法律/道德责任，AI 接不住。这也是 HN 拆一人独角兽叙事的主线。'},
+    {q:'按记忆协议，plan / review / debug 任务开工的第一个动作是什么？',
+     opts:['直接开始规划或改代码','检索本项目的 Learnings 与 ADR，命中的在产出里标注 Known Pattern 并遵循；查不到就明说，不虚构先例','把整个知识库全文喂进上下文','问用户还记不记得以前怎么解决的'],
+     a:1,anchor:'#d-b',tech:'§2-B 记忆桥',
+     ok:'对。这就是 compound 的「review 反哺 plan」：先查先例（一次检索 2 秒，重踩一次坑 2 小时），命中显式标注，没命中也要说明查过——防止编造。',
+     no:'第一动作是查项目记忆（Learnings/ADR）。全文喂上下文违反「每任务小范围」；问用户是把人当数据库。查到标 Known Pattern，查不到明说——绝不虚构先例。'},
 
-    {q:'下列哪一组，属于作者自造、在业界查不到一手出处的框架/术语？',
-     opts:['context engineering、vibe coding、compound engineering','GCC（Goal/Context/Constraints）、商业大脑、五步闭环的前四步命名','orchestrator-worker、lead agent、subagent','RAG、long context、memory'],
-     a:1,anchor:'#prov',tech:'§2 正本清源',
-     ok:'对。GCC、商业大脑、以及五步闭环里除 Compound Loop 外的命名，都是作者的原创归纳，应标注为「个人框架」而非行业共识——这正是全文「概念密度高于实证密度」的来源。',
-     no:'A、C、D 都是有一手出处的行业概念。真正自造的是 GCC、商业大脑、以及五步闭环前四步的命名——它们没有外部一手来源。'},
+    {q:'五个决策点里，哪条纪律是所有级别（L0/L1/L2）都不可豁免的？',
+     opts:['TDD 测试先行','双模型 review','verification-before-completion：没跑验证命令、没看到输出证据，不许说「完成」','worktree 隔离'],
+     a:2,anchor:'#d-e',tech:'§2-E 纪律档位',
+     ok:'对。TDD、双模型 review、worktree 都跟着 L 级走档位，唯独 verify 全级别强制——它成本最低（跑一条命令），防「假完成」收益最大。',
+     no:'TDD 从 L1 起、双模型 review 只在 L2、worktree 只在特定阶段强制；全级别不可豁免的只有 verify：改完必须跑起来、拿到输出证据才算完成。'},
 
-    {q:'核实文章来源后，最准确的结论是？',
-     opts:['会议和嘉宾都是虚构的','会议、嘉宾真实，但官方日期是 2026-06-27，与文章暗示的「上周六/7 月」对不上','作者彭超的实名和履历都已在工商记录核实','整篇文章不可信'],
-     a:1,anchor:'#verify',tech:'§6 核实',
-     ok:'对。GTLC 杭州站与三位嘉宾经官网逐字核实属实（真实来源）；但官方日期是 06-27、非 7 月，「上周六」不准确。作者背后是真 AI 产品公司（OneOneTalk），但「彭超」实名在公开渠道查不到。',
-     no:'会议和嘉宾是真的（GTLC 官网可核对），瑕疵只在时间：官方是 2026-06-27，非文章暗示的 7 月。作者有真实产品背书，但「彭超」实名无法在工商/应用记录里确证。'},
-
-    {q:'（实战）在 Claude Code 里，要「硬保证」某个目录（如 migrations）绝不被修改，最可靠的做法是？',
-     opts:['在 CLAUDE.md 里写一句「never touch migrations/」','写一条 permissions 的 deny 规则，或一个 PreToolUse hook','切到 plan 模式看看','每次口头提醒它小心'],
-     a:1,anchor:'#gcc-c2',tech:'§3 Constraints',
-     ok:'对。CLAUDE.md 是上下文/建议，模型可能违背；deny 规则和 PreToolUse hook 是确定性护栏——「必须每次发生、零例外」，deny 连 bypass 模式都拦得住。',
-     no:'写进 CLAUDE.md 只是「建议」，模型可能违背。要「硬保证」得用 permissions 的 deny 规则或 PreToolUse hook（确定性护栏）——deny 在所有模式含 bypass 都生效。'},
-
-    {q:'（实战）Codex 的护栏是两个正交维度。官方推荐的「安全默认」是哪一组？',
-     opts:['full-auto + danger-full-access','approval_policy=on-request + sandbox_mode=workspace-write，且联网默认关','approval_policy=never + sandbox_mode=read-only','老的 suggest 模式'],
-     a:1,anchor:'#gcc-c2',tech:'§3 Constraints',
-     ok:'对。on-request + workspace-write = 沙箱内自主、越界（联网/出工作区）才问；联网默认关，需 network_access=true 才放开。suggest/auto-edit/full-auto 是已废弃的旧命名。',
-     no:'官方安全默认是 approval_policy=on-request + sandbox_mode=workspace-write（沙箱内自主、越界才问，联网默认关）。full-auto/suggest 是废弃旧词；never+read-only 是 CI 或纯只读的极端档。'},
-
-    {q:'（实战）作者说的「把结果写回 Context 形成复利」，落到 Claude Code 上最具体的做法是？',
-     opts:['每次都开新会话重头讲一遍','把踩坑/评审结论写回 CLAUDE.md 与 docs/solutions，并把缺陷升级成 lint 规则或 review agent','把所有历史对话都留在上下文里不清空','只依赖模型自己的记忆'],
-     a:1,anchor:'#practice',tech:'§3 Compound Loop',
-     ok:'对。这正是 Every 的 compound engineering：事实写回 CLAUDE.md、可搜索解法进 docs/solutions（带 frontmatter）、一个 bug 升级成 lint 规则 + review agent 的 prompt——「每个 bug 变成永久教训」。',
-     no:'复利不是靠模型记忆或堆历史上下文（那会 context rot）。做法是把踩坑/评审写回 CLAUDE.md 与 docs/solutions、把缺陷升级成 lint 规则或 review agent，让系统下次自动 catch。'}
+    {q:'关于 spec 的价值，SDD 框架对比调研得出的公认教训是？',
+     opts:['spec 写得越长越详细越好','有 spec 就比没 spec 强','spec 的价值 = agent 真的会读 × 跨会话存活 × 随代码演进；写完即弃的 spec 是纯开销','spec 必须用官方框架生成才有效'],
+     a:2,anchor:'#d-c',tech:'§2-C SDD 分级',
+     ok:'对。这是 OpenSpec 的 living spec（archive 回写 source of truth）比「每 feature 写一套然后再也不看」更值钱的原因——spec 是活资产，不是仪式产物。',
+     no:'长度和框架都不是价值来源。公认教训：agent 会读、跨会话存活、随代码演进，三者缺一 spec 就退化成仪式——写完即弃等于白写。'}
   ];
   var root=document.getElementById('quizRoot'),pill=document.getElementById('scorePill'),verdict=document.getElementById('verdict');
   var answered=0,correct=0;
@@ -586,16 +606,16 @@
   function finish(){
     if(correct===QS.length){
       verdict.className='verdict show pass';
-      verdict.innerHTML='<h3>✓ Cleared — 你能分清「道」与「名词」了</h3>'+
-        '<p>一句话总结这篇文章：</p><ul>'+
-        '<li><b>方向对</b>：Context 比 Prompt 重要、Plan 化、多 Agent 编排、复利式工程、一人公司趋势——都有一手来源支撑。</li>'+
-        '<li><b>但缺实证</b>：GCC、商业大脑、五步命名、Clawmancer 是自造包装；原文没引任何数字（Anthropic 90.2%/15×、METR −19% 它都没提）。</li>'+
-        '<li><b>该怎么用</b>：拿它当「记忆抓手」可以，但真要落地，回到一手来源（Anthropic context engineering / building effective agents）和反面证据（METR、HN），自己称重。</li>'+
-        '<li><b>更要动手</b>：把 GCC 落成 plan mode + CLAUDE.md/AGENTS.md + deny 规则/hook，把复利落成写回 docs/solutions——概念记住不算数，敲进工作流才算（见 §3）。</li></ul>';
+      verdict.innerHTML='<h3>✓ Cleared — 你有自己的作战手册了</h3>'+
+        '<p>带走四句话：</p><ul>'+
+        '<li><b>共识不用选</b>：spec 先行、状态落盘、硬纪律 + 反借口、fresh context、闭环沉淀——直接采纳。</li>'+
+        '<li><b>决策必须答</b>：CLAUDE.md 分层、大脑放哪、SDD 分级、skill 主将、验证档位——我的答案在 §2，你的可以不同，但不能不答。</li>'+
+        '<li><b>路由是杠杆</b>：L0 看结果、L1 批提案、L2 全程设计——注意力只花在杠杆最高的决策点，这就是「高效指挥 agent」的具体形态。</li>'+
+        '<li><b>落地才算数</b>：把 §4 的四份模板抄走改成你的，从下一个任务开始自报 L 级。</li></ul>';
     }else{
       verdict.className='verdict show retry';
       verdict.innerHTML='<h3>Not yet — 还差 '+(QS.length-correct)+' 题</h3>'+
-        '<p>按错题链接回去重读对应小节再重考。分清「有一手出处的真概念」和「作者自造的新名词」，是读这类观点文的核心技能。</p>'+
+        '<p>按错题链接回去重读对应小节。分级路由和流程型/工具型的区分，是这套体系最容易答错、也最值钱的两处。</p>'+
         '<button class="reset" type="button" id="retryBtn">重置测验</button>';
       var rb=document.getElementById('retryBtn');
       if(rb)rb.addEventListener('click',function(){build();document.getElementById('quiz').scrollIntoView();});
