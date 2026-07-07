@@ -223,7 +223,7 @@
       <a href="#duel"><span class="dot"></span>支持 vs 质疑</a>
       <a href="#evidence"><span class="dot"></span>原文缺的硬证据</a>
       <a href="#verify"><span class="dot"></span>会议与作者核实</a>
-      <a href="#quiz"><span class="dot"></span>自测（8 题）</a>
+      <a href="#quiz"><span class="dot"></span>自测（11 题）</a>
     </nav>
   </div>
 </header>
@@ -346,7 +346,7 @@
     <article class="pract">
       <div class="pract-head"><span class="pract-tag">Vibe Coding 的解药</span><h4>怎么用 AI 快，又不在生产里翻车</h4></div>
       <ul class="do">
-        <li><b>读 diff、别 Accept All</b>：Karpathy 本人对认真代码就逐行看 diff。长会话大 diff 用第 11 招（merge 前让它考你）收尾。</li>
+        <li><b>读 diff、别 Accept All</b>：Karpathy 本人对认真代码就逐行看 diff。长会话大 diff 用<a href="../unknowns/#t11">第 11 招（merge 前让它考你）</a>收尾。</li>
         <li><b>给能自跑的验证器</b>：测试 / build 退出码 / linter / 截图对比——有它循环自己闭合，没它「看起来做完」就是唯一信号，你被迫当人肉验证。</li>
         <li><span class="tool cc">Claude Code</span> <b>对抗式复核</b>：收工前让一个全新上下文的子 agent 只看 diff + 验收标准复核（内置 <code>/code-review</code>）；但约束它只报「影响正确性」的 gap，否则会过度工程。</li>
         <li><b>放手就上沙箱 + 停止条件</b>：要无人值守就在隔离环境跑（无网 Docker、只给测试凭证、设预算/最大迭代上限），而不是靠逐条点批准。</li>
@@ -452,13 +452,14 @@
     <p class="sec-lede">11 道题：既考你能不能把主张对回一手来源、守住批判视角，也考落地实战（GCC 怎么做、护栏怎么设）。答错会告诉你回读哪一节。全对解锁一句话总结。</p>
     <div id="quizRoot"></div>
     <div class="verdict" id="verdict"></div>
-    <div class="score-rail"><span class="score-pill" id="scorePill">0 / 8 已作答</span></div>
+    <div class="score-rail"><span class="score-pill" id="scorePill">0 / 11 已作答</span></div>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
     <p><a href="../">← 返回学习主页</a></p>
+    <p>姊妹篇：<a href="../agentic/">Agentic 开发作战手册</a>——那页管「怎么做」，本页管「怎么读」。</p>
     <p>原文：《Agentic 之道》· 公众号 ChaoGeek（彭超），2026-07-06 · GTLC 杭州站演讲整理。</p>
     <p>一手来源：Anthropic Engineering（context engineering / building effective agents / multi-agent research）· Karpathy、Tobi Lütke（X）· Every（compound engineering）· Sam Altman（one-person company）· METR（arXiv 2507.09089）· HackerNews · GitHub · GTLC 官网。</p>
     <p>实战来源：Claude Code 文档（code.claude.com/docs）· Codex 文档（developers.openai.com/codex）· AGENTS.md · EveryInc/compound-engineering-plugin · Simon Willison / Drew Breunig / Harper Reed / Addy Osmani。</p>

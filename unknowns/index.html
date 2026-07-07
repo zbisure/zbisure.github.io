@@ -310,7 +310,7 @@
       <p class="phase-lede">代码写下之前，是发现未知项成本最低的地方。规格上的小变化会导致实现的巨大差异，让智能体回退也更困难。</p>
 
       <article class="card" id="t01">
-        <div class="card-head"><span class="card-no">01</span><h4>盲点扫描</h4><span class="en">Blindspot pass</span><span class="chip">未知的未知</span><a class="demo-zh" href="https://zbisure.github.io/unknowns/demos/01-blindspot-pass.html">中文演示 ↗</a></div>
+        <div class="card-head"><span class="card-no">01</span><h4>盲点扫描</h4><span class="en">Blindspot pass</span><span class="chip">未知的未知</span><a class="demo-zh" href="demos/01-blindspot-pass.html">中文演示 ↗</a></div>
         <div class="card-body">
           <p class="when"><b>何时用</b>：进入陌生模块或陌生领域动手之前。直接使用 “blindspot pass”“unknown unknowns” 这些字眼，并告诉它你是谁、你知道什么。</p>
           <div class="promptbox"><pre>I'm adding a new SSO auth provider to Acme but I've never touched the auth module. Do a blindspot pass: find my unknown unknowns in this part of the codebase, explain each one, and tell me how to prompt you better for the implementation.</pre><button class="copy" type="button">copy</button></div>
@@ -324,7 +324,7 @@
       </article>
 
       <article class="card" id="t02">
-        <div class="card-head"><span class="card-no">02</span><h4>教我词汇</h4><span class="en">Teach me my unknowns</span><span class="chip">未知的未知</span><a class="demo-zh" href="https://zbisure.github.io/unknowns/demos/02-color-grading-explainer.html">中文演示 ↗</a></div>
+        <div class="card-head"><span class="card-no">02</span><h4>教我词汇</h4><span class="en">Teach me my unknowns</span><span class="chip">未知的未知</span><a class="demo-zh" href="demos/02-color-grading-explainer.html">中文演示 ↗</a></div>
         <div class="card-body">
           <p class="when"><b>何时用</b>：要做完全不懂的领域工作（调色、法务、音频……），连提需求的语言都没有。先学行话，再谈要求。</p>
           <div class="promptbox"><pre>I don't know what color grading is but I need to grade the Acme launch video. Teach me color grading well enough that I understand my unknown unknowns and can prompt you with real vocabulary.</pre><button class="copy" type="button">copy</button></div>
@@ -338,7 +338,7 @@
       </article>
 
       <article class="card" id="t03">
-        <div class="card-head"><span class="card-no">03</span><h4>四个设计方向</h4><span class="en">Four design directions</span><span class="chip">未知的已知</span><a class="demo-zh" href="https://zbisure.github.io/unknowns/demos/03-design-directions.html">中文演示 ↗</a></div>
+        <div class="card-head"><span class="card-no">03</span><h4>四个设计方向</h4><span class="en">Four design directions</span><span class="chip">未知的已知</span><a class="demo-zh" href="demos/03-design-directions.html">中文演示 ↗</a></div>
         <div class="card-body">
           <p class="when"><b>何时用</b>：视觉、风格类决策，“看到才知道要什么”。要求方向<b>互斥</b>（wildly different）而非四个变体，且用<b>同一份数据</b>渲染，让设计成为唯一变量。</p>
           <div class="promptbox"><pre>I want a review-queue dashboard for Acme but I have no visual taste and don't know what's possible. Make me one HTML page with 4 wildly different design directions so I can react to them.</pre><button class="copy" type="button">copy</button></div>
@@ -352,7 +352,7 @@
       </article>
 
       <article class="card" id="t04">
-        <div class="card-head"><span class="card-no">04</span><h4>先做假原型</h4><span class="en">Mock before you wire</span><span class="chip">未知的已知</span><a class="demo-zh" href="https://zbisure.github.io/unknowns/demos/04-toolbar-mock.html">中文演示 ↗</a></div>
+        <div class="card-head"><span class="card-no">04</span><h4>先做假原型</h4><span class="en">Mock before you wire</span><span class="chip">未知的已知</span><a class="demo-zh" href="demos/04-toolbar-mock.html">中文演示 ↗</a></div>
         <div class="card-body">
           <p class="when"><b>何时用</b>：改动会牵动真实代码，但布局和交互还没定。一次性 HTML + 假数据，绝不接真后端、不碰前端状态。</p>
           <div class="promptbox"><pre>Before wiring anything up, make a single HTML file mocking Acme's new frame-annotation toolbar with fake data. I want to react to the layout before you touch the real app.</pre><button class="copy" type="button">copy</button></div>
@@ -366,7 +366,7 @@
       </article>
 
       <article class="card" id="t05">
-        <div class="card-head"><span class="card-no">05</span><h4>头脑风暴干预点</h4><span class="en">Brainstorm the intervention</span><span class="chip">已知的未知</span><a class="demo-zh" href="https://zbisure.github.io/unknowns/demos/05-churn-brainstorm.html">中文演示 ↗</a></div>
+        <div class="card-head"><span class="card-no">05</span><h4>头脑风暴干预点</h4><span class="en">Brainstorm the intervention</span><span class="chip">已知的未知</span><a class="demo-zh" href="demos/05-churn-brainstorm.html">中文演示 ↗</a></div>
         <div class="card-body">
           <p class="when"><b>何时用</b>：只有粗糙问题，还没定方案。三要素：粗糙问题 + 要求<b>搜索代码库</b>落地 + 按成本排序并预告“我会告诉你哪些 resonate”（决策权留给自己）。</p>
           <div class="promptbox"><pre>Here's my rough problem: Acme users churn after onboarding. Search the codebase and brainstorm 10 places we could intervene, from cheapest to most ambitious. I'll tell you which ones resonate.</pre><button class="copy" type="button">copy</button></div>
@@ -380,7 +380,7 @@
       </article>
 
       <article class="card" id="t06">
-        <div class="card-head"><span class="card-no">06</span><h4>访谈</h4><span class="en">The interview</span><span class="chip">已知的未知</span><a class="demo-zh" href="https://zbisure.github.io/unknowns/demos/06-interview.html">中文演示 ↗</a></div>
+        <div class="card-head"><span class="card-no">06</span><h4>访谈</h4><span class="en">The interview</span><span class="chip">已知的未知</span><a class="demo-zh" href="demos/06-interview.html">中文演示 ↗</a></div>
         <div class="card-body">
           <p class="when"><b>何时用</b>：头脑风暴之后仍有歧义。与其让 Claude 静默猜，不如让它问你——排序标准是<b>答案对架构的改变程度</b>（blast radius），不是重要性直觉。</p>
           <div class="promptbox"><pre>Interview me one question at a time about anything still ambiguous in the annotation-export feature. Prioritize questions where my answer would change the architecture.</pre><button class="copy" type="button">copy</button></div>
@@ -394,7 +394,7 @@
       </article>
 
       <article class="card" id="t07">
-        <div class="card-head"><span class="card-no">07</span><h4>指向参照实现</h4><span class="en">Point at a reference</span><span class="chip">未知的已知</span><a class="demo-zh" href="https://zbisure.github.io/unknowns/demos/07-reference-port.html">中文演示 ↗</a></div>
+        <div class="card-head"><span class="card-no">07</span><h4>指向参照实现</h4><span class="en">Point at a reference</span><span class="chip">未知的已知</span><a class="demo-zh" href="demos/07-reference-port.html">中文演示 ↗</a></div>
         <div class="card-body">
           <p class="when"><b>何时用</b>：说不清想要什么，但存在一个“就是它”的实现——哪怕是另一种语言。最好的参考资料是源代码，不是截图。</p>
           <div class="promptbox"><pre>This Rust crate in vendor/rate-limiter implements the exact backoff behavior I want. Read it and reimplement the same semantics in our TypeScript API client — but first show me a semantics map so I can confirm you understood it.</pre><button class="copy" type="button">copy</button></div>
@@ -408,7 +408,7 @@
       </article>
 
       <article class="card" id="t08">
-        <div class="card-head"><span class="card-no">08</span><h4>可调整的计划</h4><span class="en">The tweakable plan</span><span class="chip">收束决策</span><a class="demo-zh" href="https://zbisure.github.io/unknowns/demos/08-implementation-plan.html">中文演示 ↗</a></div>
+        <div class="card-head"><span class="card-no">08</span><h4>可调整的计划</h4><span class="en">The tweakable plan</span><span class="chip">收束决策</span><a class="demo-zh" href="demos/08-implementation-plan.html">中文演示 ↗</a></div>
         <div class="card-body">
           <p class="when"><b>何时用</b>：准备动手前的最后一步。让计划<b>按“你多可能想改它”排序</b>而不是执行顺序，并明说哪部分你选择信任。</p>
           <div class="promptbox"><pre>Write an implementation plan for annotation export as HTML, but lead with the decisions I'm most likely to tweak: data model changes, new type interfaces, and anything user-facing. Bury the mechanical refactoring at the bottom — I trust you on that part.</pre><button class="copy" type="button">copy</button></div>
@@ -427,7 +427,7 @@
       <p class="phase-lede">无论规划多充分，智能体都可能在实现深处撞上边界情况、被迫换思路。别让这些发现消失在滚动的终端输出里。</p>
 
       <article class="card" id="t09">
-        <div class="card-head"><span class="card-no">09</span><h4>实现笔记</h4><span class="en">Implementation notes</span><span class="chip">未知的未知</span><a class="demo-zh" href="https://zbisure.github.io/unknowns/demos/09-implementation-notes.html">中文演示 ↗</a></div>
+        <div class="card-head"><span class="card-no">09</span><h4>实现笔记</h4><span class="en">Implementation notes</span><span class="chip">未知的未知</span><a class="demo-zh" href="demos/09-implementation-notes.html">中文演示 ↗</a></div>
         <div class="card-body">
           <p class="when"><b>何时用</b>：每个长时间自主构建任务开始时顺手加上。三段式指令同时解决自主性（不停下来问）与可审计性（不静默决策）。</p>
           <div class="promptbox"><pre>Keep an implementation-notes file as you build the export feature. If you hit an edge case that forces you to deviate from the plan, pick the conservative option, log it under 'Deviations', and keep going.</pre><button class="copy" type="button">copy</button></div>
@@ -447,7 +447,7 @@
       <p class="phase-lede">发布意味着评审者、审批人带着他们自己的未知项进场；而你自己对变更的理解也可能比想象中浅。</p>
 
       <article class="card" id="t10">
-        <div class="card-head"><span class="card-no">10</span><h4>争取支持文档</h4><span class="en">The buy-in doc</span><span class="chip">他人的未知</span><a class="demo-zh" href="https://zbisure.github.io/unknowns/demos/10-pitch-doc.html">中文演示 ↗</a></div>
+        <div class="card-head"><span class="card-no">10</span><h4>争取支持文档</h4><span class="en">The buy-in doc</span><span class="chip">他人的未知</span><a class="demo-zh" href="demos/10-pitch-doc.html">中文演示 ↗</a></div>
         <div class="card-body">
           <p class="when"><b>何时用</b>：功能完成要拿 sign-off、跨团队汇报。在异议被提出之前就回答它。</p>
           <div class="promptbox"><pre>Package the prototype, the spec, and the implementation notes into a single doc I can drop in Slack to get buy-in on shipping annotation export. Lead with the demo.</pre><button class="copy" type="button">copy</button></div>
@@ -461,7 +461,7 @@
       </article>
 
       <article class="card" id="t11">
-        <div class="card-head"><span class="card-no">11</span><h4>合并前先考我</h4><span class="en">Quiz me before I merge</span><span class="chip">自己的未知</span><a class="demo-zh" href="https://zbisure.github.io/unknowns/demos/11-change-quiz.html">中文演示 ↗</a></div>
+        <div class="card-head"><span class="card-no">11</span><h4>合并前先考我</h4><span class="en">Quiz me before I merge</span><span class="chip">自己的未知</span><a class="demo-zh" href="demos/11-change-quiz.html">中文演示 ↗</a></div>
         <div class="card-body">
           <p class="when"><b>何时用</b>：长会话结束、diff 很大（尤其 AI 生成的）。只看 diff 只能获得浅层理解——很多行为取决于既有代码路径。<b>不通过测验不 merge。</b></p>
           <div class="promptbox"><pre>I want to make sure I understand everything that happened in this change before I merge. Give me an HTML report on the export-feature diff — context, intuition, what was done — with a quiz at the bottom that I must pass.</pre><button class="copy" type="button">copy</button></div>
