@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Agent Harness（挽具工程）野外手册：Agent = Model + Harness。三页讲了内层 agent loop 和外层循环工程，这一页专攻中间那层——模型与循环之间的工程脚手架。谱系、五大件解剖、Böckeler 的 Guides/Sensors 双控制、长时 agent 的两段式 harness、单线程 vs 多 agent，附 7 个可复制模板、28 篇来源书架与 12 题自测。">
+<title>Agent Harness · 挽具工程野外手册</title>
+<style>
+  :root{
+    --paper:#F3F5F1; --paper-raised:#FBFCFA; --ink:#20302E; --ink-soft:#5A6B67;
+    --ink-faint:#8B9995; --line:#D8DED8; --contour:#B5A488; --survey:#28599C;
+    --survey-soft:#DCE6F4; --marker:#B4452B; --good:#3D7A4E; --good-soft:#DFEDE2;
+    --bad-soft:#F4E2DC; --mono-bg:#E9EEE9;
+    --shadow:0 1px 2px rgba(32,48,46,.06),0 6px 20px rgba(32,48,46,.07);
+    --serif:"Songti SC","Georgia","Times New Roman",serif;
+    --sans:"PingFang SC",-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    --mono:"SF Mono","Menlo","Consolas",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#151B1B; --paper-raised:#1D2525; --ink:#DCE3DF; --ink-soft:#96A5A0;
+      --ink-faint:#687571; --line:#2E3938; --contour:#6E6350; --survey:#7FA9E4;
+      --survey-soft:#22334C; --marker:#D97B62; --good:#7FB98E; --good-soft:#243B2B;
+      --bad-soft:#462921; --mono-bg:#111716;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#151B1B; --paper-raised:#1D2525; --ink:#DCE3DF; --ink-soft:#96A5A0;
+    --ink-faint:#687571; --line:#2E3938; --contour:#6E6350; --survey:#7FA9E4;
+    --survey-soft:#22334C; --marker:#D97B62; --good:#7FB98E; --good-soft:#243B2B;
+    --bad-soft:#462921; --mono-bg:#111716;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --paper:#F3F5F1; --paper-raised:#FBFCFA; --ink:#20302E; --ink-soft:#5A6B67;
+    --ink-faint:#8B9995; --line:#D8DED8; --contour:#B5A488; --survey:#28599C;
+    --survey-soft:#DCE6F4; --marker:#B4452B; --good:#3D7A4E; --good-soft:#DFEDE2;
+    --bad-soft:#F4E2DC; --mono-bg:#E9EEE9;
+    --shadow:0 1px 2px rgba(32,48,46,.06),0 6px 20px rgba(32,48,46,.07);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+  a{color:var(--survey)}
+
+  /* hero */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding:72px 0 56px}
+  .hero svg.contours{position:absolute;inset:0;width:100%;height:100%;color:var(--contour);opacity:.28;pointer-events:none}
+  .hero .wrap{position:relative}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--survey);margin:0 0 18px}
+  h1{font-family:var(--serif);font-size:clamp(34px,6vw,54px);line-height:1.2;margin:0 0 20px;text-wrap:balance;font-weight:700}
+  .thesis{max-width:39em;font-size:17.5px;color:var(--ink-soft);margin:0 0 8px}
+  .thesis strong{color:var(--ink)}
+  .credit{font-size:13.5px;color:var(--ink-faint);margin-top:20px;max-width:42em}
+  .credit a{color:var(--ink-faint)}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .legend a{font-family:var(--mono);font-size:12.5px;text-decoration:none;color:var(--ink-soft);
+    border:1px solid var(--line);background:var(--paper-raised);border-radius:3px;
+    padding:6px 12px;display:inline-flex;gap:8px;align-items:center}
+  .legend a:hover{border-color:var(--survey);color:var(--survey)}
+  .legend .dot{width:7px;height:7px;border-radius:50%;background:var(--survey)}
+
+  /* sections */
+  section{padding:60px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .sec-no{font-family:var(--mono);font-size:13px;color:var(--contour);letter-spacing:.1em}
+  h2{font-family:var(--serif);font-size:clamp(24px,3.6vw,32px);margin:0;text-wrap:balance}
+  .sec-lede{color:var(--ink-soft);max-width:42em;margin:10px 0 34px}
+  h3{font-family:var(--serif);font-size:20px;margin:36px 0 14px}
+
+  /* quote plate */
+  .plate{background:var(--paper-raised);border:1px solid var(--line);border-left:3px solid var(--survey);
+    border-radius:0 5px 5px 0;box-shadow:var(--shadow);padding:18px 22px;margin:0 0 16px}
+  .plate .en{font-family:var(--serif);font-size:17px;font-style:italic;margin:0 0 6px}
+  .plate .zh{font-size:14px;color:var(--ink-soft);margin:0 0 4px}
+  .plate .who{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin:0}
+
+  /* nested three layers (signature visual) */
+  .nest{margin:26px 0 6px}
+  .nl{border:1.5px solid var(--line);border-radius:9px;padding:16px 16px 18px;background:var(--paper-raised)}
+  .nl .nlab{display:block;font-size:13px;line-height:1.55;color:var(--ink-soft);margin-bottom:12px}
+  .nl .nlab b{font-family:var(--serif);font-size:15.5px;color:var(--ink)}
+  .nl .nlab .who{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-top:2px}
+  .nl.mid{border-color:var(--survey);border-width:2px;background:var(--survey-soft);margin-top:6px}
+  .nl.mid>.nlab b{color:var(--survey)}
+  .nl.inner{border-color:var(--contour);background:var(--paper);margin-top:6px}
+  .nl.inner .nlab{margin-bottom:0}
+
+  /* genealogy timeline */
+  .gene{list-style:none;padding:0;margin:22px 0 0;position:relative}
+  .gene::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--line)}
+  .gene li{position:relative;padding:0 0 20px 32px;font-size:14.5px;color:var(--ink-soft)}
+  .gene li::before{content:"";position:absolute;left:1px;top:7px;width:14px;height:14px;border-radius:50%;
+    background:var(--paper);border:3px solid var(--survey)}
+  .gene b{color:var(--ink)}
+  .gene .when{font-family:var(--mono);font-size:11.5px;color:var(--contour);letter-spacing:.06em;display:block}
+  .gene .phase{padding-left:0}
+  .gene .phase::before{display:none}
+  .gene .phase b{font-family:var(--serif);font-size:16px;color:var(--survey)}
+
+  /* duo cols */
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0 0}
+  @media(max-width:640px){.duo{grid-template-columns:1fr}}
+  .duo .cell{border:1px solid var(--line);border-radius:4px;padding:16px 18px;background:var(--paper-raised);font-size:14px;line-height:1.65;color:var(--ink-soft)}
+  .duo .a{border-left:3px solid var(--survey)}
+  .duo .b{border-left:3px solid var(--contour)}
+  .duo .cell b{display:block;font-family:var(--serif);font-size:16.5px;margin-bottom:6px;color:var(--ink)}
+  .duo .cell .tag{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:8px}
+  .duo .cell em{font-style:normal;color:var(--survey);font-weight:600}
+
+  /* part cards (五大件) */
+  .lt{background:var(--paper-raised);border:1px solid var(--line);border-left:3px solid var(--survey);
+    border-radius:5px;box-shadow:var(--shadow);margin-bottom:16px;padding:20px 22px 16px}
+  .lt-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px;margin-bottom:10px}
+  .lt-head h4{font-family:var(--serif);font-size:19px;margin:0}
+  .lt-head .cmd{font-family:var(--mono);font-size:12.5px;color:var(--survey);margin-left:auto;white-space:nowrap}
+  .lt dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+  .lt dt{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-faint);text-transform:uppercase;padding-top:3px;white-space:nowrap}
+  .lt dd{margin:0;color:var(--ink-soft)}
+  .lt dd b{color:var(--ink)}
+  .lt dd .src{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+
+  /* tables */
+  .tbl-scroll{overflow-x:auto;margin:20px 0 0}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);
+    text-align:left;padding:8px 12px;border-bottom:2px solid var(--line)}
+  td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--ink-soft);vertical-align:top}
+  td b{color:var(--ink)}
+  td .m{font-family:var(--mono);font-size:12.5px;color:var(--survey)}
+  .tbl-scroll caption{caption-side:bottom;font-size:12px;color:var(--ink-faint);text-align:left;padding-top:8px}
+
+  /* anatomy / do list */
+  .do{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:9px}
+  .do li{padding-left:18px;position:relative;font-size:14px;line-height:1.64;color:var(--ink-soft)}
+  .do li::before{content:"▸";position:absolute;left:0;top:0;color:var(--survey)}
+  .do li b{color:var(--ink)}
+
+  /* stats strip */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0 0}
+  @media(max-width:640px){.stats{grid-template-columns:1fr}}
+  .stats .st{border:1px solid var(--line);border-radius:4px;background:var(--paper-raised);padding:14px 16px;text-align:center}
+  .stats .num{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--survey);display:block}
+  .stats .lbl{font-size:12.5px;color:var(--ink-faint)}
+
+  /* four checks */
+  .quad{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0 0}
+  @media(max-width:560px){.quad{grid-template-columns:1fr}}
+  .quad .cell{border:1px solid var(--line);border-left:3px solid var(--good);border-radius:4px;
+    padding:14px 16px;background:var(--paper-raised);font-size:14px;line-height:1.6;color:var(--ink-soft)}
+  .quad .cell b{display:block;color:var(--ink);font-family:var(--serif);font-size:15.5px;margin-bottom:4px}
+
+  /* fit lists */
+  .fit{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0 0}
+  @media(max-width:640px){.fit{grid-template-columns:1fr}}
+  .fit .cell{border:1px solid var(--line);border-radius:4px;padding:14px 16px;background:var(--paper-raised);font-size:14px;line-height:1.6}
+  .fit .yes{border-left:3px solid var(--good)}
+  .fit .no{border-left:3px solid var(--marker)}
+  .fit b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+  .fit .yes b{color:var(--good)}
+  .fit .no b{color:var(--marker)}
+  .fit ul{margin:0;padding-left:18px;color:var(--ink-soft)}
+  .fit li{margin-bottom:4px}
+
+  /* template cards */
+  .tpl{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);margin-bottom:18px;padding:18px 22px 16px}
+  .tpl-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:8px}
+  .tpl-head h4{font-family:var(--serif);font-size:18px;margin:0;text-wrap:balance}
+  .tpl-tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--survey);text-transform:uppercase;width:100%}
+  .tpl .when{font-size:14px;color:var(--ink-soft);margin:0 0 12px}
+  .tpl .when b{color:var(--ink)}
+  .promptbox{position:relative;margin:0 0 10px}
+  .promptbox pre{
+    margin:0;background:var(--mono-bg);border:1px solid var(--line);border-radius:4px;
+    padding:14px 16px;padding-right:74px;font-family:var(--mono);font-size:13px;line-height:1.6;
+    white-space:pre-wrap;overflow-x:auto;color:var(--ink);
+  }
+  .copy{
+    position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11.5px;
+    border:1px solid var(--line);background:var(--paper-raised);color:var(--ink-soft);
+    border-radius:3px;padding:4px 10px;cursor:pointer;
+  }
+  .copy:hover{border-color:var(--survey);color:var(--survey)}
+  .copy.done{border-color:var(--good);color:var(--good)}
+  .prompt-zh{font-size:13.5px;color:var(--ink-soft);margin:0 0 6px;padding:4px 0 4px 14px;border-left:2px solid var(--line);line-height:1.7}
+  .prompt-zh b{color:var(--ink-faint);font-weight:500;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em}
+
+  /* boundaries */
+  .lesson{background:var(--paper-raised);border:1px solid var(--line);border-left:3px solid var(--marker);
+    border-radius:0 4px 4px 0;padding:14px 18px;margin-bottom:12px;font-size:14.5px;color:var(--ink-soft)}
+  .lesson b{color:var(--ink);font-family:var(--serif)}
+
+  .keyline{margin:24px 0 0;border-left:3px solid var(--contour);padding:8px 16px;
+    font-size:15px;color:var(--ink-soft);font-style:italic}
+
+  code{font-family:var(--mono);font-size:.85em;background:var(--mono-bg);border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--ink);word-break:break-word}
+
+  /* source shelf */
+  .shelf h3{margin-top:30px}
+  .src{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:13px}
+  .src li{border-left:2px solid var(--line);padding:2px 0 2px 14px}
+  .src .t{font-family:var(--serif);font-size:15.5px;color:var(--ink);line-height:1.4}
+  .src .t a{text-decoration:none}
+  .src .t a:hover{text-decoration:underline}
+  .src .by{font-family:var(--mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;margin-left:2px}
+  .src .take{font-size:13.5px;color:var(--ink-soft);margin-top:3px}
+  .src .take b{color:var(--ink)}
+  .src .partial{color:var(--marker);font-family:var(--mono);font-size:10.5px;letter-spacing:.05em}
+
+  /* quiz */
+  .quiz-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+  .quiz-card .q-no{font-family:var(--mono);font-size:12px;color:var(--contour);letter-spacing:.1em}
+  .quiz-card p.q{font-size:15.5px;margin:8px 0 14px;font-weight:600}
+  .opts{display:grid;gap:8px}
+  .opt{text-align:left;font:inherit;font-size:14.5px;line-height:1.55;color:var(--ink);
+    background:transparent;border:1px solid var(--line);border-radius:4px;padding:10px 14px;cursor:pointer;transition:border-color .12s}
+  .opt:hover:not(:disabled){border-color:var(--survey)}
+  .opt:disabled{cursor:default;opacity:.92}
+  .opt.right{border-color:var(--good);background:var(--good-soft)}
+  .opt.wrong{border-color:var(--marker);background:var(--bad-soft)}
+  .fb{display:none;margin-top:12px;font-size:14px;border-radius:4px;padding:12px 15px;line-height:1.6}
+  .fb.show{display:block}
+  .fb.ok{background:var(--good-soft);border-left:3px solid var(--good)}
+  .fb.no{background:var(--bad-soft);border-left:3px solid var(--marker)}
+  .verdict{display:none;border-radius:5px;padding:24px;margin-top:26px}
+  .verdict.show{display:block}
+  .verdict.pass{background:var(--good-soft);border:1px solid var(--good)}
+  .verdict.retry{background:var(--bad-soft);border:1px solid var(--marker)}
+  .verdict h3{margin:0 0 10px;font-family:var(--serif)}
+  .verdict p{margin:0}
+  .reset{font:inherit;font-size:14px;margin-top:14px;cursor:pointer;
+    border:1px solid var(--line);background:var(--paper-raised);color:var(--ink);border-radius:4px;padding:8px 18px}
+  .reset:hover{border-color:var(--survey);color:var(--survey)}
+  .score-rail{position:sticky;bottom:14px;display:flex;justify-content:center;pointer-events:none;margin-top:20px}
+  .score-pill{pointer-events:auto;font-family:var(--mono);font-size:12.5px;
+    background:var(--ink);color:var(--paper);border-radius:99px;padding:7px 18px;box-shadow:var(--shadow)}
+
+  footer{padding:44px 0 64px;color:var(--ink-faint);font-size:13.5px}
+  footer p{margin:4px 0;max-width:44em}
+  footer a{color:var(--ink-faint)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <svg class="contours" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1">
+    <ellipse cx="470" cy="210" rx="330" ry="150"/>
+    <ellipse cx="470" cy="210" rx="255" ry="115"/>
+    <ellipse cx="470" cy="210" rx="185" ry="82"/>
+    <ellipse cx="470" cy="210" rx="120" ry="52"/>
+    <ellipse cx="470" cy="210" rx="62" ry="26"/>
+    <ellipse cx="820" cy="380" rx="180" ry="80"/>
+    <ellipse cx="820" cy="380" rx="120" ry="52"/>
+  </svg>
+  <div class="wrap">
+    <p class="eyebrow">Field Guide · 挽具工程</p>
+    <h1>如果你不是模型，<br>你就是 Harness</h1>
+    <p class="thesis"><strong>Agent = Model + Harness</strong>。模型只是 agent 的一个输入；其余一切——prompts、工具、上下文策略、hooks、沙箱、子 agent、反馈与恢复回路——都是 harness。你已有的三页讲了<strong>内层</strong>（模型自己转的圈）和<strong>外层</strong>（谁来推这个圈），这一页专攻此前没有一页系统解剖过的<strong>中间那层</strong>：模型与循环之间的全部工程。</p>
+    <p class="thesis">这里把 2026 年中爆发的 “harness engineering” 讨论收成一张地图——这个词怎么来的、harness 由哪五大件组成、Böckeler 的前馈/反馈双控制、长时 agent 怎么搭跨会话的记忆桥、单线程还是多 agent——最后 12 题验证你真的学会了。一条主线贯穿：<strong>配置差距，常常大于模型差距。</strong></p>
+    <p class="credit">主要一手来源：Anthropic 工程博客系列（Building Effective Agents / Writing Tools / Context Engineering / Effective Harnesses / Harness Design / Demystifying Evals / Claude Code Best Practices）· <a href="https://addyosmani.com/blog/agent-harness-engineering/">Addy Osmani《Agent Harness Engineering》</a> · <a href="https://martinfowler.com/articles/harness-engineering.html">Birgitta Böckeler《Harness Engineering》</a> · <a href="https://www.langchain.com/blog/the-anatomy-of-an-agent-harness">LangChain《The Anatomy of an Agent Harness》</a> · <a href="https://www.latent.space/p/harness-eng">Latent Space《Extreme Harness Engineering》</a> · Thorsten Ball / Simon Willison / Armin Ronacher / Geoffrey Huntley / Cognition · 本地 LLM-WIKI 概念群。</p>
+    <nav class="legend" aria-label="页面导航">
+      <a href="#model"><span class="dot"></span>心智模型</a>
+      <a href="#map"><span class="dot"></span>三层嵌套</a>
+      <a href="#genealogy"><span class="dot"></span>谱系</a>
+      <a href="#parts"><span class="dot"></span>五大件</a>
+      <a href="#control"><span class="dot"></span>双控制</a>
+      <a href="#inner"><span class="dot"></span>内层 300 行</a>
+      <a href="#longrun"><span class="dot"></span>长时 agent</a>
+      <a href="#multi"><span class="dot"></span>单 vs 多 agent</a>
+      <a href="#templates"><span class="dot"></span>模板库</a>
+      <a href="#sources"><span class="dot"></span>来源书架</a>
+      <a href="#quiz"><span class="dot"></span>自测（12 题）</a>
+    </nav>
+  </div>
+</header>
+
+<section id="model">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§1</span><h2>心智模型：Agent = Model + Harness</h2></div>
+    <p class="sec-lede">先立一句能扛住整页的骨架。裸模型不是 agent——只有当 harness 赋予它状态、工具执行、反馈回路与可强制的约束后，它才成为 agent。</p>
+
+    <article class="plate">
+      <p class="en">"If you're not the model, you're the harness."</p>
+      <p class="zh">中文大意：一个 agent 系统里，除了模型，剩下的全部都是 harness。模型只是被插进来的一个部件。</p>
+      <p class="who">— Addy Osmani《Agent Harness Engineering》；LangChain《The Anatomy of an Agent Harness》独立给出同一两层模型</p>
+    </article>
+
+    <ul class="do">
+      <li><b>配置差距 &gt; 模型差距。</b>同一个 Opus，换上定制 harness，能把 Terminal-Bench 成绩从 Top30 提升到 Top5——仅改 harness、不换模型。（Addy / LangChain 双证）</li>
+      <li><b>harness 模式正在收敛。</b>把 Claude Code、Cursor、Codex、Aider、Cline 并排看，它们彼此的相似度，高于各自底层模型的相似度。（Addy）</li>
+      <li><b>模型变强不会让 harness 消失，只会让它「上移」（harness moves up）。</b>更强的模型接管低层杂活，工程重心随之抬到更高层。（Addy）</li>
+      <li><b>mistake-driven design（贯穿全页的方法）：</b>每当 agent 犯错，就花时间工程化一个方案让它<em>永不再犯</em>——每条约束都能追溯到一次具体失败，并固化进 <code>AGENTS.md</code> / pre-commit hook / 一个 review 子 agent。配套口味：hooks 要「静默成功、响亮失败（quiet success, loud failure）」。（Addy）</li>
+    </ul>
+    <p class="keyline">这一页的全部内容，都是在回答一个问题：模型之外那层工程，到底该搭些什么、怎么搭得让 agent 转得稳。</p>
+  </div>
+</section>
+
+<section id="map">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§2</span><h2>三层嵌套地图：内层 / 中层 / 外层</h2></div>
+    <p class="sec-lede">最容易混的三个「循环/工程」其实是套在一起的三层。分清谁负责哪层，才知道这一页在讲哪一块。中层高亮的就是本页主场。</p>
+
+    <div class="nest">
+      <div class="nl outer">
+        <span class="nlab"><b>外层 · Loop Engineering（循环工程）</b><span class="who">设计者负责 · 你设计的系统 · 已由 loop-engineering 页详解</span>人设计的、包在 harness 之外、按时/按目标反复触发并喂养 agent 的系统：谁来 prompt、何时触发、状态记在哪。→ <a href="../loop-engineering/">看外层这一页</a></span>
+        <div class="nl mid">
+          <span class="nlab"><b>中层 · Harness（挽具／脚手架）</b><span class="who">工程师负责 · 你来搭建配置 · ← 本页主场</span>模型之外、循环之外的一切工程供给：上下文策略、工具与执行、验收/评测、运行时反馈、编排与恢复、hooks、沙箱、子 agent。「这个圈能不能转得稳」的全部工程。</span>
+          <div class="nl inner">
+            <span class="nlab"><b>内层 · Agent Loop（智能体循环）</b><span class="who">模型 + 产品自带 · 你不用造它</span>模型每一轮自己跑的 <code>收集上下文 → 行动（调工具）→ 验证 → 重复</code>（Anthropic 概括 gather context → take action → verify work → repeat），即 ReAct 回路。Claude Code、Codex、Amp 都内置这一层。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="keyline" style="margin-top:22px">一句话记边界：内层是「模型自己转的圈」（产品给你的）；外层是「谁来推这个圈、多久推一次」（你设计的系统，已在 loop-engineering 页讲透）；<b>中层 harness 是「这个圈能不能转得稳」的全部工程——这是本页独占的地盘。</b>Böckeler 还把 coding agent 语境下的 harness 再分成<b>内建 harness</b>（产品自带）与你自加的 <b>outer harness</b>（Guides/Sensors），本页主要讲后者。</p>
+  </div>
+</section>
+
+<section id="genealogy">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§3</span><h2>谱系：一个词的三级跳（2024 → 2026）</h2></div>
+    <p class="sec-lede">“harness engineering” 不是一天冒出来的。先有「agent = LLM harness」的心智，再由 Anthropic 官方系列把各面逐一工程化，最后在 2026 年中被正式命名、解剖，成为行业术语。诚实标注：命名爆发期几篇只有抓取日期，确切发表日未标注，故不硬排先后。</p>
+    <ul class="gene">
+      <li class="phase"><b>阶段 0 · 地基（2024-12 → 2025 中）</b>——先有「agent = LLM harness」的心智，还没有「harness engineering」这个词。</li>
+      <li><span class="when">2024-12-19 · 官方奠基</span><b>Anthropic《Building Effective Agents》</b>：确立 workflow 与 agent 之分、五种可组合 workflow 模式，以及 <b>ACI（Agent-Computer Interface）与工具设计是关键投资点</b>。「围绕模型做工程」最早的系统论述。</li>
+      <li><span class="when">2025 上半年 · 摊开最小形态</span><b>Thorsten Ball《How to Build an Agent》</b>：一个 agent = 一个 LLM + 一个循环 + 足够的 token，约 300 行 Go。"The Emperor Has No Clothes." 门槛远低于直觉。</li>
+      <li><span class="when">2025-04-18 · 配置面成型</span><b>Boris Cherny《Claude Code Best Practices》</b>：全篇即「如何配置 Claude Code 的 harness」——permissions / hooks / skills / subagents / plugins + 给 Claude 一个它自己能跑的检查。</li>
+      <li><span class="when">2025 全年 · 推到极端</span><b>Geoffrey Huntley</b> 系列把「极简 harness」做绝：stdlib（规则当标准库）→ specs（specs-first）→ <b>Ralph（"Ralph is a Bash loop"）</b>→ subagents（上下文即稀缺 RAM）。用文件系统/git 当记忆，绕过 context rot。</li>
+      <li><span class="when">2025-09-30 · 建立心智</span><b>Simon Willison</b>：编码 agent = 一段充当 LLM harness 的软件；<b>反馈信号（干净通过的测试套件）能指数级放大 agent</b>。</li>
+      <li class="phase"><b>阶段 1 · 官方系列把各面工程化（2025 秋 → 2026 春）</b></li>
+      <li><span class="when">2025-09-11</span><b>《Writing Effective Tools for Agents》</b>：工具即 ACI 契约，少而精、返回高信号、用 eval 驱动工具改进。</li>
+      <li><span class="when">2025-09-29</span><b>《Effective Context Engineering》</b>：context engineering 是 prompt engineering 的自然演进；<b>上下文是有限且会退化的资源（context rot），模型有「注意力预算」</b>。</li>
+      <li><span class="when">2025-11-26</span><b>《Effective Harnesses for Long-Running Agents》</b>：<b>两段式 harness（initializer + coding agent）</b>，跨上下文窗口的记忆桥。</li>
+      <li><span class="when">2026-03-24</span><b>《Harness Design for Long-Running Apps》</b>：<b>generator + evaluator 双 agent</b>；长任务用 context reset 而非 compaction。</li>
+      <li class="phase"><b>阶段 2 · 正式命名与解剖，成词爆发（2026 年中）</b></li>
+      <li><span class="when">2026-06-21 · 中文圈先落地命名</span>dolphin07《SDD 实战手记 08》把 harness 定义为<b>让 Spec 持续生效的三类工程供给：Context（燃油）+ Eval（质检）+ Runtime Feedback（仪表盘）</b>。</li>
+      <li><span class="when">2026 年中 · 发表日未标注</span><b>Addy Osmani《Agent Harness Engineering》</b>定名「Agent = Model + Harness」「配置差距 &gt; 模型差距」「mistake-driven design」；<b>Böckeler《Harness Engineering》</b>给出最严谨框架 Guides/Sensors 双控制；<b>LangChain《The Anatomy of an Agent Harness》</b>做组件解剖；<b>Latent Space</b> 访谈证明「5 个月百万行、几乎 0 行人工手写」的规模化上限。</li>
+      <li class="phase"><b>阶段 3 · 循环工程接棒</b>——harness 之上再叠一层，已由本站 <a href="../loop-engineering/">循环工程页</a>覆盖，本页只互链。</li>
+    </ul>
+    <p class="keyline">一句话谱系：<code>agent = LLM harness</code>（2024–2025 建立心智）→ Anthropic 官方系列把工具/上下文/长时/eval 逐面工程化（2025 秋–2026 春）→ <b>2026 年中 Addy 命名公式、Böckeler 给框架、LangChain 做解剖，“harness engineering” 成词</b> → 循环工程在其上接棒。</p>
+  </div>
+</section>
+
+<section id="parts">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§4</span><h2>Harness 五大件解剖</h2></div>
+    <p class="sec-lede">把 LangChain 的组件清单、Addy 的核心组件、Böckeler 的控制分类、Anthropic 各面官方文，收敛成一张部件图——<b>五件</b>。记忆口诀：上下文（知道什么）· 工具（能做什么）· 验收（做对没有）· 运行时反馈（正在发生什么）· 编排恢复（多轮/多手怎么协同兜底）。</p>
+
+    <article class="lt">
+      <div class="lt-head"><h4>件 1 · 上下文供给 Context Provisioning</h4><span class="cmd">燃油</span></div>
+      <dl>
+        <dt>定义</dt><dd>agent 开始前/过程中知道的一切系统约束与任务燃料。<b>不是知识库，是本次任务的燃料。</b></dd>
+        <dt>要点</dt><dd>上下文是有限、会退化的资源（context rot），模型有「注意力预算」，目标是<b>能达成结果的最小高信号 token 集</b>；知识要<b>分层 + 保鲜</b>（组织红线 + 项目约束，继承+覆写；每条带出处/owner/失效条件——过期知识比没有知识更危险）；<b>just-in-time 检索</b>优于预塞。真实可用窗口远小于标称：Sonnet 名义 200k，扣系统提示与 harness 后约 176k，MCP 工具易吃掉约 76k。「Less is more」。</dd>
+        <dt>出处</dt><dd class="src">Anthropic《Effective Context Engineering》· EngineeringHarness / dolphin07 · Ghuntley《How to Build a Coding Agent》</dd>
+      </dl>
+    </article>
+
+    <article class="lt">
+      <div class="lt-head"><h4>件 2 · 工具与执行 Tools &amp; Execution / ACI</h4><span class="cmd">手</span></div>
+      <dl>
+        <dt>定义</dt><dd>agent 与外部世界交互的契约与执行层——文件系统、bash、编辑、搜索、沙箱。</dd>
+        <dt>要点</dt><dd>一个工具 = <b>四要素</b>（name + 给模型的 description + 输入 JSON schema + 本地执行函数）；五个基础原语 read / list / bash / edit / search(ripgrep)。<b>少而精、别机械包裹 API</b>：把多步合并进单次高层调用减少往返；清晰 namespacing；返回高信号（语义化标识、concise/detailed 两档、分页、可操作的错误提示）。<b>工具太多/功能重叠会稀释注意力，削减常比增加更有效</b>；用 eval 让 Claude 读 transcript 自己重写工具描述。工具还要<b>快</b>——延迟直接拖累回路。</dd>
+        <dt>出处</dt><dd class="src">Thorsten Ball · Anthropic《Writing Effective Tools》· Ghuntley · Ronacher</dd>
+      </dl>
+    </article>
+
+    <article class="lt">
+      <div class="lt-head"><h4>件 3 · 验收 / 评测 Eval / Verification Gate</h4><span class="cmd">质检</span></div>
+      <dl>
+        <dt>定义</dt><dd>交付后独立于 agent 的验收闸门。<b>生成者不能批改自己的试卷。</b></dd>
+        <dt>要点</dt><dd><b>三闸门</b>：① 验收覆盖率（shallow 命名匹配 / deep 语义比对）② Spec 漂移检测（结构层 + 语义层）③ 失败熔断（有限次数 → 暂停 → 回滚）。<b>eval 早启动</b>：从真实失败案例取 20–50 个 test case 起步，别等「完美」；组合 grader = 代码型（确定性断言）+ 模型型（LLM-judge）+ 人评校准；同时测能力（低通过率暴露空间）与回归（≈100% 通过率抓退化）。<b>generator ≠ evaluator</b>：把「做事」与「评判」拆成两个 agent，是长任务可靠性的最强杠杆之一。</dd>
+        <dt>出处</dt><dd class="src">EngineeringHarness / dolphin07 · Anthropic《Demystifying Evals》《Harness Design》</dd>
+      </dl>
+    </article>
+
+    <article class="lt">
+      <div class="lt-head"><h4>件 4 · 运行时反馈 Runtime Feedback</h4><span class="cmd">仪表盘</span></div>
+      <dl>
+        <dt>定义</dt><dd>写代码时的即时环境反馈，让 agent 能自诊断、自恢复、闭合回路。</dd>
+        <dt>要点</dt><dd><b>四件旧工程债现在是前提</b>：一键启动环境（<code>make dev</code>）+ 种子数据（测试账号/订单）+ 关键路径冒烟测试（零 flaky）+ 结构化日志（JSON + request id）。以前是加分项，现在是 agent 能否自主工作的前提——<b>旧工程债直接变成 AI 债</b>。<b>反馈信号是放大器</b>（Willison）；<b>构建回路要短</b>——保持 &lt;1 分钟是规模化的关键加速器（Latent Space）；充分日志作为执行副产物，让 agent 自我诊断恢复（Ronacher）。</dd>
+        <dt>出处</dt><dd class="src">EngineeringHarness · Simon Willison · Latent Space · Ronacher</dd>
+      </dl>
+    </article>
+
+    <article class="lt">
+      <div class="lt-head"><h4>件 5 · 编排与恢复 Orchestration &amp; Recovery</h4><span class="cmd">调度台</span></div>
+      <dl>
+        <dt>定义</dt><dd>控制流、子 agent 的派生与隔离、失败隔离与回退手段——决定多轮/多 agent 怎么协作、出错怎么收。</dd>
+        <dt>要点</dt><dd><b>子 agent 隔离上下文</b>：主 agent 当调度器，把昂贵的搜索/审计 fan-out 给隔离 context 的 subagent，只回传摘要，防主线程 death spiral。<b>失败隔离 + reinforcement</b>：让 sub-agent 私下迭代、只上报成功；用上下文编辑移除无用失败痕迹但保留教训；在 loop 中不断注入目标提醒/任务状态/失败提示。<b>恢复与 hooks</b>：规划/验证回路 +「静默成功、响亮失败」；共享状态靠（虚拟）文件系统而非复杂 IPC。</dd>
+        <dt>出处</dt><dd class="src">Ghuntley《subagents》· Ronacher · Addy · LangChain</dd>
+      </dl>
+    </article>
+
+    <p class="keyline">对齐中文圈最早的命名：dolphin07 的「三类供给」= 件 1（上下文）+ 件 3（验收）+ 件 4（运行时反馈）。本页在其上补齐<b>件 2 工具</b>与<b>件 5 编排</b>，合成完整五件——这是把散在五六篇里的拆法收成一张图，全站首次。</p>
+  </div>
+</section>
+
+<section id="control">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§5</span><h2>双控制框架：Guides vs Sensors（Böckeler）</h2></div>
+    <p class="sec-lede">最严谨的 harness 拆法。外层 harness = 两类控制，每类再按「确定性计算 / LLM 推断」分成计算式与推断式 → 四象限。价值：把人类隐性经验外部化为显式、可复用的控制，减少 review toil、少浪费 token。</p>
+
+    <div class="duo">
+      <div class="cell a"><span class="tag">Feedforward · 事前</span><b>Guides（前馈控制）</b>开始前给方向，防止不良行为、提高「一次做对」的概率。像给 agent 事先划好的护栏。</div>
+      <div class="cell b"><span class="tag">Feedback · 事后</span><b>Sensors（反馈控制）</b>过程中观察产出、在问题到达人眼前就触发自我纠错。像装在流水线上的传感器。</div>
+    </div>
+
+    <h3>四象限速查</h3>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th></th><th>计算式（确定性、快）</th><th>推断式（LLM 语义判断）</th></tr></thead>
+      <tbody>
+        <tr><td><b>Guides · 前馈（事前）</b></td><td>linter / 类型系统 / 模板生成 / codemod / pre-commit 规则 / <code>AGENTS.md</code>·<code>CLAUDE.md</code> 约定 / 权限 allow&nbsp;deny</td><td>规划阶段的 spec 澄清 / skill·SOP 里的领域指令 / prompt 里的 few-shot 示范</td></tr>
+        <tr><td><b>Sensors · 反馈（事后）</b></td><td>LSP 诊断 / 测试退出码 / 构建·CI 状态 / 脚本断言 / 静态分析</td><td>review agent 对抗式复核 / generator+evaluator 的 evaluator / 语义 diff 检查</td></tr>
+      </tbody>
+    </table></div>
+    <p class="keyline">分布原则 <b>“Keep quality left”</b>：按成本与速度把控制铺到开发生命周期上——<b>快检查放 pre-commit，昂贵的推断式检查放集成之后</b>。从三个维度治理质量：可维护性 / 架构适配度 / 行为。（Böckeler，Thoughtworks）</p>
+  </div>
+</section>
+
+<section id="inner">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§6</span><span class="sec-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.5 12a8.5 8.5 0 1 1-2.4-5.9" stroke-linecap="round"/><path d="M18.5 2.5v4.2h-4.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h2>内层探秘：最小 agent loop 只有 300 行</h2></div>
+    <p class="sec-lede">要知道 harness 该补什么，先看清产品替你内置的内层长什么样。Thorsten Ball 把它摊开：一个 agent = 一个 LLM + 一个循环 + 足够的 token，约 300 行。"The Emperor Has No Clothes."</p>
+
+    <article class="plate">
+      <p class="en">"An agent is an LLM with access to tools that let it modify things beyond its own context window."</p>
+      <p class="zh">中文大意：所谓 agent，就是一个能调用工具、从而改变自身上下文窗口之外事物的 LLM。工具四要素：name + 给模型的 description + 输入 JSON schema + 本地执行函数。</p>
+      <p class="who">— Thorsten Ball《How to Build an Agent》（Amp / Sourcegraph）</p>
+    </article>
+
+    <figure class="fig fig-card dia reveal">
+      <svg viewBox="0 0 460 320" role="img" aria-label="内层 Agent Loop 环形流程：感知→行动→验证→重复">
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fill-survey"/></marker></defs>
+        <g class="stroke" fill="none" stroke-width="1.9" marker-end="url(#ah)">
+          <path d="M270 58 A108 108 0 0 1 330 118"/>
+          <path d="M330 198 A108 108 0 0 1 270 258"/>
+          <path d="M190 258 A108 108 0 0 1 130 198"/>
+          <path d="M130 118 A108 108 0 0 1 190 58"/>
+        </g>
+        <circle class="stroke fill-soft" cx="230" cy="158" r="46" stroke-width="1.6"/>
+        <text class="tx-survey" x="230" y="153" font-size="14" text-anchor="middle" font-weight="700">AGENT LOOP</text>
+        <text class="tx-faint" x="230" y="171" font-size="10" text-anchor="middle">LLM ＋ 循环 ＋ token</text>
+        <g><circle class="stroke fill-paper" cx="230" cy="50" r="34" stroke-width="1.8"/><text class="tx" x="230" y="55" font-size="13.5" text-anchor="middle" font-weight="600">① 感知</text><text class="tx-faint" x="230" y="16" font-size="10.5" text-anchor="middle">gather context</text></g>
+        <g><circle class="stroke fill-paper" cx="338" cy="158" r="34" stroke-width="1.8"/><text class="tx" x="338" y="163" font-size="13.5" text-anchor="middle" font-weight="600">② 行动</text><text class="tx-faint" x="380" y="162" font-size="10.5" text-anchor="start">take action</text></g>
+        <g><circle class="stroke fill-paper" cx="230" cy="266" r="34" stroke-width="1.8"/><text class="tx" x="230" y="271" font-size="13.5" text-anchor="middle" font-weight="600">③ 验证</text><text class="tx-faint" x="230" y="312" font-size="10.5" text-anchor="middle">verify work</text></g>
+        <g><circle class="stroke fill-paper" cx="122" cy="158" r="34" stroke-width="1.8"/><text class="tx" x="122" y="163" font-size="13.5" text-anchor="middle" font-weight="600">④ 重复</text><text class="tx-faint" x="80" y="162" font-size="10.5" text-anchor="end">repeat</text></g>
+      </svg>
+      <figcaption>模型自主决定何时调哪个工具；harness 负责提取请求、执行、把结果回灌进下一轮</figcaption>
+    </figure>
+
+    <div class="tpl">
+      <div class="tpl-head"><span class="tpl-tag">Pseudocode · 内层循环骨架</span><h4>一个最小编码 agent loop</h4></div>
+      <div class="promptbox"><pre>tools = register([read_file, list_files, edit_file, bash, search])  # 五原语
+
+conversation = [ system_prompt ]         # 系统提示定义可用工具与期望行为(可数百行)
+conversation += [ user_task ]
+
+while True:
+    response = model.infer(conversation, tools)     # 1) 发给模型
+    conversation += [ response ]
+    if response.has_tool_calls():                   # 2) 模型请求调用工具?
+        for call in response.tool_calls:
+            result = tools[call.name].run(call.args)   # 3) harness 本地执行
+            conversation += [ tool_result(result) ]    # 4) 结果回灌进对话
+        continue                                       # 5) 带新观察再推理
+    if is_done(response):                            # 完成信号/停止条件
+        break</pre><button class="copy" type="button">copy</button></div>
+      <p class="prompt-zh"><b>关键点</b> 模型自主决定何时调哪个工具；harness 负责提取工具请求、执行、把结果回灌进下一轮。上下文纪律：活动之间清空/隔离 context，防 death spiral。</p>
+    </div>
+
+    <ul class="do">
+      <li><b>编码 agent = 一段充当 LLM harness 的软件</b>：用不可见的系统提示（可长达数百行）+ 可调用工具扩展 LLM；<b>反馈信号是放大器</b>。（Simon Willison）</li>
+      <li><b>“There is no moat”</b>：各家产品的差异被模型能力抹平，真正干活的是模型——所以竞争力落到 harness 的工程质量上。（Ghuntley）</li>
+      <li>这解释了为什么本页把重心放在中层：内层是产品给你的、且各家趋同；<b>你能拉开差距的，是包在它外面的那层工程</b>。</li>
+    </ul>
+  </div>
+</section>
+
+<section id="longrun">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§7</span><span class="sec-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="8.5" width="6" height="7" rx="1"/><rect x="16" y="8.5" width="6" height="7" rx="1"/><path d="M8 12h8" stroke-linecap="round"/><path d="M11 9.5l2-2 2 2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h2>长时 agent 的 harness：搭一座记忆桥</h2></div>
+    <p class="sec-lede">根本困难：长任务必须在<b>离散会话</b>中工作，每个新会话对之前毫无记忆。仅靠 compaction 不够——前沿模型在循环里会「一口气想做太多」或「看到有进展就宣布完工」。Anthropic 两篇给出两套机制。</p>
+
+    <figure class="fig fig-card dia reveal">
+      <svg viewBox="0 0 640 240" role="img" aria-label="长时 agent 两段式流程：initializer 与 generator/evaluator，底部记忆桥贯穿">
+        <defs><marker id="ah2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fill-survey"/></marker></defs>
+        <rect class="stroke fill-soft" x="24" y="180" width="592" height="44" rx="10" stroke-width="1.6"/>
+        <text class="tx-survey" x="320" y="200" font-size="12.5" text-anchor="middle" font-weight="700">记忆桥（跨会话持久）</text>
+        <text class="tx-faint" x="320" y="216" font-size="10" text-anchor="middle">git 历史 · progress.md · feature_checklist.json（pass / fail）</text>
+        <g stroke-width="1.9" class="stroke" fill="none" marker-end="url(#ah2)" marker-start="url(#ah2)"><path d="M112 128V178"/><path d="M320 128V178"/><path d="M528 128V178"/></g>
+        <rect class="stroke fill-paper" x="28" y="44" width="168" height="82" rx="9" stroke-width="1.8"/>
+        <text class="tx-faint" x="112" y="66" font-size="10" text-anchor="middle" letter-spacing="1">SESSION 0 · 只跑一次</text>
+        <text class="tx-survey" x="112" y="86" font-size="14" text-anchor="middle" font-weight="700">Initializer</text>
+        <text class="tx-soft" x="112" y="104" font-size="10.5" text-anchor="middle">搭环境 · 写 checklist</text>
+        <text class="tx-soft" x="112" y="118" font-size="10.5" text-anchor="middle">建「环境校验仪式」</text>
+        <rect class="stroke fill-paper" x="236" y="44" width="168" height="82" rx="9" stroke-width="1.8"/>
+        <text class="tx-faint" x="320" y="66" font-size="10" text-anchor="middle" letter-spacing="1">SESSION N · 每次会话</text>
+        <text class="tx-survey" x="320" y="86" font-size="14" text-anchor="middle" font-weight="700">Generator</text>
+        <text class="tx-soft" x="320" y="104" font-size="10.5" text-anchor="middle">推进下一个 feature</text>
+        <text class="tx-soft" x="320" y="118" font-size="10.5" text-anchor="middle">E2E 测试 → clean commit</text>
+        <rect class="stroke fill-paper" x="444" y="44" width="168" height="82" rx="9" stroke-width="1.8"/>
+        <text class="tx-faint" x="528" y="66" font-size="10" text-anchor="middle" letter-spacing="1">独立 · 不做事只评判</text>
+        <text class="tx-survey" x="528" y="86" font-size="14" text-anchor="middle" font-weight="700">Evaluator</text>
+        <text class="tx-soft" x="528" y="104" font-size="10.5" text-anchor="middle">按「契约」打分</text>
+        <text class="tx-soft" x="528" y="118" font-size="10.5" text-anchor="middle">不达标打回 · context reset</text>
+        <g class="stroke" fill="none" stroke-width="1.9" marker-end="url(#ah2)"><path d="M196 78H236"/><path d="M404 72H444"/></g>
+        <path class="stroke-mark" fill="none" stroke-width="1.6" marker-end="url(#ah2)" d="M444 96H404" stroke-dasharray="3 3"/>
+      </svg>
+      <figcaption>两段式 = initializer（首次搭环境）+ 每会话 generator 增量推进；evaluator 独立打分把关，长任务用 reset 而非 compaction</figcaption>
+    </figure>
+
+    <h3>E1 · 两段式 harness（Effective Harnesses for Long-Running Agents，2025-11-26）</h3>
+    <div class="duo">
+      <div class="cell a"><span class="tag">跑一次 · Session 0</span><b>Initializer agent</b>首次运行搭好环境：写 <code>feature_checklist.json</code>（每项含 pass/fail 状态）、建立「环境校验仪式」脚本。</div>
+      <div class="cell b"><span class="tag">每次会话 · Session N</span><b>Coding agent</b>每个会话做增量推进，并为下一会话留下清晰 artifact：描述性 commit + 进度摘要，强制 clean state。</div>
+    </div>
+    <ul class="do">
+      <li>跨会话持久记忆载体：<b>git commit 历史 + 进度日志 + 功能 checklist</b>。</li>
+      <li><b>feature-driven 增量 + JSON pass/fail 状态</b>：一次只推进「下一个未完成 feature」，防贪多、防过早收工。</li>
+      <li>把<b>端到端测试（含浏览器）</b>当核心行为；每次会话<b>以「环境校验仪式」开场</b>，先自检环境是否 ready。</li>
+    </ul>
+
+    <h3>E2 · generator + evaluator 双 agent（Harness Design for Long-Running Apps，2026-03-24）</h3>
+    <ul class="do">
+      <li><b>最强杠杆</b>：把「做事」（generator）与「评判」（evaluator）拆成两个 agent。</li>
+      <li>长任务用 <b>context reset（干净重启）而非 compaction（压缩累积历史）</b>；<b>sprint 式分解</b> + agent 之间建立显式「契约」——先定义清楚什么叫 done；<b>基于文件的 artifact handoff</b> 跨会话无损接续。</li>
+      <li>需要可打分、可迭代的评测标准；<b>随模型变强应持续精简 harness，而非不断加复杂度</b>。</li>
+    </ul>
+    <p class="keyline">机理旁证（Ghuntley）：Claude 3.7 名义 200k，输出质量在 147k–152k 就开始 clip，tool-call 到 tool-call 开始失败——这正是「为什么要 reset / 隔离而不是硬撑」的物理原因。</p>
+  </div>
+</section>
+
+<section id="multi">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§8</span><h2>编排层的架构决策：单线程 vs 多 Agent</h2></div>
+    <p class="sec-lede">这是件 5 编排里最贵的一个选择。两派各有硬论据与硬数字——不是「多 agent 更酷」，而是一道成本/收益的架构题。（多 agent 数字的批判性对冲另见 <a href="../agentic-way/">正本清源页</a>。）</p>
+
+    <div class="fit">
+      <div class="cell no"><b>审慎派 · 单线程优先</b><ul>
+        <li>Cognition《Don't Build Multi-Agents》：并行 subagent 基于<b>彼此看不见的假设</b>行动，冲突决策累积放大、产出脆弱。</li>
+        <li>原则一：<em>Share context, and share full agent traces, not just individual messages.</em></li>
+        <li>原则二：<em>Actions carry implicit decisions, and conflicting decisions carry bad results.</em></li>
+        <li>推荐单线程线性 agent；超长任务用专门 LLM 做上下文压缩。「跨 agent 传上下文」2025 仍未解决。</li>
+      </ul></div>
+      <div class="cell yes"><b>并行派 · 隔离 subagent</b><ul>
+        <li>Anthropic 多 agent 研究系统（orchestrator-worker）：内部评测比单 agent <b>高 90.2%</b>，但 token 消耗<b>约 15×</b>（单 agent 约 4×）——<b>仅当任务价值撑得起才划算</b>。</li>
+        <li>Geoffrey Huntley（Ralph）：主 context 当调度器，用大量并行 subagent 做审计/搜索，靠隔离 context window 防污染；但构建/测试验证只用 1 个 subagent 防 back pressure。</li>
+      </ul></div>
+    </div>
+
+    <div class="stats">
+      <div class="st"><span class="num">+90.2%</span><span class="lbl">多 agent 内部评测相对单 agent</span></div>
+      <div class="st"><span class="num">≈15×</span><span class="lbl">token 消耗（单 agent 约 4×）</span></div>
+      <div class="st"><span class="num">单线程</span><span class="lbl">紧耦合/连续决策任务的默认解</span></div>
+    </div>
+
+    <h3>「该不该上多 Agent」判断清单（四问全 Yes 才上）</h3>
+    <div class="quad">
+      <div class="cell"><b>① breadth-first 可并行？</b>子任务能各自独立探索——不能并行就没意义。</div>
+      <div class="cell"><b>② 子任务弱依赖？</b>不需要连续共享决策；紧耦合 → 退回单线程。</div>
+      <div class="cell"><b>③ 价值撑得起 ≈15× token？</b>成本自己先算清，别为炫技买单。</div>
+      <div class="cell"><b>④ 能共享完整 context+traces？</b>避免「看不见彼此假设」的冲突决策。</div>
+    </div>
+    <p class="keyline">共识（双方都同意）：多 agent 适合 breadth-first、可并行探索、子任务弱依赖的场景；不适合紧耦合、需连续决策的任务。而且 Anthropic 官方另一处主张——<b>能用单 agent 别上多 agent，能用 workflow 别上 agent</b>：从最简单方案起步，只在确有收益时加复杂度。任一问 No → 退回单线程线性 agent 或 workflow。</p>
+  </div>
+</section>
+
+<section id="templates">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§9</span><h2>可复制模板：拿去就能用</h2></div>
+    <p class="sec-lede">7 个模板 + 1 个微模板，对应五大件与两大架构决策。功能性内容保留英文/结构原文（是拿来用的，不是拿来读的），说明用中文。从上到下，覆盖 harness 的搭建全链。</p>
+
+    <article class="tpl">
+      <div class="tpl-head"><span class="tpl-tag">件 2 工具 · Tool Definition</span><h4>工具描述四要素</h4></div>
+      <p class="when"><b>用在：</b>为 agent 新增/审查一个工具时，逼齐四要素 + 高信号返回。</p>
+      <div class="promptbox"><pre>name: &lt;verb_noun, e.g. search_orders&gt;
+description: |
+  &lt;一句话说清"什么时候该用它"，给模型看，不是给人看。
+   写清副作用、返回什么、何时别用。&gt;
+input_schema:            # JSON schema, 每个字段带 description
+  query: {type: string, description: "..."}
+returns:                 # 高信号: 语义化标识 + concise/detailed 两档 + 分页
+  format: concise | detailed
+  on_error: "&lt;actionable message: 告诉 agent 下一步怎么办&gt;"</pre><button class="copy" type="button">copy</button></div>
+      <p class="prompt-zh"><b>纪律</b> 能合并成一次高层调用就别拆成多次往返；工具总数宁少勿多；错误信息必须可操作。（Anthropic《Writing Tools》）</p>
+    </article>
+
+    <article class="tpl">
+      <div class="tpl-head"><span class="tpl-tag">件 1 上下文 · CLAUDE.md / AGENTS.md</span><h4>Context 分层 + 知识保鲜</h4></div>
+      <p class="when"><b>用在：</b>写项目约定或知识库时，做到「分层 + 保鲜」。</p>
+      <div class="promptbox"><pre># 组织红线（继承，所有项目共享，最高优先）
+- &lt;合规 / 安全 / 不可承诺项&gt;
+
+# 项目约束（覆写组织默认）
+- 构建/测试命令: &lt;agent 猜不到的&gt;
+- 架构决策: &lt;项目特有&gt;
+
+# 知识条目（每条必带三元信息，否则不许进库）
+- fact: &lt;内容&gt;
+  provenance: &lt;出处链接/来源&gt;
+  owner: &lt;谁维护&gt;
+  expires_when: &lt;失效条件, 如 "v3 发布后作废"&gt;</pre><button class="copy" type="button">copy</button></div>
+      <p class="prompt-zh"><b>纪律</b> 注入越多未必越好（注意力稀释）；<b>过期知识比没有知识更危险</b>。（EngineeringHarness）</p>
+    </article>
+
+    <article class="tpl">
+      <div class="tpl-head"><span class="tpl-tag">件 3 验收 · Eval Gate</span><h4>Eval 三闸门清单</h4></div>
+      <p class="when"><b>用在：</b>交付前的独立验收门禁（生成者不能批改自己的试卷）。</p>
+      <div class="promptbox"><pre>闸门①  验收覆盖率:  [ ] 需求逐条有对应用例  [ ] shallow 命名匹配  [ ] deep 语义比对
+闸门②  Spec 漂移:   [ ] 结构层(接口/字段未擅改)  [ ] 语义层(行为未偏离 spec)
+闸门③  失败熔断:    [ ] 有限重试 N=___  [ ] 超限 → 暂停  [ ] 暂停 → 回滚/转人工
+起步:  从真实失败 case 取 20–50 条建 eval; grader = 代码型 + 模型型 + 人评校准</pre><button class="copy" type="button">copy</button></div>
+      <p class="prompt-zh"><b>出处</b> EngineeringHarness / dolphin07；Anthropic《Demystifying Evals》。generator 与 evaluator 拆成两个 agent。</p>
+    </article>
+
+    <article class="tpl">
+      <div class="tpl-head"><span class="tpl-tag">件 5 编排 · Böckeler</span><h4>Guides + Sensors 四象限自检表</h4></div>
+      <p class="when"><b>用在：</b>搭 harness 时自查「前馈/反馈 × 计算式/推断式」四格是否都有覆盖。</p>
+      <div class="promptbox"><pre>              计算式(确定性快)            推断式(LLM 语义)
+Guides 前馈   [ ] linter/类型/模板        [ ] spec 澄清 / skill 指令 / few-shot
+             [ ] 权限 allow/deny         [ ]
+Sensors 反馈  [ ] 测试退出码/CI/LSP       [ ] review agent 对抗复核 / evaluator
+             [ ] 静态分析                [ ]
+分布: 快检查放 pre-commit, 昂贵推断式放集成之后 (Keep quality left)</pre><button class="copy" type="button">copy</button></div>
+      <p class="prompt-zh"><b>出处</b> Birgitta Böckeler《Harness Engineering》。四格都空的那一列/行，就是你 harness 的盲区。</p>
+    </article>
+
+    <article class="tpl">
+      <div class="tpl-head"><span class="tpl-tag">内层 · Thorsten Ball</span><h4>最小 agent loop 骨架</h4></div>
+      <p class="when"><b>用在：</b>想理解/自建内层循环时的起点。五工具原语 read/list/edit/bash/search + <code>while</code> 回灌循环，完整骨架见 <a href="#inner">§6</a>。约 300 行即可跑起来。</p>
+      <div class="promptbox"><pre>while True:
+    response = model.infer(conversation, tools)
+    if response.has_tool_calls():
+        for call in response.tool_calls:
+            conversation += [ tool_result(tools[call.name].run(call.args)) ]
+        continue
+    if is_done(response): break</pre><button class="copy" type="button">copy</button></div>
+      <p class="prompt-zh"><b>出处</b> Thorsten Ball / Ghuntley。模型决定调什么工具，harness 执行并回灌——这就是 agent 的全部魔法。</p>
+    </article>
+
+    <article class="tpl">
+      <div class="tpl-head"><span class="tpl-tag">件 3+5 长时 · Anthropic</span><h4>长时 agent 两段式骨架</h4></div>
+      <p class="when"><b>用在：</b>任务跨多个上下文窗口时。initializer 只跑一次，generator 每会话推进，evaluator 独立打分。</p>
+      <div class="promptbox"><pre># 会话 0: initializer agent —— 只跑一次
+- 搭好环境, 写 feature_checklist.json (每项含 pass/fail)
+- 建立"环境校验仪式"脚本 (verify_env.sh)
+
+# 会话 N: generator agent —— 每次会话
+1. 先跑 verify_env.sh (环境校验仪式)
+2. 读 git log + progress.md + feature_checklist.json 恢复记忆
+3. 只推进"下一个未完成 feature" (别一口气想做太多)
+4. 端到端测试(含浏览器) 必须过
+5. 描述性 commit + 更新 progress.md (clean state) 交下一会话
+
+# evaluator agent —— 独立于 generator
+- 按显式"契约(done 的定义)"打分; 不达标打回
+- 长任务用 context reset 而非 compaction</pre><button class="copy" type="button">copy</button></div>
+      <p class="prompt-zh"><b>出处</b> Anthropic《Effective Harnesses…》《Harness Design…》。记忆桥 = git 历史 + 进度日志 + checklist。</p>
+    </article>
+
+    <article class="tpl">
+      <div class="tpl-head"><span class="tpl-tag">件 5 编排 · 架构选型</span><h4>单 / 多 Agent 选型四格</h4></div>
+      <p class="when"><b>用在：</b>决定该不该上多 agent。四问全 Yes 才上，任一 No 退回单线程。</p>
+      <div class="promptbox"><pre>[ ] breadth-first 可并行?
+[ ] 子任务弱依赖 / 无需连续共享决策?
+[ ] 价值撑得起 ≈15× token?
+[ ] 能共享完整 context+traces, 避免看不见彼此假设?
+→ 全 Yes: orchestrator-worker 多 agent (Anthropic: +90.2% / ~15× token)
+→ 任一 No: 单线程线性 agent 或 workflow (Cognition: 单线程优先)</pre><button class="copy" type="button">copy</button></div>
+      <p class="prompt-zh"><b>出处</b> Cognition / Anthropic。默认单线程，多 agent 是需要论证才配得上的例外。</p>
+    </article>
+
+    <div class="lesson"><b>微模板 · mistake-driven design（Addy）：</b>每次 agent 犯错 → 追问根因 → 固化为 <code>{ AGENTS.md 约束 | pre-commit hook | 一个 review subagent }</code> → 让同类错误永不复发。你的 harness 就是一部「踩坑史」的物化。</div>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§10</span><h2>来源书架：28 篇，每篇最值得抄的一件事</h2></div>
+    <p class="sec-lede">按 5 组分类。想深挖某一件事就顺着链接回一手来源。诚实标注：partial 的两篇正文在订阅墙后，只用了可见开篇；命名爆发期几篇确切发表日未标注。</p>
+
+    <div class="shelf">
+      <h3>组 1 · Anthropic 官方（7 篇）</h3>
+      <ul class="src">
+        <li><div class="t"><a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective Agents</a> <span class="by">Erik Schluntz &amp; Barry Zhang · 2024-12-19</span></div><div class="take"><b>能用单 agent 别上多 agent、能用 workflow 别上 agent</b>；五种可组合 workflow 模式 + ACI 是关键投资点。</div></li>
+        <li><div class="t"><a href="https://www.anthropic.com/engineering/writing-tools-for-agents">Writing Effective Tools for Agents</a> <span class="by">Ken Aizawa · 2025-09-11</span></div><div class="take"><b>削减工具集常比增加更有效</b>；工具返回高信号 + 可操作错误提示，用 eval 让 Claude 自己重写工具描述。</div></li>
+        <li><div class="t"><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Effective Context Engineering for AI Agents</a> <span class="by">Applied AI · 2025-09-29</span></div><div class="take">上下文是有限且会退化资源（context rot），要「<b>最小高信号 token 集</b>」+ 系统提示的「正确海拔」。</div></li>
+        <li><div class="t"><a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">Effective Harnesses for Long-Running Agents</a> <span class="by">Justin Young · 2025-11-26</span></div><div class="take"><b>两段式 harness（initializer + coding agent）</b>；feature-driven + JSON pass/fail 防贪多与过早收工。</div></li>
+        <li><div class="t"><a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">Harness Design for Long-Running Apps</a> <span class="by">Prithvi Rajasekaran · 2026-03-24</span></div><div class="take"><b>generator + evaluator 双 agent</b>；长任务用 context reset 而非 compaction；模型变强应精简 harness。</div></li>
+        <li><div class="t"><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Demystifying Evals for AI Agents</a> <span class="by">Mikaela Grace 等 · 2026-01-09</span></div><div class="take">从 <b>20–50 个真实失败 case</b> 起步；组合 grader（代码型+模型型+人评）；eval 是活文档。</div></li>
+        <li><div class="t"><a href="https://code.claude.com/docs/en/best-practices">Claude Code Best Practices</a> <span class="by">Boris Cherny · 2025-04-18</span></div><div class="take"><b>给 Claude「一个它自己能跑的检查」</b>；Explore→Plan→Code→Commit；permissions/hooks/skills/subagents 是 harness 配置面。</div></li>
+      </ul>
+
+      <h3>组 2 · Geoffrey Huntley（Ralph / 极简 harness，7 篇）</h3>
+      <ul class="src">
+        <li><div class="t"><a href="https://ghuntley.com/ralph/">Ralph Wiggum as a Software Engineer</a> <span class="by">Geoffrey Huntley</span></div><div class="take"><b>"Ralph is a Bash loop"</b>——<code>while :; do cat PROMPT.md | agent; done</code>，文件系统/git 当记忆绕过 context rot；$297 造出 CURSED 语言。</div></li>
+        <li><div class="t"><a href="https://ghuntley.com/loop/">Everything is a Ralph Loop</a> <span class="by">Geoffrey Huntley</span></div><div class="take">Ralph 是 <b>orchestrator 模式</b>（allocate specs + 下 goal + 循环该 goal），monolithic 而非乱哄哄的 multi-agent；关键动作是「watch the loop」。</div></li>
+        <li><div class="t"><a href="https://ghuntley.com/agent/">How to Build a Coding Agent</a> <span class="by">Geoffrey Huntley · 免费 workshop</span></div><div class="take"><b>≈300 行 + 循环 + LLM token</b>，五原语 read/list/bash/edit/search；「There is no moat」；176k 可用、MCP 吃 76k。</div></li>
+        <li><div class="t"><a href="https://ghuntley.com/subagents/">I dreamed of AI subagents</a> <span class="by">Geoffrey Huntley · 2025-04</span></div><div class="take"><b>上下文即 1980s 的 RAM</b>；Claude 3.7 在 147k–152k 就 clip；主 agent 派生克隆 context 的 subagent 防 death spiral。</div></li>
+        <li><div class="t"><a href="https://ghuntley.com/specs/">Specs / Groundhog（specs-first）</a> <span class="by">Geoffrey Huntley</span> <span class="partial">◐ partial</span></div><div class="take"><b>一个规格一个文件放进 <code>specs/</code>，规格是可复用单一真相源，代码可反复重生</b>。</div></li>
+        <li><div class="t"><a href="https://ghuntley.com/stdlib/">You're using Cursor wrong（stdlib）</a> <span class="by">Geoffrey Huntley</span> <span class="partial">◐ partial</span></div><div class="take"><b>把 <code>.cursor/rules/*.mdc</code> 规则当标准库沉淀组合</b>；「you can program LLM outcomes」。</div></li>
+        <li><div class="t"><a href="https://github.com/anthropics/claude-code/blob/main/plugins/ralph-wiggum/README.md">ralph-wiggum 插件 README</a> <span class="by">Anthropic 官方 claude-code 仓库 · 2026-07-05</span></div><div class="take">用 <b>Stop hook 在 session 内部拦截退出并喂回同一 prompt</b>，<code>--max-iterations</code> 是首要安全阀。</div></li>
+      </ul>
+
+      <h3>组 3 · 命名 · 概念 cluster（6 篇）</h3>
+      <ul class="src">
+        <li><div class="t"><a href="https://addyosmani.com/blog/agent-harness-engineering/">Agent Harness Engineering</a> <span class="by">Addy Osmani · 2026 年中</span></div><div class="take"><b>「Agent = Model + Harness」「配置差距 &gt; 模型差距」（Terminal-Bench Top30→Top5）、mistake-driven design</b>。</div></li>
+        <li><div class="t"><a href="https://martinfowler.com/articles/harness-engineering.html">Harness Engineering</a> <span class="by">Birgitta Böckeler（Thoughtworks）· 2026 年中</span></div><div class="take"><b>Guides（前馈）/ Sensors（反馈）双控制 + 计算式/推断式四象限</b>；「Keep quality left」。</div></li>
+        <li><div class="t"><a href="https://www.langchain.com/blog/the-anatomy-of-an-agent-harness">The Anatomy of an Agent Harness</a> <span class="by">Vivek Trivedy（LangChain）· 2026 年中</span></div><div class="take">harness 必备组件清单（文件系统/bash/沙箱/记忆/上下文管理/自纠错验证回路）+ 推导 ReAct 回路 + 长程 Ralph Loop。</div></li>
+        <li><div class="t"><a href="https://www.latent.space/p/harness-eng">Extreme Harness Engineering</a> <span class="by">Latent Space（swyx &amp; Vibhu）访谈 Ryan Lopopolo · 2026 年中</span></div><div class="take"><b>5 个月百万行、几乎 0 行人工手写</b>；「唯一根本稀缺的是团队的同步人类注意力」；&lt;1 分钟构建回路 + ~6 核心 skill。</div></li>
+        <li><div class="t"><a href="https://addyosmani.com/blog/loop-engineering/">Loop Engineering（命名文）</a> <span class="by">Addy Osmani · 2026 年中</span></div><div class="take"><b>loop engineering 位于 harness engineering 之上一层</b>；五构件 Automations/Worktrees/Skills/Connectors/Sub-agents + 状态记忆。</div></li>
+        <li><div class="t"><a href="https://thenewstack.io/loop-engineering/">Loop Engineering（谱系报道）</a> <span class="by">Janakiram MSV（The New Stack）· 2026 年中</span></div><div class="take">谱系 <b>Boris Cherny（源）→ Peter Steinberger（鼓吹）→ Addy Osmani（命名）</b>；loop 四要素：定时/隔离工作区/验证 agent/持久记忆。</div></li>
+      </ul>
+
+      <h3>组 4 · 实践者（6 篇）</h3>
+      <ul class="src">
+        <li><div class="t"><a href="https://ampcode.com/how-to-build-an-agent">How to Build an Agent</a> <span class="by">Thorsten Ball（Amp / Sourcegraph）</span></div><div class="take"><b>agent = LLM + 循环 + 足够 token，约 300 行 Go</b>；工具四要素 name/description/JSON schema/执行函数。</div></li>
+        <li><div class="t"><a href="https://simonwillison.net/guides/agentic-engineering-patterns/how-coding-agents-work/">How Coding Agents Work</a> <span class="by">Simon Willison</span></div><div class="take"><b>编码 agent = 一段充当 LLM harness 的软件</b>；系统提示（不可见、可数百行）定义工具与行为。</div></li>
+        <li><div class="t"><a href="https://simonwillison.net/2025/Sep/30/designing-agentic-loops/">Designing Agentic Loops</a> <span class="by">Simon Willison · 2025-09-30</span></div><div class="take"><b>一套能干净通过的测试套件指数级放大 agent</b>；工具选择胜过复杂框架；最安全是隔离沙箱 + 降权 + 预算上限。</div></li>
+        <li><div class="t"><a href="https://lucumr.pocoo.org/2025/06/12/agentic-coding/">Agentic Coding Recommendations</a> <span class="by">Armin Ronacher · 2025-06-12</span></div><div class="take"><b>工具要快</b>、日志作副产物让 agent 自恢复、「让 agent 做能奏效的最蠢的事」（朴素 SQL / 长描述性函数名 / 少魔法）。</div></li>
+        <li><div class="t"><a href="https://lucumr.pocoo.org/2025/11/21/agents-are-hard/">Agent Design is Still Hard</a> <span class="by">Armin Ronacher · 2025-11-21</span></div><div class="take"><b>「reinforcement 是重活」</b>（loop 中不断注入目标/状态/失败提示）；显式缓存优于自动；失败隔离（sub-agent 私下迭代只上报成功）。</div></li>
+        <li><div class="t"><a href="https://cognition.com/blog/dont-build-multi-agents">Don't Build Multi-Agents</a> <span class="by">Walden Yan（Cognition / Devin）</span></div><div class="take"><b>单线程优先</b>；两原则（共享完整 context+traces；动作隐含决策、冲突决策放大坏结果）；跨 agent 传上下文 2025 仍未解决。</div></li>
+      </ul>
+
+      <h3>组 5 · 老金 / 中文圈（2 篇）</h3>
+      <ul class="src">
+        <li><div class="t"><a href="https://laojin.blog/blog/20260612_loop_engineering_practice">Loop Engineering 实战</a> <span class="by">老金 · 2026-06-12</span></div><div class="take"><b>Harness vs Loop 四维对比</b>（触发/周期/状态/角色）；演进链 Prompt→Context→Harness→Loop；最小可用 Loop = cron + skill + markdown 记忆。</div></li>
+        <li><div class="t"><a href="https://mp.weixin.qq.com/s/b42vc8atqqRUC92zPys0cg">Loop/Ralph/Heartbeat/Cron：Agent 自主性的三维密码</a> <span class="by">龙虾研究员（微信公众号）· 2026-06-23</span></div><div class="take"><b>不看文档、直接读源码</b>对比 Claude Code 的 Loop/Ralph 与 OpenClaw 的 Heartbeat/Cron 四种自主性机制。</div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§11</span><h2>自测：通过才算学会</h2></div>
+    <p class="sec-lede">12 道题，覆盖公式、三层区分、五大件、双控制、长时 agent、单 vs 多 agent、工具与上下文。选错会立刻告诉你为什么错，并给出「重读 §X →」锚点。<b>全对才算通关</b>，未过可重置重考。</p>
+    <div id="quizbox"></div>
+    <div class="score-rail"><span class="score-pill" id="scorePill">0 / 12 已答</span></div>
+    <div class="verdict" id="verdict"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><strong>来源</strong>：Anthropic 工程博客系列（Building Effective Agents / Writing Effective Tools / Context Engineering / Effective Harnesses / Harness Design / Demystifying Evals / Claude Code Best Practices）· Addy Osmani《Agent Harness Engineering》《Loop Engineering》· Birgitta Böckeler《Harness Engineering》· LangChain《The Anatomy of an Agent Harness》· Latent Space《Extreme Harness Engineering》· Thorsten Ball · Simon Willison · Armin Ronacher · Geoffrey Huntley · Cognition · 老金 · LLM-WIKI 概念群（EngineeringHarness / AgentLoop / MultiAgent）。完整书架见 §10。</p>
+    <p>本页与 <a href="../loop-engineering/">循环工程野外手册</a>（外层）、<a href="../agentic/">Agentic 开发作战手册</a>、<a href="../agentic-way/">Agentic 之道·正本清源</a>、<a href="../">学习地图</a> 同属一组野外手册。</p>
+    <p>zbisure · 用 Claude Code 整理与构建 · 明暗主题跟随系统</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // quiz
+  var QS = [
+    {q:'“Agent = Model + Harness” 这个公式里，harness 指的是什么？',
+     opts:['更强的基础模型','除模型之外的一切脚手架（prompts/工具/上下文策略/hooks/沙箱/子 agent/反馈回路）','只是系统提示词','训练数据'],
+     a:1, anchor:'#model', tech:'§1 心智模型', fb:'模型只是一个输入，其余全是 harness（Addy Osmani / LangChain 两家独立给出同一模型）。'},
+    {q:'“配置差距常常大于模型差距” 最直接的证据是？',
+     opts:['换更大参数的模型','同一个 Opus 换定制 harness，把 Terminal-Bench 从 Top30 提到 Top5','增加上下文窗口','多训练一轮'],
+     a:1, anchor:'#model', tech:'§1 心智模型', fb:'仅改 harness、不换模型就能大幅提升——Addy / LangChain 双证。'},
+    {q:'三层嵌套里，“内层 Agent Loop” 由谁负责？',
+     opts:['你手写','产品/模型自带（Claude Code、Codex 内置）','运维团队','没人管'],
+     a:1, anchor:'#map', tech:'§2 三层地图', fb:'“收集上下文→行动→验证→重复”是产品内置的最内层，你不用造它。'},
+    {q:'下面哪一项属于“外层 Loop Engineering”而不是“中层 Harness”？',
+     opts:['给 agent 配 bash 和沙箱','写独立的 eval 闸门','用 cron 定时触发并跨会话喂养 agent','压缩上下文'],
+     a:2, anchor:'#map', tech:'§2 三层地图', fb:'定时触发/跨会话/谁来 prompt 是外层循环工程；A/B/D 都是 harness。'},
+    {q:'Harness 五大件中，“生成者不能批改自己的试卷” 对应哪一件？',
+     opts:['上下文供给','工具与执行','验收 / 评测（Eval）','运行时反馈'],
+     a:2, anchor:'#parts', tech:'§4 五大件', fb:'Eval 必须独立于 agent，含验收覆盖率 / spec 漂移 / 失败熔断三闸门。'},
+    {q:'Böckeler 的双控制框架里，Guides 和 Sensors 分别是？',
+     opts:['Guides=反馈、Sensors=前馈','Guides=前馈（事前防错）、Sensors=反馈（事后纠错）','两个都是前馈','两个都是人工审查'],
+     a:1, anchor:'#control', tech:'§5 双控制', fb:'Guides 事前引导提高一次做对概率，Sensors 事后观察触发自我纠错。'},
+    {q:'“linter / 类型系统 / 测试退出码” 在 Guides/Sensors 四象限里属于哪一类？',
+     opts:['推断式','计算式（确定性、快）','人评','不属于 harness'],
+     a:1, anchor:'#control', tech:'§5 双控制', fb:'确定性、快的控制是计算式；linter/类型偏 Guides，测试退出码偏 Sensors。'},
+    {q:'Anthropic 长时 agent 的“两段式 harness” 指的是？',
+     opts:['前端 + 后端','initializer agent（首次搭环境）+ coding agent（后续会话增量推进）','大模型 + 小模型','训练 + 推理'],
+     a:1, anchor:'#longrun', tech:'§7 长时 agent', fb:'解决“每个新会话对之前毫无记忆”的记忆桥问题：git 历史 + 进度日志 + checklist。'},
+    {q:'长任务里，Anthropic《Harness Design》更推荐哪种上下文策略？',
+     opts:['一直用 compaction 压缩累积历史','context reset（干净重启）+ 基于文件的 artifact 交接','无限拉长上下文窗口','关闭记忆'],
+     a:1, anchor:'#longrun', tech:'§7 长时 agent', fb:'reset 优于 compaction，配 generator+evaluator 双 agent。'},
+    {q:'Cognition《Don\'t Build Multi-Agents》的核心主张是？',
+     opts:['多 agent 永远更好','单线程线性 agent 更可靠；并行 subagent 基于看不见的假设、冲突决策放大坏结果','完全不要用 agent','只能用 workflow'],
+     a:1, anchor:'#multi', tech:'§8 单 vs 多 agent', fb:'两原则=共享完整 context/traces；动作隐含决策、冲突决策放大坏结果。'},
+    {q:'Anthropic 多 agent 研究系统相对单 agent 的表现与代价是？',
+     opts:['高 90.2%，但 token 约 15×','高 10%，成本相同','表现更差','只是快 19%'],
+     a:0, anchor:'#multi', tech:'§8 单 vs 多 agent', fb:'仅当任务价值撑得起 ~15× token 才划算（单 agent 约 4×）。'},
+    {q:'Thorsten Ball 对“最小 agent” 的论断是？',
+     opts:['需要专门的框架','一个 LLM + 一个循环 + 足够 token，约 300 行；工具 = name+description+JSON schema+执行函数','至少上万行代码','必须多 agent'],
+     a:1, anchor:'#inner', tech:'§6 内层探秘', fb:'“The Emperor Has No Clothes”——门槛远低于直觉。'},
+  ];
+  var quizbox = document.getElementById('quizbox');
+  var answered = 0, correct = 0;
+  function build(){
+  quizbox.innerHTML=''; answered=0; correct=0;
+  var _v0=document.getElementById('verdict'); _v0.className='verdict'; _v0.innerHTML='';
+  document.getElementById('scorePill').textContent='0 / '+QS.length+' 已答';
+  QS.forEach(function(item, i){
+    var card = document.createElement('div'); card.className = 'quiz-card';
+    var no = document.createElement('div'); no.className='q-no'; no.textContent = 'Q'+(i+1);
+    var q = document.createElement('p'); q.className='q'; q.textContent = item.q;
+    card.appendChild(no); card.appendChild(q);
+    var opts = document.createElement('div'); opts.className='opts';
+    item.opts.forEach(function(txt, j){
+      var b = document.createElement('button'); b.className='opt'; b.type='button'; b.textContent = txt;
+      b.addEventListener('click', function(){ pick(card, item, j, b); });
+      opts.appendChild(b);
+    });
+    card.appendChild(opts);
+    var fb = document.createElement('div'); fb.className='fb'; card.appendChild(fb);
+    quizbox.appendChild(card);
+  });
+  }
+  build();
+  function pick(card, item, j, btn){
+    if(card.dataset.done) return;
+    card.dataset.done = '1'; answered++;
+    var opts = card.querySelectorAll('.opt');
+    opts.forEach(function(o){ o.disabled = true; });
+    var fb = card.querySelector('.fb');
+    if(j === item.a){
+      correct++;
+      btn.classList.add('right');
+      fb.className = 'fb ok show'; fb.innerHTML = '✓ ' + item.fb;
+    } else {
+      btn.classList.add('wrong');
+      opts[item.a].classList.add('right');
+      fb.className = 'fb no show'; fb.innerHTML = '✗ ' + item.fb + ' <a href="'+item.anchor+'">重读 '+item.tech+' →</a>';
+    }
+    updateScore();
+  }
+  function updateScore(){
+    var pill = document.getElementById('scorePill');
+    pill.textContent = answered + ' / ' + QS.length + ' 已答';
+    if(answered === QS.length){
+      var v = document.getElementById('verdict');
+      var pass = correct === QS.length;
+      v.className = 'verdict show ' + (pass ? 'pass':'retry');
+      v.innerHTML = pass
+        ? '<h3>✓ Cleared — 你会拆 harness 了</h3><p>'+correct+' / '+QS.length+' 正确。你能分清三层嵌套、说出五大件、按 Guides/Sensors 四象限自查盲区，也知道单 vs 多 agent 怎么选。</p>'
+        : '<h3>Not yet — 还差 '+(QS.length-correct)+' 题</h3><p>'+correct+' / '+QS.length+' 正确。顺着每道错题下的「重读 §X →」回对应小节。</p><button class="reset" type="button" id="retryBtn">重置测验</button>';
+      var _rb=document.getElementById('retryBtn'); if(_rb){ _rb.onclick=function(){ build(); var qz=document.getElementById('quiz'); if(qz) qz.scrollIntoView({behavior:'smooth',block:'start'}); }; }
+      v.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  }
+
+  // copy buttons
+  Array.prototype.slice.call(document.querySelectorAll('.copy')).forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var pre = btn.parentNode.querySelector('pre');
+      if(!pre) return;
+      var text = pre.innerText;
+      var done = function(){ btn.textContent = 'copied'; btn.classList.add('done');
+        setTimeout(function(){ btn.textContent = 'copy'; btn.classList.remove('done'); }, 1600); };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done, done);
+      } else {
+        var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
+        ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); done();
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
