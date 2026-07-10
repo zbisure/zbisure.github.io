@@ -1,0 +1,1582 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="小型团队 AI Coding 实战手册：以 Anthropic 官方控制面与验证闭环为骨架，结合 Superpowers / Compound Engineering / AGENTS.md / Addy Osmani 一线实践，给出周一就能装上的门禁、宪法写法、skill 治理与协作协议。">
+<title>小型团队 AI Coding 实战手册 · Team AI Coding Playbook</title>
+<script>try{var t=localStorage.getItem('zb-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  :root{
+    --paper:#F3F5F1; --paper-raised:#FBFCFA; --ink:#20302E; --ink-soft:#5A6B67;
+    --ink-faint:#8B9995; --line:#D8DED8; --contour:#B5A488; --survey:#28599C;
+    --survey-soft:#DCE6F4; --marker:#B4452B; --good:#3D7A4E; --good-soft:#DFEDE2;
+    --bad-soft:#F4E2DC; --mono-bg:#E9EEE9;
+    --shadow:0 1px 2px rgba(32,48,46,.06),0 6px 20px rgba(32,48,46,.07);
+    --serif:"Songti SC","Georgia","Times New Roman",serif;
+    --sans:"PingFang SC",-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    --mono:"SF Mono","Menlo","Consolas",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#151B1B; --paper-raised:#1D2525; --ink:#DCE3DF; --ink-soft:#96A5A0;
+      --ink-faint:#687571; --line:#2E3938; --contour:#6E6350; --survey:#7FA9E4;
+      --survey-soft:#22334C; --marker:#D97B62; --good:#7FB98E; --good-soft:#243B2B;
+      --bad-soft:#462921; --mono-bg:#111716;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#151B1B; --paper-raised:#1D2525; --ink:#DCE3DF; --ink-soft:#96A5A0;
+    --ink-faint:#687571; --line:#2E3938; --contour:#6E6350; --survey:#7FA9E4;
+    --survey-soft:#22334C; --marker:#D97B62; --good:#7FB98E; --good-soft:#243B2B;
+    --bad-soft:#462921; --mono-bg:#111716;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --paper:#F3F5F1; --paper-raised:#FBFCFA; --ink:#20302E; --ink-soft:#5A6B67;
+    --ink-faint:#8B9995; --line:#D8DED8; --contour:#B5A488; --survey:#28599C;
+    --survey-soft:#DCE6F4; --marker:#B4452B; --good:#3D7A4E; --good-soft:#DFEDE2;
+    --bad-soft:#F4E2DC; --mono-bg:#E9EEE9;
+    --shadow:0 1px 2px rgba(32,48,46,.06),0 6px 20px rgba(32,48,46,.07);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+  a{color:var(--survey)}
+  code{font-family:var(--mono);font-size:.85em;background:var(--mono-bg);border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--ink);word-break:break-word}
+
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);padding:72px 0 56px}
+  .hero svg.contours{position:absolute;inset:0;width:100%;height:100%;color:var(--contour);opacity:.28;pointer-events:none}
+  .hero .wrap{position:relative}
+  .theme-toggle{
+    position:absolute;top:16px;right:24px;z-index:2;font-family:var(--mono);font-size:12px;
+    border:1px solid var(--line);background:var(--paper-raised);color:var(--ink-soft);
+    border-radius:3px;padding:5px 11px;cursor:pointer;
+  }
+  .theme-toggle:hover{border-color:var(--survey);color:var(--survey)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--survey);margin:0 0 18px}
+  h1{font-family:var(--serif);font-size:clamp(32px,5.8vw,50px);line-height:1.2;margin:0 0 20px;text-wrap:balance;font-weight:700}
+  .thesis{max-width:42em;font-size:17.5px;color:var(--ink-soft);margin:0 0 8px}
+  .thesis strong{color:var(--ink)}
+  .credit{font-size:13.5px;color:var(--ink-faint);margin-top:20px;max-width:46em}
+  .credit a{color:var(--ink-faint)}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .legend a{
+    font-family:var(--mono);font-size:12.5px;text-decoration:none;color:var(--ink-soft);
+    border:1px solid var(--line);background:var(--paper-raised);border-radius:3px;
+    padding:6px 12px;display:inline-flex;gap:8px;align-items:center;
+  }
+  .legend a:hover{border-color:var(--survey);color:var(--survey)}
+  .legend .dot{width:7px;height:7px;border-radius:50%;background:var(--survey)}
+
+  section{padding:60px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .sec-no{font-family:var(--mono);font-size:13px;color:var(--contour);letter-spacing:.1em}
+  h2{font-family:var(--serif);font-size:clamp(24px,3.6vw,32px);margin:0;text-wrap:balance}
+  .sec-lede{color:var(--ink-soft);max-width:44em;margin:10px 0 28px}
+  h3{font-family:var(--serif);font-size:20px;margin:32px 0 12px}
+  h4{font-family:var(--serif);font-size:17px;margin:20px 0 8px}
+  p{max-width:46em}
+
+  .toc{
+    position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:10;
+    width:220px;max-height:70vh;overflow-y:auto;
+    background:var(--paper-raised);border:1px solid var(--line);border-left:3px solid var(--survey);
+    border-radius:0 6px 6px 0;box-shadow:var(--shadow);
+    padding:16px 0;transition:transform .25s ease,opacity .25s ease;
+  }
+  .toc.collapsed{transform:translateY(-50%) translateX(-100%);opacity:.6}
+  .toc.collapsed:hover{transform:translateY(-50%) translateX(0);opacity:1}
+  .toc-toggle{
+    position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);
+    border-radius:3px;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    padding:0;transition:color .12s;
+  }
+  .toc-toggle:hover{color:var(--survey)}
+  .toc ol{list-style:none;padding:0;margin:0;counter-reset:toc}
+  .toc li{counter-increment:toc}
+  .toc a{
+    display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink-soft);
+    font-size:13px;padding:6px 16px 6px 12px;transition:background .12s,color .12s;
+  }
+  .toc a:hover,.toc a.active{background:var(--survey-soft);color:var(--survey)}
+  .toc a::before{
+    content:counter(toc,decimal-leading-zero);font-family:var(--mono);font-size:11px;
+    color:var(--contour);letter-spacing:.05em;min-width:20px;flex-shrink:0;
+  }
+  @media(max-width:900px){
+    .toc{display:none}
+  }
+
+  ul.plain{margin:10px 0 16px;padding-left:1.2em;color:var(--ink-soft);max-width:46em}
+  ul.plain li{margin-bottom:6px}
+  ul.plain b{color:var(--ink)}
+
+  .plate{background:var(--paper-raised);border:1px solid var(--line);border-left:3px solid var(--survey);
+    border-radius:0 5px 5px 0;box-shadow:var(--shadow);padding:16px 20px;margin:0 0 18px;max-width:46em}
+  .plate .who{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin:0 0 6px;letter-spacing:.04em}
+  .plate p{margin:0;font-size:15px;color:var(--ink-soft)}
+  .plate strong{color:var(--ink)}
+
+  .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0 6px}
+  @media(max-width:600px){.reveal-grid{grid-template-columns:1fr}}
+  .reveal{
+    text-align:left;font:inherit;color:inherit;cursor:pointer;
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:4px;
+    padding:16px 18px;transition:border-color .15s;
+  }
+  .reveal:hover,.reveal:focus-visible{border-color:var(--survey)}
+  .reveal[aria-pressed="true"]{border-color:var(--survey);box-shadow:inset 0 0 0 1px var(--survey)}
+  .reveal .r-tag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--survey);text-transform:uppercase}
+  .reveal h4{font-family:var(--serif);font-size:16.5px;margin:6px 0 4px}
+  .reveal p{margin:0;font-size:13.5px;color:var(--ink-soft);line-height:1.55}
+  .reveal-answer{
+    border-left:3px solid var(--survey);background:var(--survey-soft);
+    border-radius:0 4px 4px 0;padding:14px 18px;margin-top:14px;font-size:14.5px;min-height:48px;
+  }
+  .reveal-answer em{font-style:normal;color:var(--survey);font-weight:600}
+
+  .steps{list-style:none;padding:0;margin:18px 0 0;counter-reset:st}
+  .steps li{
+    counter-increment:st;position:relative;padding:16px 18px 16px 58px;
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:4px;
+    margin-bottom:10px;font-size:14.5px;color:var(--ink-soft);
+  }
+  .steps li::before{
+    content:counter(st, decimal-leading-zero);position:absolute;left:16px;top:16px;
+    font-family:var(--mono);font-size:13px;color:var(--survey);font-weight:700;
+  }
+  .steps b{color:var(--ink);display:block;font-family:var(--serif);font-size:16px;margin-bottom:4px}
+
+  .tbl-wrap{overflow-x:auto;margin:16px 0}
+  table{border-collapse:collapse;width:100%;font-size:14px;background:var(--paper-raised);min-width:560px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;line-height:1.55}
+  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--ink-soft);text-transform:uppercase;background:var(--mono-bg)}
+  td b{color:var(--survey)}
+
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+  @media(max-width:640px){.duo{grid-template-columns:1fr}}
+  .duo .cell{border:1px solid var(--line);border-radius:4px;padding:16px 18px;background:var(--paper-raised);font-size:14px;line-height:1.65;color:var(--ink-soft)}
+  .duo .a{border-left:3px solid var(--survey)}
+  .duo .b{border-left:3px solid var(--contour)}
+  .duo .x{border-left:3px solid var(--marker)}
+  .duo .cell b{display:block;font-family:var(--serif);font-size:16px;margin-bottom:6px;color:var(--ink)}
+  .duo .cell .tag{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:6px}
+
+  .verdict-strip{margin:16px 0 0;padding:12px 16px;border-left:3px solid var(--good);background:var(--good-soft);border-radius:0 4px 4px 0;font-size:14.5px;max-width:46em}
+  .verdict-strip b{font-family:var(--serif)}
+  .warn-strip{margin:16px 0 0;padding:12px 16px;border-left:3px solid var(--marker);background:var(--bad-soft);border-radius:0 4px 4px 0;font-size:14.5px;max-width:46em}
+  .keyline{margin:22px 0 0;border-left:3px solid var(--contour);padding:8px 16px;font-size:15px;color:var(--ink-soft);font-style:italic;max-width:46em}
+
+  .anti{list-style:none;padding:0;margin:12px 0 0}
+  .anti li{padding:12px 16px;border:1px solid var(--line);border-radius:4px;background:var(--paper-raised);margin-bottom:8px;font-size:14.5px;color:var(--ink-soft)}
+  .anti li b{color:var(--marker);font-family:var(--serif)}
+
+  .promptbox{position:relative;margin:0 0 12px}
+  .promptbox pre{
+    margin:0;background:var(--mono-bg);border:1px solid var(--line);border-radius:4px;
+    padding:14px 16px;padding-right:88px;font-family:var(--mono);font-size:12.5px;line-height:1.65;
+    white-space:pre-wrap;overflow-x:auto;color:var(--ink);
+  }
+  .copy{
+    position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11.5px;
+    border:1px solid var(--line);background:var(--paper-raised);color:var(--ink-soft);
+    border-radius:3px;padding:4px 10px;cursor:pointer;
+  }
+  .copy:hover{border-color:var(--survey);color:var(--survey)}
+  .copy.done{border-color:var(--good);color:var(--good)}
+  .prompt-note{font-size:13.5px;color:var(--ink-soft);margin:-2px 0 20px;line-height:1.65;max-width:46em}
+
+  .shelf{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+  .shelf li{
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:4px;
+    padding:14px 18px;font-size:14.5px;color:var(--ink-soft);
+  }
+  .shelf b{color:var(--ink);font-family:var(--serif);font-size:15.5px;display:block;margin-bottom:2px}
+  .shelf .src{display:block;margin-top:6px;font-family:var(--mono);font-size:12.5px}
+  .shelf .date{color:var(--ink-faint);font-family:var(--mono);font-size:12px;margin-left:8px}
+
+  .quiz-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:5px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+  .quiz-card .q-no{font-family:var(--mono);font-size:12px;color:var(--contour);letter-spacing:.1em}
+  .quiz-card p.q{font-size:15.5px;margin:8px 0 14px;font-weight:600}
+  .opts{display:grid;gap:8px}
+  .opt{
+    text-align:left;font:inherit;font-size:14.5px;line-height:1.55;color:var(--ink);
+    background:transparent;border:1px solid var(--line);border-radius:4px;
+    padding:10px 14px;cursor:pointer;transition:border-color .12s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--survey)}
+  .opt:disabled{cursor:default;opacity:.92}
+  .opt.right{border-color:var(--good);background:var(--good-soft)}
+  .opt.wrong{border-color:var(--marker);background:var(--bad-soft)}
+  .fb{display:none;margin-top:12px;font-size:14px;border-radius:4px;padding:12px 15px;line-height:1.6}
+  .fb.show{display:block}
+  .fb.ok{background:var(--good-soft);border-left:3px solid var(--good)}
+  .fb.no{background:var(--bad-soft);border-left:3px solid var(--marker)}
+  .fb a{font-weight:600}
+  .verdict{display:none;border-radius:5px;padding:24px;margin-top:26px}
+  .verdict.show{display:block}
+  .verdict.pass{background:var(--good-soft);border:1px solid var(--good)}
+  .verdict.retry{background:var(--bad-soft);border:1px solid var(--marker)}
+  .verdict h3{margin:0 0 10px;font-family:var(--serif)}
+  .verdict ul{margin:8px 0 0;padding-left:20px;font-size:14.5px}
+  .verdict li{margin-bottom:5px}
+  .reset{
+    font:inherit;font-size:14px;margin-top:14px;cursor:pointer;
+    border:1px solid var(--line);background:var(--paper-raised);color:var(--ink);
+    border-radius:4px;padding:8px 18px;
+  }
+  .reset:hover{border-color:var(--survey);color:var(--survey)}
+  .score-rail{position:sticky;bottom:14px;display:flex;justify-content:center;pointer-events:none;margin-top:20px}
+  .score-pill{
+    pointer-events:auto;font-family:var(--mono);font-size:12.5px;
+    background:var(--ink);color:var(--paper);border-radius:99px;padding:7px 18px;box-shadow:var(--shadow);
+  }
+
+  footer{padding:44px 0 64px;color:var(--ink-faint);font-size:13.5px}
+  footer p{margin:4px 0}
+  footer a{color:var(--ink-faint)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <svg class="contours" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1">
+    <ellipse cx="720" cy="90" rx="300" ry="130"/>
+    <ellipse cx="720" cy="90" rx="240" ry="100"/>
+    <ellipse cx="720" cy="90" rx="180" ry="72"/>
+    <ellipse cx="720" cy="90" rx="120" ry="46"/>
+    <ellipse cx="720" cy="90" rx="65" ry="24"/>
+    <ellipse cx="120" cy="360" rx="260" ry="110"/>
+    <ellipse cx="120" cy="360" rx="195" ry="80"/>
+    <ellipse cx="120" cy="360" rx="130" ry="52"/>
+    <ellipse cx="120" cy="360" rx="70" ry="27"/>
+  </svg>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换明暗主题">◐</button>
+  <div class="wrap">
+    <p class="eyebrow">Field Manual · 实战手册</p>
+    <h1>小型团队 AI Coding 实战手册</h1>
+    <p class="thesis">别再堆「最佳实践清单」。团队真正缺的是一套<strong>可安装的控制系统</strong>：什么进每次会话、什么只在任务时加载、什么模型说了不算必须脚本拦住、什么变更先写契约再写码。<strong>建议是概率；墙是确定性。</strong>本页按「先装墙 → 再写宪法 → 再谈流程」的顺序写，可直接当小团队一周落地剧本。</p>
+    <p class="credit">主轴：Anthropic <a href="https://code.claude.com/docs/en/best-practices" rel="noopener">Claude Code Best Practices</a> · <a href="https://claude.com/blog/steering-claude-code-skills-hooks-rules-subagents-and-more" rel="noopener">Steering Claude Code</a>（2026-06）· <a href="https://code.claude.com/docs/en/memory" rel="noopener">Memory</a> / Hooks / Skills 文档。辅轴：AGENTS.md 标准、Addy Osmani agentic 工作流、obra/superpowers、Every compound-engineering、Karpathy 行为约束（forrestchang 化）。个人选型见 <a href="../agentic/">Agentic 作战手册</a>。</p>
+    <nav class="legend" aria-label="页面导航">
+      <a href="#model"><span class="dot"></span>控制面</a>
+      <a href="#week0"><span class="dot"></span>Week-0 剧本</a>
+      <a href="#verify"><span class="dot"></span>验证墙</a>
+      <a href="#constitution"><span class="dot"></span>宪法</a>
+      <a href="#workflow"><span class="dot"></span>工作流</a>
+      <a href="#hooks"><span class="dot"></span>Hook</a>
+      <a href="#skills"><span class="dot"></span>Skill</a>
+      <a href="#spec"><span class="dot"></span>Spec / docs</a>
+      <a href="#team"><span class="dot"></span>多人</a>
+      <a href="#anti"><span class="dot"></span>反模式</a>
+      <a href="#templates"><span class="dot"></span>模板</a>
+      <a href="#shelf"><span class="dot"></span>来源</a>
+      <a href="#quiz"><span class="dot"></span><span id="quizNavLabel">自测</span></a>
+    </nav>
+  </div>
+</header>
+
+<!-- 章节目录（左侧固定） -->
+<nav class="toc" id="toc" aria-label="章节目录">
+  <button class="toc-toggle" id="tocToggle" type="button" aria-label="收起目录">‹</button>
+  <ol>
+    <li><a href="#model">控制面：指令机制 + 工具层</a></li>
+    <li><a href="#week0">Week-0 落地剧本</a></li>
+    <li><a href="#verify">验证墙：比规则更重要</a></li>
+    <li><a href="#constitution">宪法怎么写：四层 + 两套记忆</a></li>
+    <li><a href="#workflow">工作流：探索 → 计划 → 实现 → 验证</a></li>
+    <li><a href="#hooks">Hook：最小可生产集合</a></li>
+    <li><a href="#skills">Skill + Agent：少即是多</a></li>
+    <li><a href="#spec">Spec：意图进库，做完归档</a></li>
+    <li><a href="#team">多人协同 + 度量</a></li>
+    <li><a href="#anti">反模式</a></li>
+    <li><a href="#templates">可复制模板</a></li>
+    <li><a href="#shelf">来源书架</a></li>
+    <li><a href="#quiz">自测</a></li>
+  </ol>
+</nav>
+
+<!-- §1 -->
+<section id="model">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§1</span><h2>控制面：指令机制 + 工具层</h2></div>
+    <p class="sec-lede">Anthropic Steering 文讲的是「指令往哪放」；MCP 是<strong>工具连接层</strong>，不是同一种东西。团队规范的第一件事不是「写更长的 CLAUDE.md」，而是<strong>把每条指令放到正确的机制里</strong>——放错地方，轻则浪费 token，重则关键规则被淹没。</p>
+
+    <div class="plate">
+      <p class="who">ANTHROPIC · STEERING CLAUDE CODE · 2026-06</p>
+      <p>「Every time X, always do Y」写在 CLAUDE.md 里是错的——该用 <strong>hook</strong>。「Never do this」若绝对不能发生，指令不够，要用 <strong>hook / permissions / managed settings</strong>。30 行流程写进 CLAUDE.md 是错的——该用 <strong>skill</strong>。</p>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>机制</th><th>何时进上下文</th><th>权威</th><th>团队用途</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>CLAUDE.md</b></td><td>会话全程（子目录按需）</td><td>建议</td><td>命令、目录、团队规范、硬禁止的说明</td></tr>
+          <tr><td><b>Rules</b></td><td>始终或 path 命中</td><td>建议</td><td>横切约定（API 必 Zod、migration 只追加）</td></tr>
+          <tr><td><b>Skills</b></td><td>描述常驻；全文调用时</td><td>建议</td><td>发版、评审、排障等流程</td></tr>
+          <tr><td><b>Subagents</b></td><td>独立窗口；只回摘要</td><td>建议</td><td>调研、安全审、对抗审查；定义在 <code>.claude/agents/*.md</code></td></tr>
+          <tr><td><b>Hooks</b></td><td>生命周期事件</td><td><b>强制</b></td><td>format、拦危险命令、Stop 验证</td></tr>
+          <tr><td><b>Permissions</b></td><td>工具调用前</td><td><b>强制</b></td><td>allowlist / deny / sandbox</td></tr>
+          <tr><td><b>AGENTS.md</b></td><td>跨工具约定（建议 <code>@</code> 导入）</td><td>建议</td><td>Codex/Cursor/Claude 共用的项目说明书</td></tr>
+          <tr><td><b>MCP</b></td><td>工具名常驻；schema 按需</td><td>工具能力</td><td>GitHub/Slack/DB 等连接；<code>.mcp.json</code> 进 git；密钥走环境变量不进库</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="prompt-note">另有 output styles / <code>--append-system-prompt</code>（改角色或单次附加系统提示），小团队少用。别把 MCP 当成「第八条 CLAUDE.md」——它解决的是<strong>能调什么外部系统</strong>，不解决「项目规则写在哪」。</p>
+
+    <div class="reveal-grid" role="group" aria-label="三种权威">
+      <button class="reveal" data-a="Memory / Rules / Skills：模型会尽量遵守，长会话、压力、冲突指令下会漏。适合「怎么想、怎么走流程」。" aria-pressed="false">
+        <span class="r-tag">Probabilistic</span>
+        <h4>建议层</h4>
+        <p>概率服从。写清楚仍然必要，但不是墙。</p>
+      </button>
+      <button class="reveal" data-a="Hook exit 2、permissions deny、CI 红灯、失败的测试：不经过「模型是否记得」。Povilas 总结：约定是样本，测试才是墙。" aria-pressed="false">
+        <span class="r-tag">Deterministic</span>
+        <h4>强制层</h4>
+        <p>同一输入同一输出。安全与质量底线只信这里。</p>
+      </button>
+      <button class="reveal" data-a="Spec / ADR / living docs：人和 agent 共享的「要什么」。没有它，agent 优化的是你含糊说的那句话，不是产品意图。" aria-pressed="false">
+        <span class="r-tag">Contract</span>
+        <h4>契约层</h4>
+        <p>变更意图的事实源。做完要 archive，否则变假文档。</p>
+      </button>
+      <button class="reveal" data-a="上下文是稀缺资源。官方：context 填满后表现下降。所以 CLAUDE.md 要薄、skill 要按需、调研要 subagent——不是风格问题，是性能问题。" aria-pressed="false">
+        <span class="r-tag">Constraint</span>
+        <h4>上下文预算</h4>
+        <p>一切设计先服务「别把窗口撑爆」。</p>
+      </button>
+    </div>
+    <div class="reveal-answer" id="revealAnswer">☝ 点一层看权威含义。</div>
+    <p class="keyline">判据一句话：删掉这行，agent 会做错什么？答不上来就删。必须永远做对 → 别只写 markdown，写成 hook 或测试。</p>
+  </div>
+</section>
+
+<!-- §2 -->
+<section id="week0">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§2</span><h2>Week-0 落地剧本：第一周只做这些</h2></div>
+    <p class="sec-lede">小团队最常见的失败是一上来装 100 个 skill、抄 500 行 CLAUDE.md。按 Anthropic 内部与一线仓库收敛出的顺序：<strong>先能验证 → 再共享宪法 → 再自动化 → 再谈高级流程</strong>。</p>
+
+    <ol class="steps">
+      <li>
+        <b>Day 1 · 每个活跃仓库能「自证」</b>
+        确认本地有：测试命令、lint/format、CI 对 PR 的同一套命令。没有测试的模块，先给 agent 一个可跑的 check（哪怕是脚本 diff fixture）。官方第一原则：<em>Give Claude a way to verify its work</em>。
+      </li>
+      <li>
+        <b>Day 1–2 · 薄宪法 + docs Day-0</b>
+        跑 <code>/init</code>，删到 &lt;150–200 行。共享事实写 <code>AGENTS.md</code>，Claude 用薄 <code>CLAUDE.md</code> <code>@AGENTS.md</code>。每人 <code>CLAUDE.local.md</code> + gitignore。应用仓按 <a href="#spec">§8</a> 填 <code>docs/context/project-context.md</code>（真实验证命令、active 需求）——没填就别让 agent 大写代码。
+      </li>
+      <li>
+        <b>Day 2 · 装三条强制门禁</b>
+        ① PreToolUse 拦写 <code>.env</code> / secrets 与危险 <code>rm</code>；② PostToolUse 对改动文件 format/lint；③ git pre-commit 密钥扫描。慢检查（全量 Sonar/CodeQL）放 CI，不要塞进每次 Edit。
+      </li>
+      <li>
+        <b>Day 3 · 工作流纪律写进宪法，不写成长篇小说</b>
+        三句话够用：非琐碎改动先 plan；完成前必须跑验证命令；同问题纠正两次就 <code>/clear</code> 重开。大流程用 skill，不塞 CLAUDE.md。
+      </li>
+      <li>
+        <b>Day 4–5 · 选一个流程 skill，不是二十个</b>
+        从「发版检查」或「PR 自检」二选一。有副作用的加 <code>disable-model-invocation: true</code>。流程型 skill 同阶段只留一个主将（见 <a href="../agentic/#d-d">Agentic · skill 治理</a>）。
+      </li>
+      <li>
+        <b>Day 5 · 定人 + 定 PR 规则</b>
+        指定 Constitution Owner（可兼职）。约定：改 <code>AGENTS.md</code> / hooks / 共享 skill 走 PR；agent 大 diff 不免除人类 review；禁止用 <code>--no-verify</code> 当日常文化。
+      </li>
+    </ol>
+    <p class="verdict-strip"><b>Week-0 完成定义：</b>任意成员在干净 clone 上能：用同一套命令绿测、agent 读到同一份宪法、危险写操作被 hook 拦住、PR 上 CI 与本地 check 一致。应用仓额外：project-context 里验证命令非占位符，且有一份带验收标准的 active requirement。</p>
+  </div>
+</section>
+
+<!-- §3 -->
+<section id="verify">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§3</span><h2>验证墙：比再写十条规则更重要</h2></div>
+    <p class="sec-lede">官方 best practices 开篇几乎不是 CLAUDE.md，而是验证。没有 pass/fail 信号，你就是验证环本身——每个错误都等你发现。团队 AI 规范的 ROI，首先体现在<strong>agent 能否自己跑到绿</strong>。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>闸</th><th>实现</th><th>反馈速度</th><th>用途</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>提示内验证</b></td>
+            <td>同一条 prompt 要求跑测试/对比截图</td>
+            <td>最快</td>
+            <td>日常任务；零配置</td>
+          </tr>
+          <tr>
+            <td><b>PostToolUse hook</b></td>
+            <td>Edit/Write 后 format + 定向 lint</td>
+            <td>秒级</td>
+            <td>风格一致；当场修</td>
+          </tr>
+          <tr>
+            <td><b>Stop hook /goal</b></td>
+            <td>结束前跑 check；失败则阻止结束</td>
+            <td>十秒～分钟</td>
+            <td>无人值守循环的硬门</td>
+          </tr>
+          <tr>
+            <td><b>git pre-commit</b></td>
+            <td>secret + staged lint</td>
+            <td>秒～十秒</td>
+            <td>进库前底线（注意：AI 大 diff 可能拖垮慢 pre-commit）</td>
+          </tr>
+          <tr>
+            <td><b>CI</b></td>
+            <td>全量 test + typecheck +（可选）Sonar/Semgrep</td>
+            <td>分钟</td>
+            <td>合并真相；深度分析只放这里</td>
+          </tr>
+          <tr>
+            <td><b>对抗审查</b></td>
+            <td>fresh subagent 审 diff（官方 /code-review 模式）</td>
+            <td>分钟</td>
+            <td>实现者不当裁判；Addy 亦强调 fresh-context review</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="duo">
+      <div class="cell a">
+        <span class="tag">本地 · 快</span>
+        <b>Lint / format / 单测子集</b>
+        目标 &lt; 60s，agent 能自修。PostToolUse + pre-commit。AI 一次改 40 文件时，避免全仓慢 hook 超时——按变更文件跑。
+      </div>
+      <div class="cell b">
+        <span class="tag">远端 · 深</span>
+        <b>全量测试 · Sonar · CodeQL</b>
+        目标「合并前必绿」。别写进「每次 Edit」。团队可对 main 设 quality gate，对草稿 PR 降级为 warning。
+      </div>
+    </div>
+    <p class="warn-strip"><b>实战坑：</b>把 10 分钟分析塞进 agent hook → 全员关掉 hook → 底线归零。慢检查上 CI；快检查贴 agent 手边。</p>
+  </div>
+</section>
+
+<!-- §4 -->
+<section id="constitution">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§4</span><h2>宪法怎么写：谁受影响，就写给谁</h2></div>
+    <p class="sec-lede">第一性原理：CLAUDE.md 不是「另一个 README」，而是<strong>每次会话自动注入的行为说明书</strong>。写错位置的成本是：同事被你的个人习惯绑架，或你的续跑断点被提交进库。Linux/WSL 文件名必须是 <code>CLAUDE.md</code>（大小写敏感）。官方建议单文件 &lt;200 行；无主的 monorepo 宪法会只增不减——要有 owner，改动走 PR。</p>
+
+    <div class="plate">
+      <p class="who">一句话分层</p>
+      <p><strong><code>~/.claude/CLAUDE.md</code> = 你的操作系统</strong>（方法论、表达、本机环境）·
+      <strong><code>&lt;repo&gt;/CLAUDE.md</code>（+ AGENTS.md）= 团队增强版说明书</strong>（客观事实）·
+      <strong><code>CLAUDE.local.md</code> = 私人笔记本</strong>（本仓库个人工作流，gitignore）·
+      三层各管各的，不冲突。</p>
+    </div>
+
+    <h3>层级地图</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>层</th><th>路径</th><th>影响谁</th><th>Git</th><th>该写什么</th><th>不该写</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>企业</b></td>
+            <td>managed <code>/etc/claude-code/…</code></td>
+            <td>机上所有人</td>
+            <td>IT 分发</td>
+            <td>合规、安全策略</td>
+            <td>业务细节</td>
+          </tr>
+          <tr>
+            <td><b>全局·个人</b></td>
+            <td><code>~/.claude/CLAUDE.md</code></td>
+            <td>你的所有项目</td>
+            <td>否</td>
+            <td>思维方式、L0/L1/L2 路由、OpenSpec 总流程、验证纪律、Obsidian 总约定、本机环境（node 绝对路径、gh、uv…）</td>
+            <td>具体仓库结构、某项目端口</td>
+          </tr>
+          <tr>
+            <td><b>项目·团队</b></td>
+            <td><code>./CLAUDE.md</code> 或 <code>./.claude/CLAUDE.md</code> + 建议 <code>AGENTS.md</code></td>
+            <td>本仓库所有人（含同事）</td>
+            <td><b>是 · PR 管控</b></td>
+            <td>简介、结构、栈、构建/测试命令、代码规范、分支策略、架构红线、常见陷阱</td>
+            <td>个人偏好、进度、change id、个人续跑、Obsidian 路径</td>
+          </tr>
+          <tr>
+            <td><b>项目·本地</b></td>
+            <td><code>./CLAUDE.local.md</code></td>
+            <td>只有你 · 本仓库</td>
+            <td><b>否 · gitignore</b></td>
+            <td>续跑断点、当前 change、设计文档路径、本机 URL、个人临时偏好</td>
+            <td>团队必须知道的事实、密钥明文</td>
+          </tr>
+          <tr>
+            <td><b>子目录</b></td>
+            <td><code>&lt;repo&gt;/&lt;dir&gt;/CLAUDE.md</code></td>
+            <td>读该目录时（按需）</td>
+            <td>是</td>
+            <td>子模块特有约束</td>
+            <td>项目级已写过的重复内容</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>内容分级速查（统一 vs 放开）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>内容</th><th>全局个人</th><th>项目团队</th><th>CLAUDE.local</th><th>子目录</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>思维方式 / 表达风格</td><td><b>✅</b></td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><td>工作流方法论（OpenSpec 总则等）</td><td><b>✅</b></td><td>❌</td><td>仅本仓特例</td><td>❌</td></tr>
+          <tr><td>本机环境路径（nvm、uv、WSL）</td><td><b>✅</b></td><td>❌</td><td>仅本仓差异</td><td>❌</td></tr>
+          <tr><td>Obsidian / 个人档案约定</td><td><b>✅</b></td><td>❌</td><td>本仓 index 路径</td><td>❌</td></tr>
+          <tr><td>项目简介 / 仓库地图</td><td>❌</td><td><b>✅</b></td><td>❌</td><td>可选细化</td></tr>
+          <tr><td>构建·测试·部署命令</td><td>❌</td><td><b>✅</b></td><td>❌</td><td>可选</td></tr>
+          <tr><td>代码规范 / 框架坑</td><td>❌</td><td><b>✅</b></td><td>❌</td><td>可选</td></tr>
+          <tr><td>分支 / 提交 / PR 策略</td><td>❌</td><td><b>✅</b></td><td>❌</td><td>❌</td></tr>
+          <tr><td>架构红线</td><td>❌</td><td><b>✅</b></td><td>❌</td><td>可选</td></tr>
+          <tr><td>进度 / 状态 / change id</td><td>❌</td><td><b>❌ 禁止</b></td><td><b>✅</b></td><td>❌</td></tr>
+          <tr><td>个人续跑命令</td><td>总则放全局</td><td><b>❌</b></td><td><b>✅ 当前断点</b></td><td>❌</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="keyline">关键区分：<strong>全局是你个人的，项目是团队共享的。</strong>项目级会被所有人的 Claude 读到——必须是客观事实，不能放个人习惯。进度与续跑写进项目 CLAUDE.md，是多人协作第一号脏数据来源。</p>
+
+    <h3>项目级 CLAUDE.md：团队共享的必选板块</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>板块</th><th>必须?</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>项目简介</td><td>必须</td><td>一段话，新人 10 秒看懂</td></tr>
+          <tr><td>仓库结构</td><td>必须</td><td>只列容易迷路的目录</td></tr>
+          <tr><td>技术栈与版本</td><td>推荐</td><td>关键依赖约束</td></tr>
+          <tr><td>构建 / 测试 / 部署命令</td><td>必须</td><td>可复制执行</td></tr>
+          <tr><td>代码规范（框架坑）</td><td>必须</td><td>反直觉处；通用风格可引用 linter</td></tr>
+          <tr><td>分支与提交</td><td>必须</td><td>避免「分支叫啥来着」</td></tr>
+          <tr><td>架构红线</td><td>必须</td><td>不可违反的设计决策</td></tr>
+          <tr><td>常见陷阱</td><td>推荐</td><td>踩过的坑，省别人时间</td></tr>
+          <tr><td>个人工作流 / 进度</td><td><b>禁止</b></td><td>→ 全局或 CLAUDE.local.md</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="prompt-note">跨工具时：客观事实优先写 <code>AGENTS.md</code>，Claude 用薄 <code>CLAUDE.md</code> 做 <code>@AGENTS.md</code> + 少量 Claude 专用路由。改团队宪法 = 提 PR，至少一人 review，避免把个人习惯写进去。</p>
+
+    <h3>CLAUDE.local.md：私人笔记本（推荐，别塞进 ~/.claude/projects 就忘）</h3>
+    <p class="sec-lede" style="margin-bottom:14px">官方支持 <code>./CLAUDE.local.md</code>（或 <code>./.claude/CLAUDE.local.md</code>）：启动时加载，同层追加在 <code>CLAUDE.md</code> 之后。<strong>默认应 gitignore</strong>。相对 <code>~/.claude/projects/&lt;encoded-path&gt;/</code>：local 文件就在仓库根，肉眼可见，更不容易忘——适合「快速进入状态 / 续跑 / 本仓事实源」。</p>
+    <div class="duo">
+      <div class="cell a">
+        <span class="tag">放进 local</span>
+        <b>本仓 × 仅你</b>
+        当前 openspec change id 与续跑命令；tasks 断点路径；Obsidian 本项目 index/设计文档路径；localhost 端口与 docker profile；未升格为团队规范的个人实验习惯。
+      </div>
+      <div class="cell b">
+        <span class="tag">别放 local</span>
+        <b>会害团队或泄密</b>
+        架构红线、共享构建命令（→ 团队 CLAUDE/AGENTS）；密钥明文；「我个人跳过测试」；任何希望新人 clone 后自动生效的规则。
+      </div>
+    </div>
+    <ul class="plain">
+      <li><b>Worktree：</b>gitignore 后 local 不会随 worktree 自动出现。多 worktree 时：每棵拷一份，或在 local 里 <code>@~/notes/&lt;项目&gt;.md</code> 指到家目录一份个人文件。</li>
+      <li><b>settings.local.json：</b>本机 hook/权限微调放这里；行为说明放 local.md。安全门禁（拦 rm、拦 .env）必须进<strong>共享</strong> hooks，不能只写在 local。</li>
+      <li><b>团队纪律：</b>PR 扫到误提交的 <code>CLAUDE.local.md</code> 一律打回；根 <code>.gitignore</code> 固定包含它。</li>
+    </ul>
+    <div class="promptbox"><pre># CLAUDE.local.md — 本机私有，勿提交
+# .gitignore 必须包含：CLAUDE.local.md
+
+## 快速进入状态
+- 当前工程：&lt;名称&gt;（openspec change `&lt;id&gt;`）
+- 续跑：/openspec-apply &lt;id&gt;
+- 断点：openspec/changes/&lt;id&gt;/tasks.md
+
+## 事实源（个人档案）
+- 设计文档：&lt;Obsidian 路径&gt;
+- 项目大脑：Obsidian 40-Projects/&lt;项目&gt;/index.md
+
+## 本机
+- API：http://localhost:18080
+- DB：docker compose --profile dev up -d
+
+## 禁止
+- 密码 / token / 客户数据
+- 应写进团队 CLAUDE.md / AGENTS.md 的规则</pre><button class="copy" type="button">复制</button></div>
+    <p class="prompt-note">模板全文见 <a href="#templates">§11</a>。会话用 <code>/memory</code> 确认 local 已加载。</p>
+
+    <h3>全局个人层：补全本机环境，方法论只写一次</h3>
+    <ul class="plain">
+      <li>思维方式、开工路由、验证纪律、记忆/档案总约定：写在 <code>~/.claude/CLAUDE.md</code>，<strong>不要</strong>复制进每个仓库的团队 CLAUDE.md。</li>
+      <li>本机环境写全（减少每次「试探」）：node 绝对路径、包管理器（如 uv）、gh 账号与协议、WSL/内网入口等——仍是<strong>你的机器</strong>，不是团队事实。</li>
+      <li>若某条约定已变成「全员必须」（如「统一用 uv」）→ 升格进项目 AGENTS.md，而不是只留在你的全局文件。</li>
+    </ul>
+
+    <h3>薄与可验证（官方留存测试）</h3>
+    <div class="duo">
+      <div class="cell a">
+        <span class="tag">Include</span>
+        <b>agent 猜不到的</b>
+        具体命令；框架坑；分支礼仪；架构红线；gotcha。
+      </div>
+      <div class="cell b">
+        <span class="tag">Exclude</span>
+        <b>噪音</b>
+        读代码即知的结构；语言常识；API 全文；空话；长流程（→ skill）；进度状态。
+      </div>
+    </div>
+
+    <h3>加载与冲突</h3>
+    <ul class="plain">
+      <li>从 cwd 向上拼接；同层 <code>CLAUDE.local.md</code> 追加在 <code>CLAUDE.md</code> 后。</li>
+      <li>子目录 CLAUDE.md 启动通常不加载，读到该处文件时才纳入。</li>
+      <li>冲突规则可能被任意遵循一条 → <code>/memory</code> 审计，删冲突。</li>
+      <li>插件根 CLAUDE.md 不是标准插件组件，启用不会自动当 memory。</li>
+    </ul>
+
+    <h3>两套记忆：CLAUDE.md vs Auto Memory</h3>
+    <p class="sec-lede" style="margin-bottom:14px">CLAUDE.md 是你写的指令；Auto Memory 是 Claude 自己学的。两套系统互补，但在团队场景下容易混淆——尤其不要把 auto memory 当团队共识。</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th></th><th>CLAUDE.md</th><th>Auto Memory</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>谁写</b></td><td>你</td><td>Claude 自己</td></tr>
+          <tr><td><b>内容</b></td><td>指令、规则、命令</td><td>学到的模式、偏好</td></tr>
+          <tr><td><b>加载</b></td><td>每会话全量</td><td><code>MEMORY.md</code> 前 200 行/25KB；topic 文件按需</td></tr>
+          <tr><td><b>范围</b></td><td>项目/用户/企业</td><td>按仓库（机器本地）</td></tr>
+          <tr><td><b>共享</b></td><td>进 git = 全员</td><td><b>不进 git、不跨机器</b></td></tr>
+          <tr><td><b>团队风险</b></td><td>低（有 PR 审查）</td><td><b>高</b>——一个人的记忆可能被另一个人的会话误读</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="warn-strip"><b>团队纪律：</b>auto memory 是个人学习笔记，不是团队共识。团队事实只进 <code>AGENTS.md</code> / <code>CLAUDE.md</code>（git 管控）。用 <code>/memory</code> 审计当前加载了什么；发现脏数据就清。</div>
+
+    <p class="verdict-strip"><b>维护节奏：</b>agent 第二次犯同一错 → 改对应层（团队事实 / 个人 local / 或 hook）。每月修剪；砍不掉的长文挪 skill。留存测试：「去掉这行会不会做错？」</p>
+  </div>
+</section>
+
+<!-- §5 -->
+<section id="workflow">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§5</span><h2>工作流：探索 → 计划 → 实现 → 验证 → 沉淀</h2></div>
+    <p class="sec-lede">官方推荐默认四步：Explore → Plan → Implement → Commit。Superpowers 把「未批准设计不写码」做成硬门；Compound Engineering 要求每次交付让下次更容易。小团队不需要全套仪式，但需要<strong>同一条路由</strong>。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>级别</th><th>例子</th><th>强制动作</th><th>禁止</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>L0 琐碎</b></td>
+            <td>文案、单文件小修、配置笔误</td>
+            <td>直接改 + 相关 check</td>
+            <td>跳过验证</td>
+          </tr>
+          <tr>
+            <td><b>L1 行为变更</b></td>
+            <td>半日以内 feature/bugfix</td>
+            <td>短 plan（可在会话内）→ 实现 → 测试绿 → PR</td>
+            <td>无验收标准开写</td>
+          </tr>
+          <tr>
+            <td><b>L2 结构性</b></td>
+            <td>跨服务、新子系统、数据迁移</td>
+            <td>书面 spec/设计批准 → 任务拆分 → 分会话执行 → archive</td>
+            <td>厨房水槽会话从头干到尾</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>会话卫生（官方 failure patterns 压缩）</h3>
+    <ul class="plain">
+      <li><b>无关任务之间 <code>/clear</code></b>——厨房水槽会话是第一大坑。</li>
+      <li><b>同一问题纠正超过两次</b>：停，clear，把教训写进更好的首条 prompt，不要在脏上下文里缠斗。</li>
+      <li><b>调研用 subagent</b>——避免主会话读几百个文件后失忆。</li>
+      <li><b>实现与审查分离</b>——writer 与 reviewer 不同上下文（双会话或 subagent）。</li>
+      <li><b>频繁小 commit</b>——存档点；checkpoint 只跟踪 Claude 改动，不能替代 git。</li>
+    </ul>
+    <div class="plate">
+      <p class="who">ADDY OSMANI · AGENTIC CODING</p>
+      <p>难的部分从「打字」移到了「规格、审查、验证」。agent 写完后，用 fresh context 做 code review；团队应用 agent 做 PR 分诊，但人类仍对合并负责。</p>
+    </div>
+  </div>
+</section>
+
+<!-- §6 -->
+<section id="hooks">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§6</span><h2>Hook：最小可生产集合</h2></div>
+    <p class="sec-lede">Hooks 是「模型说了不算」的层。配置进 <code>.claude/settings.json</code>（团队共享）或 managed policy（企业强制）。用 <code>/hooks</code> 核对来源。</p>
+
+    <h3>Hook 五种类型（不止 shell 命令）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>类型</th><th>做什么</th><th>典型用途</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>command</b></td><td>跑 shell 命令；stdin 收 JSON，exit 码 + stdout 返回</td><td>lint、format、拦危险操作（最常用）</td></tr>
+          <tr><td><b>http</b></td><td>POST JSON 到 URL</td><td>通知 Slack、触发 webhook、记录审计</td></tr>
+          <tr><td><b>mcp_tool</b></td><td>调 MCP 服务器的工具</td><td>跨系统联动（如自动建 ticket）</td></tr>
+          <tr><td><b>prompt</b></td><td>单轮 LLM 评估，返回 yes/no</td><td>语义级判断（如「这个改动安全吗？」）</td></tr>
+          <tr><td><b>agent</b></td><td>启动子代理（实验性）</td><td>复杂审查、多步验证</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="prompt-note">常用生命周期事件：<code>PreToolUse</code>（工具调用前）、<code>PostToolUse</code>（工具调用后）、<code>Stop</code>（结束前）、<code>SessionStart</code>（会话开始）、<code>PreCompact</code> / <code>PostCompact</code>（上下文压缩前后）。完整列表见官方 hooks 文档。</p>
+
+    <h3>最小可生产五道闸</h3>
+    <ol class="steps">
+      <li>
+        <b>PreToolUse · 安全墙</b>
+        拦：写 <code>.env</code> / <code>**/secrets/**</code>；破坏性 <code>rm -rf</code>；未授权 force-push。exit 2 + 原因回灌模型。Tech lead 指南普遍把这一条列为「10 分钟最小安全」。
+      </li>
+      <li>
+        <b>PostToolUse · 编辑后整形</b>
+        matcher <code>Edit|Write</code>：只对变更路径跑 formatter / 快速 lint。官方示例就是 eslint-after-edit。保持独立、有 timeout。
+      </li>
+      <li>
+        <b>Stop · 可选完成门</b>
+        对关键仓库：结束前跑 <code>npm test --related</code> 或项目脚本；失败则阻止「我做完了」。注意连续 block 上限（官方约 8 次后可被覆盖）——门要准，别无脑全仓。
+      </li>
+      <li>
+        <b>git pre-commit · 进库门</b>
+        secret 扫描（sk-ant-、AKIA、私钥头等）+ staged 文件检查。与 Claude hook 互补：有人不用 Claude 时仍挡住。
+      </li>
+      <li>
+        <b>CI · 合并门</b>
+        与本地同一入口脚本（<code>make check</code> / <code>pnpm verify</code>）。Sonar/Semgrep 作 quality gate 或 security job，不绑定交互循环。
+      </li>
+    </ol>
+    <p class="prompt-note">配置示例见 <a href="#templates">§11 模板</a>。原则：hook 失败信息必须可读，否则模型会瞎重试。</p>
+  </div>
+</section>
+
+<!-- §7 -->
+<section id="skills">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§7</span><h2>Skill：少即是多，流程要评测</h2></div>
+    <p class="sec-lede">Skill = 可复用程序。启动只加载 name/description；装太多时 description 本身就是上下文税。官方：流程放 skill；副作用流程 <code>disable-model-invocation: true</code>。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>做法</th><th>原因</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>重复 ≥3 次再 skill 化</b></td><td>过早抽象制造互斥与维护成本</td></tr>
+          <tr><td><b>description 写触发边界</b></td><td>决定会不会被误自动调用</td></tr>
+          <tr><td><b>正文含 DoD + 命令</b></td><td>弱模型可执行；强模型也少飘</td></tr>
+          <tr><td><b>流程互斥、工具可叠</b></td><td>两个 plan skill 同时指挥 = 混乱</td></tr>
+          <tr><td><b>进 git 的 skill 走 PR</b></td><td>与代码同样的变更面</td></tr>
+          <tr><td><b>用 eval 改进，不靠 vibe</b></td><td>3–5 条二元标准 × 多样输入 × 独立评分；改 prompt 直到分数平台期（社区自改进环，同源思路来自研究侧 auto-eval）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>模型偏差怎么收</h3>
+    <ul class="plain">
+      <li>目标不是字节级相同输出，而是<strong>同一验收标准</strong>。</li>
+      <li>清单外置（检查项 + 报告格式）&gt; 散文要求「认真点」。</li>
+      <li>实现与验收分离（fresh context）。</li>
+      <li>维护 3–5 个 golden 任务：小 bug / 中 feature / 危险重构；换默认模型或改 skill 前跑一遍。</li>
+      <li>默认便宜模型；失败两次带轨迹升级——别全程 Opus 烧钱掩饰坏 skill。</li>
+    </ul>
+
+    <h3>Agents vs Skills：什么时候用哪个</h3>
+    <p class="sec-lede" style="margin-bottom:14px">Skill 是「可复用流程」；Agent（<code>.claude/agents/*.md</code>）是「可复用角色」。Skill 定义步骤；Agent 定义身份、工具权限、模型选择。两者可组合：Agent 预加载 Skill。</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th></th><th>Skill</th><th>Agent</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>定义文件</b></td><td><code>.claude/skills/&lt;name&gt;/SKILL.md</code></td><td><code>.claude/agents/&lt;name&gt;.md</code></td></tr>
+          <tr><td><b>核心用途</b></td><td>流程（发版、评审、排障）</td><td>角色（reviewer、researcher、安全审计）</td></tr>
+          <tr><td><b>工具权限</b></td><td><code>allowed-tools</code> / <code>disallowed-tools</code></td><td>同上 + <code>permissionMode</code> + <code>isolation</code></td></tr>
+          <tr><td><b>模型选择</b></td><td>可选 <code>model</code>（仅本次调用）</td><td><code>model</code> + <code>effort</code>（整个代理生命周期）</td></tr>
+          <tr><td><b>上下文</b></td><td>主会话内加载</td><td>独立窗口；只回摘要</td></tr>
+          <tr><td><b>可组合</b></td><td>—</td><td><code>skills: [skill-a, skill-b]</code> 预加载</td></tr>
+          <tr><td><b>典型 frontmatter</b></td><td><code>name</code> <code>description</code> <code>disable-model-invocation</code></td><td><code>name</code> <code>description</code> <code>tools</code> <code>model</code> <code>maxTurns</code> <code>isolation</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="keyline">判据：需要独立上下文、不同工具权限、或对抗性角色 → Agent。需要步骤化流程、在主会话内执行 → Skill。两者可叠：Agent 定义角色，<code>skills:</code> 字段给它装流程。</p>
+  </div>
+</section>
+
+<!-- §8 -->
+<section id="spec">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§8</span><h2>Spec 与仓库文档架构</h2></div>
+    <p class="sec-lede">宪法管「agent 怎么干活」；<strong>docs 树管「产品与技术真相在哪」</strong>。没有后者，再漂亮的 CLAUDE.md 也只能在聊天里猜需求。下面把「单条 change 的 spec」和「应用仓推荐的 docs 骨架」合在一节。</p>
+
+    <h3>单条变更：意图进库，做完归档</h3>
+    <div class="duo">
+      <div class="cell a">
+        <span class="tag">L1 最少字段</span>
+        <b>Why · What · Tasks · Gate · Archive</b>
+        非目标写清；行为可测；任务可勾选；质量门是真实命令；合并后谁回写 owner doc。
+      </div>
+      <div class="cell b">
+        <span class="tag">漂移三选一</span>
+        <b>对齐 · 回写 · 废弃</b>
+        代码错→修代码；文档旧→archive/回写；双废→标 deprecated，禁止 agent 再引用。
+      </div>
+    </div>
+
+    <h3>应用仓 docs 骨架：AGE App Template 能不能当规范？</h3>
+    <p class="sec-lede" style="margin-bottom:14px"><strong>结论：能当「业务应用仓」的默认文档架构，但必须按「最小路径」落地，禁止一上来抄满所有目录。</strong>模板定位是 Attractor-Guided Engineering：用一小撮稳定文件当吸引子，防止 AI 迭代漂成 demo 与聊天记忆。</p>
+
+    <div class="plate">
+      <p class="who">AGE APP TEMPLATE · 核心原则</p>
+      <p>Repo 是事实源，chat 只是临时工作面。稳定真相（context / design / architecture）与过程记录（plans / logs / bugs）分开；问题冲突时看 <code>docs/context/source-of-truth-and-precedence.md</code>，而不是让模型「看着办」。</p>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>目录 / 文件</th><th>职责</th><th>开写前要不要？</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b><code>AGENTS.md</code></b></td><td>Agent 操作契约、读哪些文件、规划触发条件</td><td><b>必须</b></td></tr>
+          <tr><td><b><code>docs/context/</code></b></td><td>强制上下文：project-context、自主策略、codebase-map、事实源优先级</td><td><b>必须 · Day 0</b></td></tr>
+          <tr><td><b><code>docs/backlog/</code></b></td><td>可执行的下一步</td><td>推荐</td></tr>
+          <tr><td><b><code>docs/requirements/</code></b></td><td>可实施需求（验收标准）</td><td><b>必须有 active 一份</b></td></tr>
+          <tr><td><b><code>docs/design/</code> + <b><code>architecture/</code></b></td><td>稳定的产品行为 / 技术边界吸引子</td><td>首片可薄，边界要有</td></tr>
+          <tr><td><b><code>docs/plans/</code></b></td><td>非琐碎切片的执行与关闭条件</td><td>触发规划时必须</td></tr>
+          <tr><td><code>docs/input/</code> · discussions · logs · bugs</td><td>原料 / 澄清 / 实施记忆 / 回归坑</td><td>按需</td></tr>
+          <tr><td><code>docs/audits/</code> · retrospectives · analysis · lessons</td><td>审计、复盘、调研、沉淀</td><td>可选层</td></tr>
+          <tr><td><code>docs/skills/</code></td><td>可复用 prompt 文稿（≠ <code>.claude/skills</code>）</td><td>可选；别和 Claude skill 混名</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>为什么说「行」：与本手册对齐的点</h3>
+    <ul class="plain">
+      <li><b>验证命令写在 project-context</b>——和「验证墙」一致；占位符命令禁止报成功。</li>
+      <li><b>source-of-truth 按问题分流</b>——需求 / 设计 / 架构 / 模型文件 / 计划 / 日志各有主；冲突要显式处理。</li>
+      <li><b>规划触发 + micro-plan 例外</b>——避免 L0 也被审计淹没；非琐碎 plan 要求独立 plan/closure audit。</li>
+      <li><b>documentation freshness / AI autonomy</b>——陈旧文档默认 research-only，防止在谎言文档上狂写代码。</li>
+      <li><b>稳定文件 vs 带日期记录</b>——owner doc 不改名；过程记录可归档——对应 living archive 纪律。</li>
+    </ul>
+
+    <h3>为什么不能无脑全抄：风险与补丁</h3>
+    <div class="duo">
+      <div class="cell x">
+        <span class="tag">风险</span>
+        <b>文档剧场</b>
+        20+ 目录全开、每文件写半页空话 → agent 不知道读哪个，人也不维护。模板自己也警告 process overhead。
+      </div>
+      <div class="cell a">
+        <span class="tag">补丁</span>
+        <b>只激活用得着的层</b>
+        Day 0 只填 context + 一份 active requirement + 验证命令。optional 目录在 project-context 打勾后再当真。
+      </div>
+    </div>
+    <ul class="plain">
+      <li><b>与 OpenSpec 共存：</b>二选一或双写清晰映射。推荐：团队流程若已用 OpenSpec，把 change 的 proposal/tasks 当 <code>docs/plans/</code> 的一种实现，或在 project-context 写明「active plan = openspec/changes/&lt;id&gt;」；禁止两套并行真相。</li>
+      <li><b>与宪法层补齐：</b>模板根常只有 AGENTS.md——落地时再加薄 <code>CLAUDE.md</code>（<code>@AGENTS.md</code>）+ gitignore 的 <code>CLAUDE.local.md</code>；hooks 仍按 Week-0 装，docs 不替代强制层。</li>
+      <li><b>命名：</b><code>docs/skills/</code> 是 prompt 文稿库；Claude 可执行 skill 在 <code>.claude/skills/</code>。混用会让人以为「写进 docs 就自动 /skill」。</li>
+      <li><b>适用边界：</b>适合中小<strong>应用</strong>仓（后台、门户、CRUD、内部工具）。框架内核 / 巨型 monorepo 要嵌套子目录 CLAUDE + 更重的模块边界，不能只靠一份 app template。</li>
+    </ul>
+
+    <h3>团队默认：最小 docs Day-0（可复制）</h3>
+    <div class="promptbox"><pre>repo/
+├── AGENTS.md                 # 操作契约（可从 AGE 模板裁剪）
+├── CLAUDE.md                 # 薄：@AGENTS.md + Claude 专用
+├── CLAUDE.local.md           # gitignore：续跑 / 本机
+├── .claude/settings.json     # 共享 hooks
+├── docs/
+│   ├── index.md
+│   ├── context/
+│   │   ├── project-context.md      # 验证命令、active 需求、autonomy
+│   │   ├── source-of-truth-and-precedence.md
+│   │   ├── ai-autonomy-policy.md
+│   │   └── codebase-map.md
+│   ├── requirements/&lt;active&gt;.md    # 带验收标准
+│   ├── design/app-overview.md      # 可先薄
+│   └── architecture/system-baseline.md
+└── src/ …</pre><button class="copy" type="button">复制</button></div>
+    <p class="prompt-note">完整模板与指南见团队参考仓 <code>age-app-template</code>（START-HERE-after-copy.md）。拷贝后先跑 Day 0 checklist，再让 agent 写业务代码。</p>
+
+    <p class="verdict-strip"><b>铁律：</b>进行中的切片只有一份 active requirement + 一份 active owner/plan。目录堆 40 个 open 文档等于没有流程。Compound：交付要留下可检索教训（lessons / bugs），不是只留下 chat。</p>
+  </div>
+</section>
+
+<!-- §9 -->
+<section id="team">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§9</span><h2>多人协同：同一宪法，同一堵墙</h2></div>
+    <p class="sec-lede">共识不是「全员同一模型」，而是<strong>全员撞同一堵墙、读同一份说明书、按同一路由升级仪式</strong>。Wix 工程侧也在强调：agent 能读 repo，仍缺 PM 意图与半年前决策——那要进 AGENTS.md / Skills / 结构化上下文，不是靠更大模型。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>角色（可兼职）</th><th>职责</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>Constitution Owner</b></td><td>根 AGENTS.md / CLAUDE.md / 共享 hooks；变更 PR 合并</td></tr>
+          <tr><td><b>Domain Owner</b></td><td>子系统 nested rules；跨域接口升级 L2</td></tr>
+          <tr><td><b>Skill Steward</b></td><td>互斥表、淘汰、golden 回归</td></tr>
+          <tr><td><b>Quality Owner</b></td><td>CI 门禁；防止为 agent 方便降质量</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>进 git / 不进 git</h3>
+    <div class="duo">
+      <div class="cell a">
+        <span class="tag">Commit</span>
+        <b>共享行为</b>
+        AGENTS.md、薄 CLAUDE.md、<code>.claude/rules</code>、<code>skills</code>、<code>.claude/agents</code>、<code>.mcp.json</code>、项目 hooks、CI、已批准 spec/ADR。
+      </div>
+      <div class="cell x">
+        <span class="tag">Never</span>
+        <b>私有与密钥</b>
+        CLAUDE.local.md、settings.local、~/.claude 全文、auto memory、.env、未脱敏对话、客户数据。
+      </div>
+    </div>
+
+    <h3>CLAUDE.md 协作三规则</h3>
+    <ul class="plain">
+      <li><b>团队 CLAUDE.md / AGENTS.md 是代码的一部分</b> → 改它 = 提 PR，至少一人 review；只放客观事实，不放个人偏好。</li>
+      <li><b>CLAUDE.local.md 是个人的</b> → 自己改、不 review；不放团队必须知道的信息；必须在 gitignore。</li>
+      <li><b>全局 ~/.claude/CLAUDE.md 是个人 OS</b> → 方法论写一次；已变成全员约定的条目，升格到项目共享文件。</li>
+    </ul>
+
+    <h3>PR 最低条</h3>
+    <ul class="plain">
+      <li>人话说明意图与风险；贴验证命令与结果（或 CI 链接）。</li>
+      <li>L1+ 链到 change/spec id（id 写在 PR/local，不写进团队 CLAUDE.md）。</li>
+      <li>agent 生成不免除 review；可用 agent 分诊，人类拍板合并。</li>
+      <li>改宪法/hooks 与改业务代码分开 PR，方便回滚；误提交 local 文件直接打回。</li>
+    </ul>
+
+    <h3>度量与持续改进（可选，Week-4+ 再加）</h3>
+    <p class="sec-lede" style="margin-bottom:14px">没有度量就没有改进。但别一上来就搞仪表盘——先跑一个月，再用数据说话。</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>指标</th><th>怎么算</th><th>为什么重要</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>Agent 自闭环率</b></td><td>agent 完成且 CI 绿、无需人工补丁的比例</td><td>衡量验证墙是否够强</td></tr>
+          <tr><td><b>Hook 绕过率</b></td><td><code>--no-verify</code> 使用次数 / 总 commit</td><td>衡量 hook 是否太慢或太吵</td></tr>
+          <tr><td><b>Skill 使用率</b></td><td>过去 90 天被调用 ≥1 次的 skill 占比</td><td>衡量 skill 目录卫生</td></tr>
+          <tr><td><b>PR Review 发现率</b></td><td>reviewer 在 agent 生成代码中发现的问题数 / PR 总数</td><td>衡量 agent 输出质量趋势</td></tr>
+          <tr><td><b>首绿时间</b></td><td>从「开始」到「CI 绿」的中位时间</td><td>衡量端到端效率</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="keyline">度量是改进输入，不是考核指标。发现 hook 绕过率高 → 查 hook 是否太慢；发现自闭环率低 → 查验证命令是否缺失。别把指标当 KPI 压人。</p>
+  </div>
+</section>
+
+<!-- §10 anti -->
+<section id="anti">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§10</span><h2>反模式：一线反复踩的坑</h2></div>
+    <ul class="anti">
+      <li><b>厨房水槽会话 ·</b> 多任务混一个 context → <code>/clear</code> 或分会话。</li>
+      <li><b>过厚宪法 ·</b> 规则越多，关键规则越容易丢 → 剪枝或改 hook。</li>
+      <li><b>禁止事项只写 markdown ·</b> 压力下会破 → permissions/hook。</li>
+      <li><b>信任间隙 ·</b> 看起来对但没跑验证 → 不绿不合并。</li>
+      <li><b>无限调研 ·</b> 无范围 investigate 吃光窗口 → subagent + 收窄问题。</li>
+      <li><b>Skill 集市成瘾 ·</b> 100 个 description 税 + 流程互殴 → 一阶段一主将。</li>
+      <li><b>慢 hook 文化 ·</b> 超时后全员 --no-verify → 快慢分离。</li>
+      <li><b>Spec / docs 坟场 ·</b> 只增不 archive；或 20 个空目录文档剧场 → 最小路径 + 废弃标记。</li>
+      <li><b>双真相 ·</b> OpenSpec change 与 docs/plans 各写一套且不互相引用 → 在 project-context 指定唯一 active plan。</li>
+      <li><b>每人私有神级 prompt ·</b> 协作比没 AI 更乱 → 共享内核 + 个人 local。</li>
+      <li><b>把 auto memory 当团队 wiki ·</b> 机器本地、不进 git → 共享事实进 AGENTS/docs。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- §11 templates -->
+<section id="templates">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§11</span><h2>可复制模板</h2></div>
+    <p class="sec-lede">自产中文，按需删改。保持薄。</p>
+
+    <h3>1 · 团队 CLAUDE.md（薄包装 + 客观事实）</h3>
+    <div class="promptbox"><pre># &lt;项目名&gt;
+
+@AGENTS.md
+
+## Claude 专用（可选，仍须是团队共识）
+- 非琐碎改动先 plan；完成前贴验证证据
+- 同问题纠正两次：/clear 后重来
+
+## 硬禁止（说明；强制靠 hooks/CI）
+- 密钥与生产凭据不进库
+- 不 force-push 共享分支
+
+# 禁止写入本文件：个人进度、change id、Obsidian 路径、本机端口
+# → 放 CLAUDE.local.md（gitignore）</pre><button class="copy" type="button">复制</button></div>
+
+    <h3>2 · AGENTS.md / 项目共享事实骨架</h3>
+    <div class="promptbox"><pre># AGENTS.md — 团队共享，改它 = 提 PR
+
+## 这是什么
+一段话：给谁用、解决什么、当前状态一句。
+
+## 仓库结构
+- `src/` …
+- `tests/` …
+（只列容易迷路的）
+
+## 技术栈与版本
+- 语言/框架/关键依赖约束
+
+## 构建与测试
+- 安装：
+- 开发：
+- 测试：（优先相关测）
+- Lint / typecheck：
+- 构建：
+- 部署：或见 ops/README.md
+
+## 代码规范
+- 框架特有坑（必写）
+- 通用风格：以 linter / editorconfig 为准
+
+## 分支与提交
+- 分支策略、commit 格式、PR 要求
+
+## 架构红线
+- 不可违反的设计决策
+
+## 常见陷阱
+- known gotchas
+
+## 验证 / 完成定义
+相关测试与 lint 必须绿。CI：`.github/workflows/…`
+
+## 安全
+禁止提交：.env、密钥、客户导出。</pre><button class="copy" type="button">复制</button></div>
+
+    <h3>3 · 项目 hooks 最小集（settings 片段）</h3>
+    <div class="promptbox"><pre>{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-secrets-path.sh"
+        }]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [{
+          "type": "command",
+          "if": "Bash(rm *)",
+          "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-rm.sh"
+        }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/format-changed.sh",
+          "timeout": 60
+        }]
+      }
+    ]
+  }
+}</pre><button class="copy" type="button">复制</button></div>
+    <p class="prompt-note">脚本需团队自备：路径黑名单、rm 策略、只格式化变更文件。失败时向 stdout/stderr 写清原因。</p>
+
+    <h3>4 · CLAUDE.local.md + .gitignore（私人笔记本）</h3>
+    <div class="promptbox"><pre># CLAUDE.local.md — 个人工作流，勿提交 git
+
+## 快速进入状态
+- 当前工程：&lt;名称&gt;（openspec change `&lt;id&gt;`）
+- 续跑：/openspec-apply &lt;id&gt;
+- 断点：openspec/changes/&lt;id&gt;/tasks.md
+
+## 事实源
+- 设计文档：&lt;Obsidian 路径&gt;
+- 项目大脑：Obsidian 40-Projects/&lt;项目&gt;/index.md
+
+## 本机
+- API：http://localhost:18080
+- DB：docker compose --profile dev up -d
+
+## 禁止
+- 密码 / token
+- 团队应共享的规则（写进 AGENTS.md / CLAUDE.md）</pre><button class="copy" type="button">复制</button></div>
+    <div class="promptbox"><pre># .gitignore（片段）
+CLAUDE.local.md
+.claude/settings.local.json
+.env
+.env.*</pre><button class="copy" type="button">复制</button></div>
+    <p class="prompt-note">同层：先团队 <code>CLAUDE.md</code>，后 local。比 <code>~/.claude/projects/…</code> 更不容易忘。详见 <a href="#constitution">§4</a>。</p>
+
+    <h3>5 · 副作用 skill frontmatter</h3>
+    <div class="promptbox"><pre>---
+name: ship-check
+description: 发版前检查。仅当用户明确要求发版或 ship 时使用。
+disable-model-invocation: true
+---
+
+# 发版检查
+1. 跑项目 verify 命令，保存摘要
+2. 核对 CHANGELOG 与用户可见变更
+3. 列出风险与回滚
+失败即停：不打 tag、不推送。</pre><button class="copy" type="button">复制</button></div>
+
+    <h3>6 · L1 PR 自检</h3>
+    <div class="promptbox"><pre>## PR checklist
+- [ ] 意图与非目标一句话
+- [ ] 验证命令 + 结果（或 CI）
+- [ ] 无密钥 / 无本机绝对路径
+- [ ] L1+ 已链 spec/change
+- [ ] 宪法/hooks 变更已拆 PR（如有）
+- [ ] 需要时已做 fresh-context review</pre><button class="copy" type="button">复制</button></div>
+
+    <h3>7 · 子代理定义（<code>.claude/agents/reviewer.md</code>）</h3>
+    <div class="promptbox"><pre>---
+name: code-reviewer
+description: 审查代码变更的质量、安全与风格。仅在用户要求 review 时使用。
+tools: Read, Glob, Grep
+model: sonnet
+maxTurns: 30
+---
+
+你是代码审查员。审查标准：
+1. 正确性：逻辑是否完备，边界是否处理
+2. 安全：是否有密钥泄漏、注入风险、权限过大
+3. 风格：是否符合项目约定（以 AGENTS.md 为准）
+4. 测试：变更是否有对应测试覆盖
+
+输出格式：按文件列出发现，每个发现含「问题 → 建议 → 严重度（P0/P1/P2）」。
+无发现则输出「LGTM」。</pre><button class="copy" type="button">复制</button></div>
+
+    <h3>8 · MCP 配置（<code>.mcp.json</code>）</h3>
+    <div class="promptbox"><pre>{
+  "mcpServers": {
+    "github": {
+      "type": "http",
+      "url": "https://mcp.github.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "local-db": {
+      "command": "npx",
+      "args": ["-y", "some-mcp-server"],
+      "env": {
+        "DB_URL": "${DATABASE_URL:-postgresql://localhost:5432/dev}"
+      }
+    }
+  }
+}</pre><button class="copy" type="button">复制</button></div>
+    <p class="prompt-note"><code>${VAR}</code> 和 <code>${VAR:-default}</code> 语法支持环境变量展开。<code>.mcp.json</code> 进 git；密钥通过环境变量注入，不写进文件。用 <code>/mcp</code> 查看连接状态。</p>
+
+    <h3>9 · 路径限定规则（<code>.claude/rules/api-rules.md</code>）</h3>
+    <div class="promptbox"><pre>---
+paths:
+  - "src/api/**/*.ts"
+  - "src/routes/**/*.ts"
+---
+
+## API 层约定
+- 所有入参必须 Zod schema 校验
+- 错误统一用 AppError 类，不抛裸 Error
+- 响应格式：{ data, error, meta }
+- 日志用 logger 工具，不直接 console.log</pre><button class="copy" type="button">复制</button></div>
+    <p class="prompt-note">带 <code>paths:</code> frontmatter 的 rules 只在 Claude 处理匹配文件时加载。适合 monorepo 按模块分规则，避免无关规则污染上下文。</p>
+
+    <h3>10 · Golden Fixture 回归脚本</h3>
+    <div class="promptbox"><pre>#!/bin/bash
+# .claude/hooks/golden-fixture.sh
+# 在 3-5 个代表性任务上跑 skill 回归
+# 用法：./golden-fixture.sh [skill-name]
+
+SKILL=${1:-"code-review"}
+FIXTURES=(
+  "fixtures/small-bugfix.diff"
+  "fixtures/medium-feature.diff"
+  "fixtures/risky-refactor.diff"
+)
+
+for f in "${FIXTURES[@]}"; do
+  echo "=== Testing $SKILL on $f ==="
+  claude -p "/$SKILL" < "$f" --output-format json > "results/$(basename $f .diff)-result.json"
+done
+
+echo "=== Summary ==="
+# 对照预期输出，计算通过率
+# 通过率下降 = skill 退化或模型变更，需调查</pre><button class="copy" type="button">复制</button></div>
+    <p class="prompt-note">Golden fixture 是对抗「模型升级后 skill 行为漂移」的结构解。发 skill 改动或换默认模型前跑一遍，记录通过率趋势。</p>
+  </div>
+</section>
+
+<!-- shelf -->
+<section id="shelf">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§12</span><h2>来源书架：优先权威与可复现</h2></div>
+    <p class="sec-lede">本页刻意少引营销帖。下列是可核对的一手或高引用实践源。</p>
+    <ul class="shelf">
+      <li>
+        <b>Anthropic · Claude Code Best Practices</b>
+        验证闭环、plan 四步、CLAUDE.md 写什么、会话卫生、对抗审查、失败模式——团队规范的主轴。
+        <span class="src"><a href="https://code.claude.com/docs/en/best-practices" rel="noopener">code.claude.com/docs/en/best-practices</a><span class="date">核对于 2026-07</span></span>
+      </li>
+      <li>
+        <b>Anthropic · Steering Claude Code（Segner, 2026-06）</b>
+        七种机制对照表；明确「永远做 Y → hook」「绝对禁止 → hook/permissions」「流程 → skill」。
+        <span class="src"><a href="https://claude.com/blog/steering-claude-code-skills-hooks-rules-subagents-and-more" rel="noopener">claude.com/blog/steering-claude-code…</a><span class="date">2026-06-18</span></span>
+      </li>
+      <li>
+        <b>Anthropic · Memory / Hooks / Skills 文档</b>
+        四层路径、拼接加载、子目录按需、disable-model-invocation、hook 生命周期。
+        <span class="src"><a href="https://code.claude.com/docs/en/memory" rel="noopener">docs/memory</a> · <a href="https://code.claude.com/docs/en/hooks" rel="noopener">hooks</a> · <a href="https://code.claude.com/docs/en/skills" rel="noopener">skills</a><span class="date">核对于 2026-07</span></span>
+      </li>
+      <li>
+        <b>AGENTS.md 开放标准</b>
+        跨 Codex/Cursor/Jules 等的 agent 说明书；与 README 人机分工；60k+ 仓库采用量级。
+        <span class="src"><a href="https://agents.md/" rel="noopener">agents.md</a><span class="date">核对于 2026-07</span></span>
+      </li>
+      <li>
+        <b>obra/superpowers</b>
+        可安装的工程级技能链：brainstorm → plan → TDD → 执行 → 验证；硬门方法论的代表实现。
+        <span class="src"><a href="https://github.com/obra/superpowers" rel="noopener">github.com/obra/superpowers</a><span class="date">持续维护</span></span>
+      </li>
+      <li>
+        <b>Every Inc · Compound Engineering Plugin</b>
+        「每次工程工作应使后续更容易」；skills 把教训结构化回写。
+        <span class="src"><a href="https://github.com/EveryInc/compound-engineering-plugin" rel="noopener">github.com/EveryInc/compound-engineering-plugin</a><span class="date">持续维护</span></span>
+      </li>
+      <li>
+        <b>Addy Osmani · AI coding workflow / agentic review</b>
+        CLAUDE.md 与 skills 实践、fresh-context review、agent 做 PR 分诊、loop engineering。
+        <span class="src"><a href="https://addyosmani.com/blog/ai-coding-workflow/" rel="noopener">ai-coding-workflow</a> · <a href="https://addyosmani.com/blog/agentic-code-review/" rel="noopener">agentic-code-review</a><span class="date">2026</span></span>
+      </li>
+      <li>
+        <b>Karpathy 行为约束（forrestchang 打包）</b>
+        先想/简单/手术刀/目标可测。Augment 实验：质量未必升，效率常升——当控制层校准用。
+        <span class="src"><a href="https://github.com/forrestchang/andrej-karpathy-skills" rel="noopener">forrestchang/andrej-karpathy-skills</a> · <a href="https://www.augmentcode.com/blog/karpathy-skills-on-openclaw-agents-don-t-write-better-code-but-they-do-it-more-efficiently" rel="noopener">Augment 评测</a><span class="date">2026</span></span>
+      </li>
+      <li>
+        <b>Anthropic · Subagents 文档</b>
+        <code>.claude/agents/*.md</code> 定义格式：name/description/tools/model/permissionMode/isolation/skills。独立上下文，只回摘要。
+        <span class="src"><a href="https://code.claude.com/docs/en/sub-agents" rel="noopener">docs/sub-agents</a><span class="date">核对于 2026-07</span></span>
+      </li>
+      <li>
+        <b>Anthropic · MCP 文档</b>
+        <code>.mcp.json</code> 配置格式；http/stdio/ws 传输；环境变量展开；工具按需加载。
+        <span class="src"><a href="https://code.claude.com/docs/en/mcp" rel="noopener">docs/mcp</a><span class="date">核对于 2026-07</span></span>
+      </li>
+      <li>
+        <b>Povilas Korop · 验证墙</b>
+        约定是样本概率；失败的测试才是墙——别只往 CLAUDE.md 堆规则。
+        <span class="src"><a href="https://x.com/PovilasKorop/status/2074067087501246975" rel="noopener">x.com/PovilasKorop</a><span class="date">2026-07-06</span></span>
+      </li>
+      <li>
+        <b>AGE App Template（团队参考仓）</b>
+        应用层 Attractor-Guided docs：context 强制入口、事实源优先级、Day 0 checklist、micro-plan 例外、稳定/日期文件分离。本页 §8 的落地参照。
+        <span class="src">本地路径：alpha-ai-agent/…/age-app-template · START-HERE-after-copy.md<span class="date">核对于 2026-07</span></span>
+      </li>
+      <li>
+        <b>站内姊妹篇</b>
+        <a href="../agentic/">Agentic 作战手册</a>（个人选型）· <a href="../harness/">Harness</a> · <a href="../loop-engineering/">循环工程</a> · <a href="../unknowns/">未知项</a>
+        <span class="src">zbisure.github.io<span class="date">2026-07</span></span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- quiz -->
+<section id="quiz">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no">§13</span><h2>自测：通过才算学会</h2></div>
+    <p class="sec-lede">偏实战判断。全对才通过。</p>
+    <div id="quizRoot"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="score-rail"><span class="score-pill" id="scorePill"></span></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><a href="../">← 返回学习主页</a></p>
+    <p>姊妹篇：
+      <a href="../agentic/">Agentic 开发作战手册</a> ·
+      <a href="../harness/">Agent Harness 挽具工程</a> ·
+      <a href="../loop-engineering/">循环工程野外手册</a> ·
+      <a href="../unknowns/">未知项野外指南</a>
+    </p>
+    <p>zbisure · 实战手册审阅版：控制面 + CLAUDE.local + AGE docs 架构</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var rootEl=document.documentElement,tt=document.getElementById('themeToggle');
+  function curTheme(){
+    var s=rootEl.getAttribute('data-theme');
+    if(s)return s;
+    return (window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  }
+  function paintToggle(){tt.textContent=curTheme()==='dark'?'☀ 亮色':'☾ 暗色'}
+  tt.addEventListener('click',function(){
+    var next=curTheme()==='dark'?'light':'dark';
+    rootEl.setAttribute('data-theme',next);
+    try{localStorage.setItem('zb-theme',next)}catch(e){}
+    paintToggle();
+  });
+  paintToggle();
+
+  // TOC 收起/展开
+  var toc=document.getElementById('toc'),tocToggle=document.getElementById('tocToggle');
+  if(toc&&tocToggle){
+    var tocCollapsed=false;
+    try{tocCollapsed=localStorage.getItem('zb-toc-collapsed')==='1'}catch(e){}
+    if(tocCollapsed){toc.classList.add('collapsed');tocToggle.textContent='›'}
+    tocToggle.addEventListener('click',function(){
+      tocCollapsed=!tocCollapsed;
+      toc.classList.toggle('collapsed',tocCollapsed);
+      tocToggle.textContent=tocCollapsed?'›':'‹';
+      try{localStorage.setItem('zb-toc-collapsed',tocCollapsed?'1':'0')}catch(e){}
+    });
+    // 滚动高亮当前章节
+    var tocLinks=toc.querySelectorAll('a');
+    var sectionIds=[];
+    tocLinks.forEach(function(a){sectionIds.push(a.getAttribute('href').slice(1))});
+    function updateTocActive(){
+      var scrollY=window.scrollY+120;
+      var currentId=sectionIds[0];
+      for(var i=0;i<sectionIds.length;i++){
+        var el=document.getElementById(sectionIds[i]);
+        if(el&&el.offsetTop<=scrollY)currentId=sectionIds[i];
+      }
+      tocLinks.forEach(function(a){
+        a.classList.toggle('active',a.getAttribute('href')==='#'+currentId);
+      });
+    }
+    window.addEventListener('scroll',updateTocActive,{passive:true});
+    updateTocActive();
+  }
+
+  var reveals=document.querySelectorAll('.reveal');
+  var rAns=document.getElementById('revealAnswer');
+  reveals.forEach(function(b){
+    b.addEventListener('click',function(){
+      reveals.forEach(function(o){o.setAttribute('aria-pressed','false')});
+      b.setAttribute('aria-pressed','true');
+      rAns.innerHTML=b.getAttribute('data-a');
+    });
+  });
+
+  document.querySelectorAll('.promptbox').forEach(function(box){
+    var btn=box.querySelector('.copy'),pre=box.querySelector('pre');
+    btn.addEventListener('click',function(){
+      var t=pre.textContent;
+      function done(){btn.textContent='已复制 ✓';btn.classList.add('done');
+        setTimeout(function(){btn.textContent='复制';btn.classList.remove('done')},1600);}
+      function fallback(){
+        var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);
+        ta.select();try{document.execCommand('copy');done()}catch(e){}
+        document.body.removeChild(ta);
+      }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(t).then(done,function(){fallback()});
+      }else{fallback()}
+    });
+  });
+
+  var QS=[
+    {q:'Anthropic 说「每次编辑后必须跑 prettier」。应优先放在哪？',
+     opts:['CLAUDE.md 加粗写 IMPORTANT','PostToolUse hook（确定性）','用户级 output style','每次口头提醒'],
+     a:1,anchor:'#model',tech:'§1 控制面',
+     ok:'对。永远发生的事用 hook，不是 markdown。',
+     no:'官方 steering：always do Y → hook，不是 CLAUDE.md。'},
+    {q:'小团队 Week-0 正确顺序是？',
+     opts:[
+       '先装 50 个 skill，再写 800 行 CLAUDE.md',
+       '先验证命令/CI 对齐 → 薄宪法进 git → 安全+format hook → 一个流程 skill → 定 owner',
+       '先上 Sonar 全量进 PostToolUse',
+       '先禁用所有权限让 agent 完全自主'
+     ],
+     a:1,anchor:'#week0',tech:'§2 Week-0',
+     ok:'对。先墙与自证，再宪法与少量流程。',
+     no:'先堆 skill/厚宪法是常见翻车路径。'},
+    {q:'官方 best practices 最强调的「可离开座位」条件是？',
+     opts:['更长的系统提示','给 agent 可跑的 pass/fail 验证','强制 Opus','关掉所有 hooks'],
+     a:1,anchor:'#verify',tech:'§3 验证墙',
+     ok:'对。有检查才能闭环；否则你就是验证环。',
+     no:'核心是 verification signal，不是模型更大。'},
+    {q:'同事把「当前 openspec change id + Obsidian 续跑路径」写进仓库根 CLAUDE.md 并提交。问题？',
+     opts:[
+       '很好，全员都能续跑同一 change',
+       '进度与个人工作流应放 CLAUDE.local.md（gitignore）；团队文件只放客观事实',
+       '应写进企业 managed CLAUDE.md',
+       '应删掉所有 CLAUDE.md 只留 skill'
+     ],
+     a:1,anchor:'#constitution',tech:'§4 宪法',
+     ok:'对。项目共享文件禁止进度/个人续跑；local 才是私人笔记本。',
+     no:'change id 与 Obsidian 路径是个人层，写进共享宪法会污染所有人会话。'},
+    {q:'同会话里 agent 连续两次修错同一 bug。官方建议？',
+     opts:['继续纠正第三次','/clear，把教训写进更具体的新 prompt','立刻换模型并保留脏上下文','删除测试'],
+     a:1,anchor:'#workflow',tech:'§5 工作流',
+     ok:'对。脏上下文缠斗不如干净重来。',
+     no:'失败模式：纠正过并过。'},
+    {q:'AI 一次改 40 文件，husky 全仓 lint 总超时。更合理？',
+     opts:['永久 --no-verify','按变更文件快速检查 + 全量放 CI','取消所有测试','只在 CLAUDE.md 写「请 lint」'],
+     a:1,anchor:'#hooks',tech:'§6 Hook',
+     ok:'对。快慢分离，保留底线。',
+     no:'关掉门禁或只靠 markdown 都会回到裸奔。'},
+    {q:'/deploy 类 skill 应如何配置？',
+     opts:['description 写得很泛以便自动触发','disable-model-invocation: true，仅手动','放进 managed CLAUDE.md 全文','禁止做成 skill'],
+     a:1,anchor:'#skills',tech:'§7 Skill',
+     ok:'对。副作用流程手动触发。',
+     no:'官方对 commit/deploy 明确建议 disable-model-invocation。'},
+    {q:'Spec 与代码长期不一致，正确处置不是？',
+     opts:['archive/回写或标废弃','无限保留 open proposal 当历史荣耀墙','改代码对齐仍有效的 spec','禁止 agent 引用已废弃路径'],
+     a:1,anchor:'#spec',tech:'§8 Spec / docs',
+     ok:'对。坟场式保留是反模式。',
+     no:'漂移必须显式处置，不能堆着当史料。'},
+    {q:'采用 AGE app-template 做应用仓文档规范时，第一周最正确的用法？',
+     opts:[
+       '复制全部 20+ 目录并要求每目录至少一篇完整文档再写代码',
+       'Day 0 只填 context（含真实验证命令）+ active requirement；可选层用到再开；另加薄 CLAUDE.md 与 hooks',
+       '只保留 docs/，删除 AGENTS.md 与测试',
+       '把所有过程记录写进根 CLAUDE.md 以便每次会话加载'
+     ],
+     a:1,anchor:'#spec',tech:'§8 Spec / docs',
+     ok:'对。模板行在「吸引子 + 最小路径」，不在文档剧场。',
+     no:'全抄所有目录是模板自己警告的 process overhead。'},
+    {q:'多人协作最关键的共识是？',
+     opts:['全员同一付费档模型','同一宪法 + 同一验证/CI 墙 + 同一变更路由','取消 code review','每人私有 CLAUDE.md 互不合并'],
+     a:1,anchor:'#team',tech:'§9 多人',
+     ok:'对。墙与说明书共享，模型可以不同。',
+     no:'私有森林和取消 review 会放大漂移。'},
+    {q:'插件目录放了很长 CLAUDE.md 并启用插件。默认？',
+     opts:['每次会话自动全文当 memory','不是标准插件组件，不因启用而自动当 memory','会覆盖企业 managed 策略','只加载前 200 行'],
+     a:1,anchor:'#constitution',tech:'§4 宪法',
+     ok:'对。插件入口是 skills/hooks/agents 等。',
+     no:'不要把插件 CLAUDE.md 误当成自动 memory。'},
+    {q:'同事说「我把学到的模式都写进 auto memory 了，团队都能用」。问题？',
+     opts:[
+       '没问题，auto memory 自动共享',
+       'auto memory 是机器本地、不进 git、不跨机器；团队事实只进 AGENTS.md / CLAUDE.md',
+       '应写进企业 managed 策略',
+       'auto memory 会自动同步到所有同事的机器'
+     ],
+     a:1,anchor:'#constitution',tech:'§4 宪法',
+     ok:'对。auto memory 是个人学习笔记，不是团队共识。',
+     no:'auto memory 机器本地、不共享。团队事实必须进 git 管控的文件。'},
+    {q:'想在每次 agent 编辑后通知 Slack 频道。Hook 该用哪种类型？',
+     opts:[
+       'command（跑 shell curl）',
+       'http（POST JSON 到 Slack webhook URL）',
+       'prompt（让 LLM 决定是否通知）',
+       '只能用 MCP，不能用 hook'
+     ],
+     a:1,anchor:'#hooks',tech:'§6 Hook',
+     ok:'对。http 类型直接 POST，不需要 shell 中间层。',
+     no:'hook 有 5 种类型，http 适合 webhook 通知场景。'},
+    {q:'需要一个「代码审查员」角色：用 Sonnet、只能读文件、独立上下文。应定义为什么？',
+     opts:[
+       '一个 Skill',
+       '一个 Agent（.claude/agents/reviewer.md）',
+       '写在 CLAUDE.md 里',
+       '一个 MCP server'
+     ],
+     a:1,anchor:'#skills',tech:'§7 Skill',
+     ok:'对。Agent 定义角色（工具权限、模型、隔离上下文）；Skill 定义流程。',
+     no:'需要独立上下文 + 工具权限 + 模型选择 → Agent，不是 Skill。'},
+    {q:'团队想衡量「agent 生成代码的质量趋势」。最该看哪个指标？',
+     opts:[
+       'CLAUDE.md 的行数',
+       'PR Review 发现率（reviewer 在 agent 代码中发现的问题数 / PR 总数）',
+       'skill 的总数量',
+       'auto memory 文件数'
+     ],
+     a:1,anchor:'#team',tech:'§9 多人',
+     ok:'对。PR Review 发现率直接衡量 agent 输出质量。',
+     no:'度量要看产出质量，不是配置数量。'}
+  ];
+
+  var root=document.getElementById('quizRoot'),pill=document.getElementById('scorePill'),verdict=document.getElementById('verdict');
+  var navLabel=document.getElementById('quizNavLabel');
+  if(navLabel)navLabel.textContent='自测（'+QS.length+' 题）';
+  var answered=0,correct=0;
+  function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+  function build(){
+    answered=0;correct=0;root.innerHTML='';verdict.className='verdict';verdict.innerHTML='';
+    pill.textContent='0 / '+QS.length+' 已作答';
+    QS.forEach(function(item,qi){
+      var card=document.createElement('div');card.className='quiz-card';
+      var h='<span class="q-no">QUESTION '+String(qi+1).padStart(2,'0')+' · '+esc(item.tech)+'</span>'+
+            '<p class="q">'+esc(item.q)+'</p><div class="opts">';
+      item.opts.forEach(function(o,oi){
+        h+='<button class="opt" type="button" data-q="'+qi+'" data-o="'+oi+'">'+esc(o)+'</button>';
+      });
+      h+='</div><div class="fb"></div>';
+      card.innerHTML=h;root.appendChild(card);
+    });
+    root.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var qi=+btn.getAttribute('data-q'),oi=+btn.getAttribute('data-o');
+        var item=QS[qi],card=btn.closest('.quiz-card');
+        var opts=card.querySelectorAll('.opt'),fb=card.querySelector('.fb');
+        opts.forEach(function(o){o.disabled=true});
+        opts[item.a].classList.add('right');
+        answered++;
+        if(oi===item.a){
+          correct++;fb.className='fb show ok';
+          fb.innerHTML='✓ '+esc(item.ok);
+        }else{
+          btn.classList.add('wrong');fb.className='fb show no';
+          fb.innerHTML='✗ '+esc(item.no)+' <a href="'+item.anchor+'">重读 '+esc(item.tech)+' →</a>';
+        }
+        pill.textContent=correct+' 对 / '+answered+' 已答 / 共 '+QS.length+' 题';
+        if(answered===QS.length)finish();
+      });
+    });
+  }
+  function finish(){
+    if(correct===QS.length){
+      verdict.className='verdict show pass';
+      verdict.innerHTML='<h3>✓ Cleared — 你拿到的是可安装的控制系统，不是概念清单</h3>'+
+        '<p>本周落地：</p><ul>'+
+        '<li>选一个仓库跑完 Week-0：验证对齐 → 薄 AGENTS+CLAUDE → 三条 hook → 一个 skill → 指定 owner</li>'+
+        '<li>用 /memory 与 /hooks 审计实际加载与门禁</li>'+
+        '<li>下一次 L1 变更强制验证证据 + 需要时 fresh review</li>'+
+        '<li>把本页反模式贴到团队频道，违者改流程不改嘴炮</li>'+
+        '</ul>';
+    }else{
+      verdict.className='verdict show retry';
+      verdict.innerHTML='<h3>Not yet — 还差 '+(QS.length-correct)+' 题</h3>'+
+        '<p>按错题链接重读，再考。不过关不算学会。</p>'+
+        '<button class="reset" type="button" id="retryBtn">重置测验</button>';
+      var rb=document.getElementById('retryBtn');
+      if(rb)rb.addEventListener('click',function(){build();document.getElementById('quiz').scrollIntoView();});
+    }
+  }
+  build();
+})();
+</script>
+
+</body>
+</html>

@@ -90,6 +90,36 @@ try{var t=localStorage.getItem('zb-theme');if(t)document.documentElement.setAttr
   .sec-lede{color:var(--ink-soft);max-width:42em;margin:10px 0 34px}
   h3{font-family:var(--serif);font-size:20px;margin:36px 0 12px}
 
+  /* ---------- 自由层（可选）：章节目录（左侧固定）。不用就整块删掉 ---------- */
+  .toc{
+    position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:10;
+    width:220px;max-height:70vh;overflow-y:auto;
+    background:var(--paper-raised);border:1px solid var(--line);border-left:3px solid var(--survey);
+    border-radius:0 6px 6px 0;box-shadow:var(--shadow);
+    padding:16px 0;transition:transform .25s ease,opacity .25s ease;
+  }
+  .toc.collapsed{transform:translateY(-50%) translateX(-100%);opacity:.6}
+  .toc.collapsed:hover{transform:translateY(-50%) translateX(0);opacity:1}
+  .toc-toggle{
+    position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);
+    border-radius:3px;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    padding:0;transition:color .12s;
+  }
+  .toc-toggle:hover{color:var(--survey)}
+  .toc ol{list-style:none;padding:0;margin:0;counter-reset:toc}
+  .toc li{counter-increment:toc}
+  .toc a{
+    display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink-soft);
+    font-size:13px;padding:6px 16px 6px 12px;transition:background .12s,color .12s;
+  }
+  .toc a:hover,.toc a.active{background:var(--survey-soft);color:var(--survey)}
+  .toc a::before{
+    content:counter(toc,decimal-leading-zero);font-family:var(--mono);font-size:11px;
+    color:var(--contour);letter-spacing:.05em;min-width:20px;flex-shrink:0;
+  }
+  @media(max-width:900px){.toc{display:none}}
+
   /* ---------- 冻结层：点选揭示范式（按钮组样式随主题自定，行为不变） ---------- */
   .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:26px 0 6px}
   @media(max-width:600px){.reveal-grid{grid-template-columns:1fr}}
@@ -208,6 +238,19 @@ try{var t=localStorage.getItem('zb-theme');if(t)document.documentElement.setAttr
     </nav>
   </div>
 </header>
+
+<!-- ============ 自由层（可选）：章节目录（左侧固定）。章节多时加，少时可删。 ============ -->
+<!--
+<nav class="toc" id="toc" aria-label="章节目录">
+  <button class="toc-toggle" id="tocToggle" type="button" aria-label="收起目录">‹</button>
+  <ol>
+    <li><a href="#model">【心智模型标题】</a></li>
+    <li><a href="#body1">【正文章节标题】</a></li>
+    <li><a href="#shelf">来源书架</a></li>
+    <li><a href="#quiz">自测</a></li>
+  </ol>
+</nav>
+-->
 
 <!-- ============ 冻结层：§1 必须是心智模型 ============ -->
 <section id="model">
