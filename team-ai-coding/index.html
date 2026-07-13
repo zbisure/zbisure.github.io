@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="小型团队 AI Coding 实战手册：以 Anthropic 官方控制面与验证闭环为骨架，结合 Superpowers / Compound Engineering / AGENTS.md / Addy Osmani 一线实践，给出周一就能装上的门禁、宪法写法、skill 治理与协作协议。">
+<meta name="description" content="小型团队 AI Coding 实战手册：控制面与验证墙、宪法分层、项目目录三面规范与 Day-0、规范持续演进（skill+账本对照 AGE，不污染 CLAUDE.md）、hooks/skills 与多人协作。">
 <title>小型团队 AI Coding 实战手册 · Team AI Coding Playbook</title>
 <script>try{var t=localStorage.getItem('zb-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <style>
@@ -265,8 +265,8 @@
   <div class="wrap">
     <p class="eyebrow">Field Manual · 实战手册</p>
     <h1>小型团队 AI Coding 实战手册</h1>
-    <p class="thesis">别再堆「最佳实践清单」。团队真正缺的是一套<strong>可安装的控制系统</strong>：什么进每次会话、什么只在任务时加载、什么模型说了不算必须脚本拦住、什么变更先写契约再写码。<strong>建议是概率；墙是确定性。</strong>本页按「先装墙 → 再写宪法 → 再谈流程」的顺序写，可直接当小团队一周落地剧本。</p>
-    <p class="credit">主轴：Anthropic <a href="https://code.claude.com/docs/en/best-practices" rel="noopener">Claude Code Best Practices</a> · <a href="https://claude.com/blog/steering-claude-code-skills-hooks-rules-subagents-and-more" rel="noopener">Steering Claude Code</a>（2026-06）· <a href="https://code.claude.com/docs/en/memory" rel="noopener">Memory</a> / Hooks / Skills 文档。辅轴：AGENTS.md 标准、Addy Osmani agentic 工作流、obra/superpowers、Every compound-engineering、Karpathy 行为约束（forrestchang 化）。个人选型见 <a href="../agentic/">Agentic 作战手册</a>。</p>
+    <p class="thesis">别再堆「最佳实践清单」。团队真正缺的是一套<strong>可安装的控制系统</strong>：什么进每次会话、什么只在任务时加载、什么模型说了不算必须脚本拦住、项目目录怎么分区、规范怎么迭代还不污染 CLAUDE.md。<strong>建议是概率；墙是确定性；对照源用 skill+账本。</strong></p>
+    <p class="credit">主轴：Anthropic Best Practices / Steering / Memory·Hooks·Skills。辅轴：AGENTS.md、Addy Osmani、superpowers、compound-engineering。目录与演进：AGE app-template 作只读参照 + 本机 <code>/standards-age-review</code> 与 Obsidian 账本。个人选型见 <a href="../agentic/">Agentic 作战手册</a>。修订 2026-07-13。</p>
     <nav class="legend" aria-label="页面导航">
       <a href="#model"><span class="dot"></span>控制面</a>
       <a href="#week0"><span class="dot"></span>Week-0 剧本</a>
@@ -275,7 +275,7 @@
       <a href="#workflow"><span class="dot"></span>工作流</a>
       <a href="#hooks"><span class="dot"></span>Hook</a>
       <a href="#skills"><span class="dot"></span>Skill</a>
-      <a href="#spec"><span class="dot"></span>Spec / docs</a>
+      <a href="#repo"><span class="dot"></span>项目目录</a>
       <a href="#team"><span class="dot"></span>多人</a>
       <a href="#anti"><span class="dot"></span>反模式</a>
       <a href="#templates"><span class="dot"></span>模板</a>
@@ -296,7 +296,7 @@
     <li><a href="#workflow">工作流：探索 → 计划 → 实现 → 验证</a></li>
     <li><a href="#hooks">Hook：最小可生产集合</a></li>
     <li><a href="#skills">Skill + Agent：少即是多</a></li>
-    <li><a href="#spec">Spec：意图进库，做完归档</a></li>
+    <li><a href="#repo">项目目录规范与落地方法论</a></li>
     <li><a href="#team">多人协同 + 度量</a></li>
     <li><a href="#anti">反模式</a></li>
     <li><a href="#templates">可复制模板</a></li>
@@ -375,7 +375,7 @@
       </li>
       <li>
         <b>Day 1–2 · 薄宪法 + docs Day-0</b>
-        跑 <code>/init</code>，删到 &lt;150–200 行。共享事实写 <code>AGENTS.md</code>，Claude 用薄 <code>CLAUDE.md</code> <code>@AGENTS.md</code>。每人 <code>CLAUDE.local.md</code> + gitignore。应用仓按 <a href="#spec">§8</a> 填 <code>docs/context/project-context.md</code>（真实验证命令、active 需求）——没填就别让 agent 大写代码。
+        跑 <code>/init</code>，删到 &lt;150–200 行。共享事实写 <code>AGENTS.md</code>，Claude 用薄 <code>CLAUDE.md</code> <code>@AGENTS.md</code>。每人 <code>CLAUDE.local.md</code> + gitignore。应用仓按 <a href="#repo">§8 项目目录</a> 搭 Day-0 树并填 <code>docs/context/project-context.md</code>——没填就别让 agent 大写代码。
       </li>
       <li>
         <b>Day 2 · 装三条强制门禁</b>
@@ -820,101 +820,276 @@
 </section>
 
 <!-- §8 -->
-<section id="spec">
+<section id="repo">
   <div class="wrap">
-    <div class="sec-head"><span class="sec-no">§8</span><h2>Spec 与仓库文档架构</h2></div>
-    <p class="sec-lede">宪法管「agent 怎么干活」；<strong>docs 树管「产品与技术真相在哪」</strong>。没有后者，再漂亮的 CLAUDE.md 也只能在聊天里猜需求。下面把「单条 change 的 spec」和「应用仓推荐的 docs 骨架」合在一节。</p>
-
-    <h3>单条变更：意图进库，做完归档</h3>
-    <div class="duo">
-      <div class="cell a">
-        <span class="tag">L1 最少字段</span>
-        <b>Why · What · Tasks · Gate · Archive</b>
-        非目标写清；行为可测；任务可勾选；质量门是真实命令；合并后谁回写 owner doc。
-      </div>
-      <div class="cell b">
-        <span class="tag">漂移三选一</span>
-        <b>对齐 · 回写 · 废弃</b>
-        代码错→修代码；文档旧→archive/回写；双废→标 deprecated，禁止 agent 再引用。
-      </div>
-    </div>
-
-    <h3>应用仓 docs 骨架：AGE App Template 能不能当规范？</h3>
-    <p class="sec-lede" style="margin-bottom:14px"><strong>结论：能当「业务应用仓」的默认文档架构，但必须按「最小路径」落地，禁止一上来抄满所有目录。</strong>模板定位是 Attractor-Guided Engineering：用一小撮稳定文件当吸引子，防止 AI 迭代漂成 demo 与聊天记忆。</p>
+    <div class="sec-head"><span class="sec-no">§8</span><h2>项目目录规范与落地方法论</h2></div>
+    <p class="sec-lede">AI coding 不是只配 CLAUDE.md。仓库目录本身就是控制系统：<strong>控制面</strong>（agent 怎么干活）、<strong>真相面</strong>（产品/技术必须成立什么）、<strong>代码面</strong>（可运行实现）。下面是一套中小应用仓默认规范——借鉴 AGE 等实践的吸引子思路，但用自己的分层命名，不要求照搬任何模板目录名。</p>
 
     <div class="plate">
-      <p class="who">AGE APP TEMPLATE · 核心原则</p>
-      <p>Repo 是事实源，chat 只是临时工作面。稳定真相（context / design / architecture）与过程记录（plans / logs / bugs）分开；问题冲突时看 <code>docs/context/source-of-truth-and-precedence.md</code>，而不是让模型「看着办」。</p>
+      <p class="who">方法论一句话</p>
+      <p><strong>Repo 是事实源，chat 是草稿。</strong>稳定真相用固定文件名维护；过程记录可带日期、可归档。Agent 每次开工先读「当前指针」，再动代码。目录只在有职责时才开——空目录是税，不是规范。</p>
     </div>
 
+    <h3>1 · 三面模型（先分区，再放文件）</h3>
     <div class="tbl-wrap">
       <table>
         <thead>
-          <tr><th>目录 / 文件</th><th>职责</th><th>开写前要不要？</th></tr>
+          <tr><th>面</th><th>放什么</th><th>典型路径</th><th>谁维护</th></tr>
         </thead>
         <tbody>
-          <tr><td><b><code>AGENTS.md</code></b></td><td>Agent 操作契约、读哪些文件、规划触发条件</td><td><b>必须</b></td></tr>
-          <tr><td><b><code>docs/context/</code></b></td><td>强制上下文：project-context、自主策略、codebase-map、事实源优先级</td><td><b>必须 · Day 0</b></td></tr>
-          <tr><td><b><code>docs/backlog/</code></b></td><td>可执行的下一步</td><td>推荐</td></tr>
-          <tr><td><b><code>docs/requirements/</code></b></td><td>可实施需求（验收标准）</td><td><b>必须有 active 一份</b></td></tr>
-          <tr><td><b><code>docs/design/</code> + <b><code>architecture/</code></b></td><td>稳定的产品行为 / 技术边界吸引子</td><td>首片可薄，边界要有</td></tr>
-          <tr><td><b><code>docs/plans/</code></b></td><td>非琐碎切片的执行与关闭条件</td><td>触发规划时必须</td></tr>
-          <tr><td><code>docs/input/</code> · discussions · logs · bugs</td><td>原料 / 澄清 / 实施记忆 / 回归坑</td><td>按需</td></tr>
-          <tr><td><code>docs/audits/</code> · retrospectives · analysis · lessons</td><td>审计、复盘、调研、沉淀</td><td>可选层</td></tr>
-          <tr><td><code>docs/skills/</code></td><td>可复用 prompt 文稿（≠ <code>.claude/skills</code>）</td><td>可选；别和 Claude skill 混名</td></tr>
+          <tr>
+            <td><b>控制面</b></td>
+            <td>Agent 行为、门禁、可复用流程</td>
+            <td><code>AGENTS.md</code>、<code>CLAUDE.md</code>、<code>CLAUDE.local.md</code>、<code>.claude/</code>（hooks/skills/agents/settings）</td>
+            <td>Constitution Owner；local 个人自管</td>
+          </tr>
+          <tr>
+            <td><b>真相面</b></td>
+            <td>要建什么、当前支持什么、技术边界、冲突时谁赢</td>
+            <td><code>docs/</code>（尤其 context / requirements / design / architecture）</td>
+            <td>产品/域 Owner；改动走 PR</td>
+          </tr>
+          <tr>
+            <td><b>代码面</b></td>
+            <td>可运行实现与可执行契约</td>
+            <td><code>src/</code>（或 apps/packages）、<code>tests/</code>、schema/API 定义、部署清单</td>
+            <td>开发；DB/API 以代码/schema 为最终真相</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="keyline">三面不能互相顶替：hooks 拦不住错误需求；docs 不能当测试；代码里的注释不能当团队 AGENTS.md。</p>
+
+    <h3>2 · 推荐目录全景（必须 / 推荐 / 按需）</h3>
+    <div class="promptbox"><pre>repo/
+├── README.md                 # 给人：如何跑起来（可薄）
+├── AGENTS.md                 # 给 agent：操作契约【必须·git】
+├── CLAUDE.md                 # 薄包装：@AGENTS.md + Claude 专用【必须·git】
+├── CLAUDE.local.md           # 个人续跑/本机【必须 gitignore】
+├── .gitignore                # 含 CLAUDE.local.md、.env、settings.local
+│
+├── .claude/                  # 控制面【必须有框架】
+│   ├── settings.json         # 共享 hooks / 权限【git】
+│   ├── settings.local.json   # 本机微调【gitignore】
+│   ├── skills/               # 可调用流程 skill
+│   ├── agents/               # 子代理角色定义
+│   └── hooks/                # hook 脚本
+│
+├── docs/                     # 真相面 + 过程记忆
+│   ├── index.md              # 文档路由（人/agent 入口）
+│   ├── context/              # 【Day-0 必须】当前指针与规则
+│   │   ├── project-context.md
+│   │   ├── source-of-truth.md
+│   │   ├── autonomy.md       # AI 可自主到什么程度
+│   │   └── codebase-map.md   # 改哪里、脆点在哪
+│   ├── requirements/         # 【必须有 active 一份】可实施需求
+│   ├── design/               # 【推荐】稳定的产品/功能行为
+│   ├── architecture/         # 【推荐】稳定的技术边界与基线
+│   ├── plans/                # 【触发才建】切片执行与关闭条件
+│   ├── backlog/              # 【推荐】下一步候选
+│   ├── input/                # 【按需】原始 PRD/截图/纪要
+│   ├── discussions/          # 【按需】需求澄清
+│   ├── logs/                 # 【按需】实施日记（常带日期）
+│   ├── bugs/                 # 【按需】非显然回归与根因
+│   ├── testing/              # 【按需】手工测记 + known-good
+│   ├── lessons/              # 【按需】可复用教训
+│   └── archive/              # 【按需】人工批准后的冷文档
+│
+├── openspec/ 或等价 change 目录  # 【可选】若团队用 OpenSpec：必须在 context 里声明 active
+├── src/ 或 apps/ + packages/     # 代码面【必须】
+├── tests/                          # 【强烈推荐】
+└── .github/workflows/              # CI【推荐】</pre><button class="copy" type="button">复制</button></div>
+    <p class="prompt-note">名字可本地化（例如 <code>docs/context/project-context.md</code> 叫 <code>当前状态.md</code>），但<strong>职责不能丢</strong>：指针文件、验收需求、稳定设计/架构、过程计划、代码与测试。</p>
+
+    <h3>3 · 每层写什么（职责表）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>路径</th><th>回答的问题</th><th>写法要点</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>AGENTS.md</code></td><td>Agent 默认读什么、何时写 plan、完成标准？</td><td>操作契约；可 <code>@</code> 进 CLAUDE.md</td></tr>
+          <tr><td><code>docs/context/project-context.md</code></td><td>现在在做什么？验证命令是什么？</td><td>短、常改；写 active 需求/计划路径；命令必须可复制执行</td></tr>
+          <tr><td><code>docs/context/source-of-truth.md</code></td><td>冲突时谁说了算？</td><td>按问题类型指主源（需求/设计/架构/schema/计划/日志）</td></tr>
+          <tr><td><code>docs/context/autonomy.md</code></td><td>AI 能否直接改代码？保护区？</td><td>implement / plan-first / ask-first / research-only</td></tr>
+          <tr><td><code>docs/context/codebase-map.md</code></td><td>常见改动动哪些文件？</td><td>入口、脆点、禁止乱改区</td></tr>
+          <tr><td><code>docs/requirements/*</code></td><td>这一片要交付什么？验收是什么？</td><td>可测行为；非目标；active 只有一份主需求</td></tr>
+          <tr><td><code>docs/design/*</code></td><td>产品当前支持的行为？</td><td>稳定文件名；收敛「已支持」而非史诗草稿</td></tr>
+          <tr><td><code>docs/architecture/*</code></td><td>模块边界与技术基线？</td><td>栈、边界、红线；DB/API 最终以代码/schema 为准</td></tr>
+          <tr><td><code>docs/plans/*</code> 或 openspec change</td><td>这一刀怎么切、何时算完？</td><td>任务可勾选；验证门；关单前回写 owner doc</td></tr>
+          <tr><td><code>docs/logs|bugs|lessons</code></td><td>发生过什么？下次别再踩？</td><td>过程记忆；可带日期；重要教训升格到 architecture/design</td></tr>
+          <tr><td><code>src/</code> + <code>tests/</code></td><td>现在真正跑的是什么？</td><td>行为真相以测试与可执行契约为准</td></tr>
+          <tr><td><code>.claude/*</code></td><td>如何强制与提效？</td><td>hooks 强制；skills 流程；agents 分工</td></tr>
         </tbody>
       </table>
     </div>
 
-    <h3>为什么说「行」：与本手册对齐的点</h3>
-    <ul class="plain">
-      <li><b>验证命令写在 project-context</b>——和「验证墙」一致；占位符命令禁止报成功。</li>
-      <li><b>source-of-truth 按问题分流</b>——需求 / 设计 / 架构 / 模型文件 / 计划 / 日志各有主；冲突要显式处理。</li>
-      <li><b>规划触发 + micro-plan 例外</b>——避免 L0 也被审计淹没；非琐碎 plan 要求独立 plan/closure audit。</li>
-      <li><b>documentation freshness / AI autonomy</b>——陈旧文档默认 research-only，防止在谎言文档上狂写代码。</li>
-      <li><b>稳定文件 vs 带日期记录</b>——owner doc 不改名；过程记录可归档——对应 living archive 纪律。</li>
-    </ul>
+    <h3>4 · 事实源优先级（冲突时用）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>问题</th><th>主源</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>现在该建什么？</td><td><code>docs/requirements/</code>（active）</td><td>input/ 只是原料，不能直接当验收</td></tr>
+          <tr><td>产品当前支持什么？</td><td><code>docs/design/</code></td><td>实现后要把变更回写 design</td></tr>
+          <tr><td>技术边界/模块职责？</td><td><code>docs/architecture/</code></td><td>跨模块红线写这里</td></tr>
+          <tr><td>DB / API 真实形状？</td><td>schema / OpenAPI / 代码</td><td>散文文档输给可执行定义</td></tr>
+          <tr><td>这一刀怎么关单？</td><td><code>docs/plans/</code> 或 openspec change</td><td>关单 ≠ 聊天说「好了」</td></tr>
+          <tr><td>上周踩了什么坑？</td><td><code>docs/bugs/</code> · <code>lessons/</code></td><td>反复出现则升格进 architecture</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="warn-strip"><b>冲突处理：</b>需求 vs 设计不一致 → 先改文档再写码；代码 vs 文档不一致 → 标明是实现漂移还是文档过期，禁止静默二选一。文档 freshness 为 stale/unknown 时，默认只调研/对齐，不改产品行为（除非人明确批准）。</p>
 
-    <h3>为什么不能无脑全抄：风险与补丁</h3>
+    <h3>5 · 落地方法论（怎么做，不是怎么抄）</h3>
+    <ol class="steps">
+      <li>
+        <b>Day-0 · 搭骨架，只填指针</b>
+        建控制面三件套（AGENTS / 薄 CLAUDE / local+gitignore）+ <code>.claude/settings.json</code> 空 hooks 也可先就位。真相面只建 <code>docs/index.md</code> + <code>docs/context/*</code> + 一份 active requirement。验证命令写真实命令；占位符则停止实现。
+      </li>
+      <li>
+        <b>切片开工 · 固定阅读序</b>
+        Agent/人：project-context → autonomy →（冲突时）source-of-truth → active requirement → owner design/architecture → 相关代码。禁止从聊天长摘要直接开写。
+      </li>
+      <li>
+        <b>分级施工 · 目录跟级别长</b>
+        L0：可只改代码 + 相关测，context 指针可不动。<br>
+        L1：更新/新建 plan（或 openspec change），任务可勾选，验证门写清；合入前回写 design/requirements 中受影响句。<br>
+        L2：先 architecture/design 批准，再拆多 plan；跨模块边界变更必须改 architecture。
+      </li>
+      <li>
+        <b>关单 · 四问</b>
+        ① 验收是否用真实命令跑绿？② owner doc 是否回写？③ context 的 active 指针是否更新或清空？④ 非显然坑是否进 bugs/lessons？四问不过不算完成。
+      </li>
+      <li>
+        <b>演进 · 按触发开目录</b>
+        第一次需要澄清歧义 → 建 discussions；第一次非显然 bug → 建 bugs；第三次同类失败 → 升 lessons 或 skill。禁止「先开 15 个空文件夹」当规范落地。
+      </li>
+      <li>
+        <b>治理 · 一人一源</b>
+        任意时刻：一份 active requirement、至多一份 active plan/change。OpenSpec 与 <code>docs/plans</code> 二选一为主，或在 project-context 写死映射路径——禁止双真相。
+      </li>
+    </ol>
+
+    <h3>6 · 单条变更（Spec）在目录里长什么样</h3>
     <div class="duo">
-      <div class="cell x">
-        <span class="tag">风险</span>
-        <b>文档剧场</b>
-        20+ 目录全开、每文件写半页空话 → agent 不知道读哪个，人也不维护。模板自己也警告 process overhead。
-      </div>
       <div class="cell a">
-        <span class="tag">补丁</span>
-        <b>只激活用得着的层</b>
-        Day 0 只填 context + 一份 active requirement + 验证命令。optional 目录在 project-context 打勾后再当真。
+        <span class="tag">最少字段</span>
+        <b>Why · What · Tasks · Gate · Archive</b>
+        落在 <code>docs/plans/…</code> 或 <code>openspec/changes/&lt;id&gt;/</code>。非目标写清；行为可测；任务可勾选；门是命令；关单后回写 design/architecture 或 archive。
+      </div>
+      <div class="cell b">
+        <span class="tag">漂移三选一</span>
+        <b>对齐 · 回写 · 废弃</b>
+        代码错→修代码；文档旧→回写/归档；双废→标 deprecated，禁止 agent 再引用路径。
       </div>
     </div>
-    <ul class="plain">
-      <li><b>与 OpenSpec 共存：</b>二选一或双写清晰映射。推荐：团队流程若已用 OpenSpec，把 change 的 proposal/tasks 当 <code>docs/plans/</code> 的一种实现，或在 project-context 写明「active plan = openspec/changes/&lt;id&gt;」；禁止两套并行真相。</li>
-      <li><b>与宪法层补齐：</b>模板根常只有 AGENTS.md——落地时再加薄 <code>CLAUDE.md</code>（<code>@AGENTS.md</code>）+ gitignore 的 <code>CLAUDE.local.md</code>；hooks 仍按 Week-0 装，docs 不替代强制层。</li>
-      <li><b>命名：</b><code>docs/skills/</code> 是 prompt 文稿库；Claude 可执行 skill 在 <code>.claude/skills/</code>。混用会让人以为「写进 docs 就自动 /skill」。</li>
-      <li><b>适用边界：</b>适合中小<strong>应用</strong>仓（后台、门户、CRUD、内部工具）。框架内核 / 巨型 monorepo 要嵌套子目录 CLAUDE + 更重的模块边界，不能只靠一份 app template。</li>
-    </ul>
 
-    <h3>团队默认：最小 docs Day-0（可复制）</h3>
+    <h3>7 · Day-0 最小可复制树</h3>
     <div class="promptbox"><pre>repo/
-├── AGENTS.md                 # 操作契约（可从 AGE 模板裁剪）
-├── CLAUDE.md                 # 薄：@AGENTS.md + Claude 专用
-├── CLAUDE.local.md           # gitignore：续跑 / 本机
-├── .claude/settings.json     # 共享 hooks
+├── AGENTS.md
+├── CLAUDE.md              # @AGENTS.md
+├── CLAUDE.local.md        # gitignore
+├── .gitignore
+├── .claude/
+│   ├── settings.json
+│   └── hooks/
 ├── docs/
 │   ├── index.md
 │   ├── context/
-│   │   ├── project-context.md      # 验证命令、active 需求、autonomy
-│   │   ├── source-of-truth-and-precedence.md
-│   │   ├── ai-autonomy-policy.md
+│   │   ├── project-context.md   # active 指针 + 验证命令表
+│   │   ├── source-of-truth.md
+│   │   ├── autonomy.md
 │   │   └── codebase-map.md
-│   ├── requirements/&lt;active&gt;.md    # 带验收标准
-│   ├── design/app-overview.md      # 可先薄
+│   ├── requirements/mvp-or-slice.md
+│   ├── design/app-overview.md
 │   └── architecture/system-baseline.md
-└── src/ …</pre><button class="copy" type="button">复制</button></div>
-    <p class="prompt-note">完整模板与指南见团队参考仓 <code>age-app-template</code>（START-HERE-after-copy.md）。拷贝后先跑 Day 0 checklist，再让 agent 写业务代码。</p>
+├── src/
+└── tests/</pre><button class="copy" type="button">复制</button></div>
+    <div class="promptbox"><pre># docs/context/project-context.md（骨架）
+## 身份
+- 项目：
+- 当前里程碑：
+- 文档新鲜度：fresh | partially-stale | stale | unknown
 
-    <p class="verdict-strip"><b>铁律：</b>进行中的切片只有一份 active requirement + 一份 active owner/plan。目录堆 40 个 open 文档等于没有流程。Compound：交付要留下可检索教训（lessons / bugs），不是只留下 chat。</p>
+## 当前指针（任意时刻只填真实路径）
+- Active requirement: docs/requirements/…
+- Active owner doc: docs/design/… 或 docs/architecture/…
+- Active plan: docs/plans/… 或 openspec/changes/… 或 none
+- AI autonomy: implement | plan-first | ask-first | research-only
+
+## 验证命令（禁止占位符）
+| 用途 | 命令 |
+| 安装 | |
+| 开发 | |
+| 测试 | |
+| Lint | |
+| 构建 | |</pre><button class="copy" type="button">复制</button></div>
+
+    <h3>8 · 反模式（目录专场）</h3>
+    <ul class="plain">
+      <li><b>文档剧场：</b>空目录 + 空 README 当「已规范化」。</li>
+      <li><b>真相写进 CLAUDE.md：</b>长需求/进度塞进每次会话，既胀上下文又无版本语义。</li>
+      <li><b>双 active：</b>两个「当前需求」或 OpenSpec 与 plans 各说各话。</li>
+      <li><b>散文压过 schema：</b>用 markdown 描述表结构却不改 migration。</li>
+      <li><b>过程当吸引子：</b>只写日志不改 design，半年后无人知道「系统现在该怎样」。</li>
+      <li><b>控制面缺失：</b>docs 很全，但无 hooks/CI，底线仍靠自觉。</li>
+      <li><b>规范演进笔记塞进 CLAUDE.md：</b>对照 AGE 的过程与账本不进会话常驻文件——见下节。</li>
+    </ul>
+
+    <h3>9 · 规范持续演进：Skill + 账本（不污染 CLAUDE.md）</h3>
+    <p class="sec-lede" style="margin-bottom:14px">项目与规范都会变。外部模板（如 AGE）适合当<strong>只读对照源</strong>，不适合拷进每个会话。推荐固定三件套：</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>层</th><th>放什么</th><th>不放什么</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Skill（流程）</b></td>
+            <td>对照步骤、读哪些文件、三栏输出、完成定义；手动触发</td>
+            <td>业务仓路径细节、历史决策全文</td>
+          </tr>
+          <tr>
+            <td><b>账本（记忆）</b></td>
+            <td>采纳 / 暂缓 / 拒绝 / 已有等价；日期与落点</td>
+            <td>AGE 原文粘贴、每次会话必载规则</td>
+          </tr>
+          <tr>
+            <td><b>结果（生效）</b></td>
+            <td>业务仓 <code>AGENTS.md</code> / <code>docs/</code> / OpenSpec / hooks</td>
+            <td>对照过程、个人续跑</td>
+          </tr>
+          <tr>
+            <td><b>CLAUDE.md</b></td>
+            <td><b>默认不写</b>（避免上下文税与团队噪音）</td>
+            <td>演进笔记、AGE 摘要、账本表格</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="duo">
+      <div class="cell a">
+        <span class="tag">本机已落地示例</span>
+        <b>手动 skill</b>
+        <code>~/.claude/skills/standards-age-review/</code>：<code>disable-model-invocation: true</code>，入口 <code>/standards-age-review</code>。优化规范、目录、plan 关单、自主策略时再跑。
+      </div>
+      <div class="cell b">
+        <span class="tag">本机已落地示例</span>
+        <b>Obsidian 账本</b>
+        vault：<code>20-Tech/AI-HARNESS/notes/age-adoption-ledger.md</code>。只追加行；先扫账本再对照，避免重复推销已拒绝项。
+      </div>
+    </div>
+    <ol class="steps">
+      <li><b>触发：</b>改共享规范 / Day-0 后复盘 / 同类翻车第二次 / 季度扫「暂缓」列——日常写码不跑。</li>
+      <li><b>对照：</b>按范围只读 AGE 2～5 个文件，输出「采纳 / 暂缓 / 不用」三栏。</li>
+      <li><b>决策：</b>用户勾选后更新账本；批准后再改结果文件。</li>
+      <li><b>禁令：</b>不把 AGE 长文或演进过程写进任何 <code>CLAUDE.md</code>；不一次 <code>cp -r</code> 全套空目录。</li>
+    </ol>
+    <p class="prompt-note">下一批高价值暂缓项（账本已记）：自主等级+保护区、codebase-map、known-good baseline、Plan 决策表/Anti-Slacking——进真实业务仓时优先落地，而不是再抄 AGE 全文。</p>
+
+    <p class="verdict-strip"><b>验收这套目录是否落地：</b>新人（或新会话 agent）只读 <code>project-context</code> + active requirement 就能开工；验证命令可复制跑绿；任意冲突能在 <code>source-of-truth</code> 找到主源；关单后 design/architecture 与代码一致。规范演进可重复跑 skill+账本，且 <code>CLAUDE.md</code> 保持干净。参考实现可对照内部 <code>age-app-template</code>，以本节职责为准裁剪。</p>
   </div>
 </section>
 
@@ -1003,6 +1178,7 @@
       <li><b>双真相 ·</b> OpenSpec change 与 docs/plans 各写一套且不互相引用 → 在 project-context 指定唯一 active plan。</li>
       <li><b>每人私有神级 prompt ·</b> 协作比没 AI 更乱 → 共享内核 + 个人 local。</li>
       <li><b>把 auto memory 当团队 wiki ·</b> 机器本地、不进 git → 共享事实进 AGENTS/docs。</li>
+      <li><b>规范演进塞 CLAUDE.md ·</b> AGE 对照笔记胀上下文 → skill + 账本 + 结果文件（§8·9）。</li>
     </ul>
   </div>
 </section>
@@ -1011,7 +1187,7 @@
 <section id="templates">
   <div class="wrap">
     <div class="sec-head"><span class="sec-no">§11</span><h2>可复制模板</h2></div>
-    <p class="sec-lede">自产中文，按需删改。保持薄。</p>
+    <p class="sec-lede">自产中文，按需删改。保持薄。规范演进对照 skill 见本机 <code>standards-age-review</code>（不在此粘全文）。</p>
 
     <h3>1 · 团队 CLAUDE.md（薄包装 + 客观事实）</h3>
     <div class="promptbox"><pre># &lt;项目名&gt;
@@ -1152,7 +1328,15 @@ disable-model-invocation: true
 - [ ] 宪法/hooks 变更已拆 PR（如有）
 - [ ] 需要时已做 fresh-context review</pre><button class="copy" type="button">复制</button></div>
 
-    <h3>7 · 子代理定义（<code>.claude/agents/reviewer.md</code>）</h3>
+    <h3>7 · 规范演进账本行（Obsidian，只追加）</h3>
+    <div class="promptbox"><pre>| 日期 | AGE 来源 | 能力点 | 决策 | 落点 | 备注 |
+|------|----------|--------|------|------|------|
+| YYYY-MM-DD | 文件名 | 一句话能力 | 采纳/暂缓/拒绝/已有等价 | 路径或「—」 | 触发条件或原因 |
+
+# 决策后：改业务仓 AGENTS/docs/hooks，不要改 CLAUDE.md 记过程
+# 手动对照：/standards-age-review</pre><button class="copy" type="button">复制</button></div>
+
+    <h3>8 · 子代理定义（<code>.claude/agents/reviewer.md</code>）</h3>
     <div class="promptbox"><pre>---
 name: code-reviewer
 description: 审查代码变更的质量、安全与风格。仅在用户要求 review 时使用。
@@ -1170,7 +1354,7 @@ maxTurns: 30
 输出格式：按文件列出发现，每个发现含「问题 → 建议 → 严重度（P0/P1/P2）」。
 无发现则输出「LGTM」。</pre><button class="copy" type="button">复制</button></div>
 
-    <h3>8 · MCP 配置（<code>.mcp.json</code>）</h3>
+    <h3>9 · MCP 配置（<code>.mcp.json</code>）</h3>
     <div class="promptbox"><pre>{
   "mcpServers": {
     "github": {
@@ -1191,7 +1375,7 @@ maxTurns: 30
 }</pre><button class="copy" type="button">复制</button></div>
     <p class="prompt-note"><code>${VAR}</code> 和 <code>${VAR:-default}</code> 语法支持环境变量展开。<code>.mcp.json</code> 进 git；密钥通过环境变量注入，不写进文件。用 <code>/mcp</code> 查看连接状态。</p>
 
-    <h3>9 · 路径限定规则（<code>.claude/rules/api-rules.md</code>）</h3>
+    <h3>10 · 路径限定规则（<code>.claude/rules/api-rules.md</code>）</h3>
     <div class="promptbox"><pre>---
 paths:
   - "src/api/**/*.ts"
@@ -1205,7 +1389,7 @@ paths:
 - 日志用 logger 工具，不直接 console.log</pre><button class="copy" type="button">复制</button></div>
     <p class="prompt-note">带 <code>paths:</code> frontmatter 的 rules 只在 Claude 处理匹配文件时加载。适合 monorepo 按模块分规则，避免无关规则污染上下文。</p>
 
-    <h3>10 · Golden Fixture 回归脚本</h3>
+    <h3>11 · Golden Fixture 回归脚本</h3>
     <div class="promptbox"><pre>#!/bin/bash
 # .claude/hooks/golden-fixture.sh
 # 在 3-5 个代表性任务上跑 skill 回归
@@ -1292,9 +1476,14 @@ echo "=== Summary ==="
         <span class="src"><a href="https://x.com/PovilasKorop/status/2074067087501246975" rel="noopener">x.com/PovilasKorop</a><span class="date">2026-07-06</span></span>
       </li>
       <li>
-        <b>AGE App Template（团队参考仓）</b>
-        应用层 Attractor-Guided docs：context 强制入口、事实源优先级、Day 0 checklist、micro-plan 例外、稳定/日期文件分离。本页 §8 的落地参照。
-        <span class="src">本地路径：alpha-ai-agent/…/age-app-template · START-HERE-after-copy.md<span class="date">核对于 2026-07</span></span>
+        <b>AGE App Template（只读对照源）</b>
+        吸引子 + context + SoT + autonomy + plan 关单等厚实现；落地时裁剪进业务仓 docs，不拷空目录、不写进 CLAUDE.md。
+        <span class="src">本地：alpha-ai-agent/…/age-app-template · START-HERE-after-copy.md<span class="date">核对于 2026-07</span></span>
+      </li>
+      <li>
+        <b>规范演进：standards-age-review + AGE 账本</b>
+        手动 skill 对照 AGE 出三栏建议；Obsidian 账本记采纳/暂缓/拒绝；结果落 AGENTS/docs，过程不进 CLAUDE.md。
+        <span class="src">~/.claude/skills/standards-age-review · vault 20-Tech/AI-HARNESS/notes/age-adoption-ledger.md<span class="date">2026-07-13</span></span>
       </li>
       <li>
         <b>站内姊妹篇</b>
@@ -1325,7 +1514,7 @@ echo "=== Summary ==="
       <a href="../loop-engineering/">循环工程野外手册</a> ·
       <a href="../unknowns/">未知项野外指南</a>
     </p>
-    <p>zbisure · 实战手册审阅版：控制面 + CLAUDE.local + AGE docs 架构</p>
+    <p>zbisure · 实战手册：控制面 + 项目目录三面 + 规范演进（skill/账本，不污染 CLAUDE.md）· 2026-07-13</p>
   </div>
 </footer>
 
@@ -1452,19 +1641,39 @@ echo "=== Summary ==="
      no:'官方对 commit/deploy 明确建议 disable-model-invocation。'},
     {q:'Spec 与代码长期不一致，正确处置不是？',
      opts:['archive/回写或标废弃','无限保留 open proposal 当历史荣耀墙','改代码对齐仍有效的 spec','禁止 agent 引用已废弃路径'],
-     a:1,anchor:'#spec',tech:'§8 Spec / docs',
+     a:1,anchor:'#repo',tech:'§8 项目目录',
      ok:'对。坟场式保留是反模式。',
      no:'漂移必须显式处置，不能堆着当史料。'},
-    {q:'采用 AGE app-template 做应用仓文档规范时，第一周最正确的用法？',
+    {q:'应用仓项目目录落地第一周，最正确的是？',
      opts:[
-       '复制全部 20+ 目录并要求每目录至少一篇完整文档再写代码',
-       'Day 0 只填 context（含真实验证命令）+ active requirement；可选层用到再开；另加薄 CLAUDE.md 与 hooks',
-       '只保留 docs/，删除 AGENTS.md 与测试',
-       '把所有过程记录写进根 CLAUDE.md 以便每次会话加载'
+       '先开满 discussions/audits/retrospectives 等全部空目录再写代码',
+       '搭三面骨架：控制面（AGENTS/CLAUDE/hooks）+ context 指针与真实验证命令 + active requirement；其余目录按触发再开',
+       '只保留 src/，文档全靠聊天',
+       '把需求与进度全部写进根 CLAUDE.md 每次会话加载'
      ],
-     a:1,anchor:'#spec',tech:'§8 Spec / docs',
-     ok:'对。模板行在「吸引子 + 最小路径」，不在文档剧场。',
-     no:'全抄所有目录是模板自己警告的 process overhead。'},
+     a:1,anchor:'#repo',tech:'§8 项目目录',
+     ok:'对。先分区再放文件；Day-0 只要指针与验收，不搞文档剧场。',
+     no:'空目录全开或只靠 chat/CLAUDE 长文都会失败。'},
+    {q:'DB 表结构以 markdown 架构文档为准、与 migration 不一致时？',
+     opts:[
+       '以 markdown 为准，改 migration 去贴文档',
+       '以 schema/migration 等可执行定义为准，并显式回写或标注文档过期',
+       '以最近一次聊天结论为准',
+       '两边都删掉，让 agent 重猜'
+     ],
+     a:1,anchor:'#repo',tech:'§8 项目目录',
+     ok:'对。代码面契约压过散文；冲突要显式处理。',
+     no:'事实源表：DB/API 主源是可执行定义。'},
+    {q:'每次优化团队规范时都想对照 AGE 模板。正确放法是？',
+     opts:[
+       '把 AGE 要点追加进每个仓库 CLAUDE.md，保证每次会话都加载',
+       '手动 skill 跑对照流程 + Obsidian 账本记决策；结果写入 AGENTS/docs；不写进 CLAUDE.md',
+       '直接 cp -r 全套 AGE 目录到业务仓',
+       '只记在 auto memory 里让同事共享'
+     ],
+     a:1,anchor:'#repo',tech:'§8 项目目录',
+     ok:'对。流程用 skill，记忆用账本，生效用结果文件，不污染 CLAUDE。',
+     no:'CLAUDE 常驻、全盘拷贝、auto memory 当团队 wiki 都是反模式。'},
     {q:'多人协作最关键的共识是？',
      opts:['全员同一付费档模型','同一宪法 + 同一验证/CI 墙 + 同一变更路由','取消 code review','每人私有 CLAUDE.md 互不合并'],
      a:1,anchor:'#team',tech:'§9 多人',
@@ -1560,10 +1769,10 @@ echo "=== Summary ==="
       verdict.className='verdict show pass';
       verdict.innerHTML='<h3>✓ Cleared — 你拿到的是可安装的控制系统，不是概念清单</h3>'+
         '<p>本周落地：</p><ul>'+
-        '<li>选一个仓库跑完 Week-0：验证对齐 → 薄 AGENTS+CLAUDE → 三条 hook → 一个 skill → 指定 owner</li>'+
-        '<li>用 /memory 与 /hooks 审计实际加载与门禁</li>'+
-        '<li>下一次 L1 变更强制验证证据 + 需要时 fresh review</li>'+
-        '<li>把本页反模式贴到团队频道，违者改流程不改嘴炮</li>'+
+        '<li>选一个仓库跑完 Week-0：三面目录 Day-0 + 验证命令真实 + 薄 AGENTS/CLAUDE + hooks</li>'+
+        '<li>用 /memory 与 /hooks 审计；确认 project-context 指针唯一</li>'+
+        '<li>下一次 L1 走 plan/change 并关单四问</li>'+
+        '<li>优化规范时：/standards-age-review → 更新账本 → 只改结果文件，不碰 CLAUDE.md 记过程</li>'+
         '</ul>';
     }else{
       verdict.className='verdict show retry';
